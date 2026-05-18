@@ -124,6 +124,11 @@ export function LegalDocument({ content }: { content: string }) {
       ? blocks
       : [{ type: 'heading' as const, level: 1 as const, text: '' }, ...blocks];
 
+  // Extract title text from titleBlock
+  const titleText = titleBlock && (titleBlock.type === 'heading' || titleBlock.type === 'paragraph')
+    ? titleBlock.text
+    : '';
+
   return (
     <main className="min-h-screen bg-[#0E0E0E] text-white">
       <div className="mx-auto flex w-full max-w-[920px] flex-col px-[20px] py-[48px] md:px-[32px] md:py-[72px]">
@@ -136,7 +141,7 @@ export function LegalDocument({ content }: { content: string }) {
         <article className="rounded-[12px] bg-[#1A1919] px-[20px] py-[28px] md:px-[48px] md:py-[44px]">
           <header className="mb-[32px] border-b border-white/10 pb-[24px]">
             <h1 className="text-[32px] font-[600] leading-tight md:text-[44px]">
-              {titleBlock.text}
+              {titleText}
             </h1>
           </header>
           <div className="flex flex-col gap-[18px] text-[15px] leading-[1.75] text-white/80">
