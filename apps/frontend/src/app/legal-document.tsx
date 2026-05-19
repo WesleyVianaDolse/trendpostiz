@@ -101,7 +101,7 @@ function renderInline(text: string): ReactNode[] {
         <a
           key={`${match.index}-link`}
           href={match[4]}
-          className="text-blue-400 hover:text-blue-300"
+          className="text-purple-400 hover:text-purple-300 transition-colors duration-300 underline decoration-purple-400/30 hover:decoration-purple-300"
         >
           {match[3]}
         </a>
@@ -131,17 +131,18 @@ export function LegalDocument({ content }: { content: string }) {
     : '';
 
   return (
-    <main className="min-h-screen bg-[#0E0E0E] text-white flex flex-col">
+    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white flex flex-col">
       {/* Header */}
-      <header className="border-b border-white/10">
-        <div className="mx-auto max-w-[920px] px-[20px] py-[24px] md:px-[32px] md:py-[32px]">
-          <Link href="/" className="flex items-center gap-[12px] hover:opacity-80 transition-opacity">
+      <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-white/5">
+        <div className="mx-auto max-w-[1200px] px-[20px] py-[16px] md:px-[40px] md:py-[20px]">
+          <Link href="/" className="inline-flex items-center hover:opacity-70 transition-opacity duration-300">
             <Image
               src="/logo-escrito-branco.png"
               alt="TrendPostiz Logo"
-              width={150}
+              width={160}
               height={40}
               priority
+              className="h-auto w-auto"
             />
           </Link>
         </div>
@@ -149,20 +150,24 @@ export function LegalDocument({ content }: { content: string }) {
 
       {/* Content */}
       <div className="flex-1">
-        <div className="mx-auto flex w-full max-w-[920px] flex-col px-[20px] py-[48px] md:px-[32px] md:py-[72px]">
-          <article className="rounded-[12px] bg-[#1A1919] px-[20px] py-[28px] md:px-[48px] md:py-[44px]">
-            <header className="mb-[32px] border-b border-white/10 pb-[24px]">
-              <h1 className="text-[32px] font-[600] leading-tight md:text-[44px]">
-                {titleText}
-              </h1>
-            </header>
-            <div className="flex flex-col gap-[18px] text-[15px] leading-[1.75] text-white/80">
+        <div className="mx-auto w-full max-w-[900px] px-[20px] py-[60px] md:px-[40px] md:py-[80px]">
+          {/* Title Section */}
+          <div className="mb-[60px]">
+            <h1 className="text-[44px] md:text-[56px] font-[700] leading-tight mb-[16px] bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+              {titleText}
+            </h1>
+            <div className="h-[2px] w-[60px] bg-gradient-to-r from-purple-500 to-transparent"></div>
+          </div>
+
+          {/* Content Card */}
+          <article className="space-y-[32px]">
+            <div className="flex flex-col gap-[24px] text-[16px] leading-[1.8] text-slate-300">
               {bodyBlocks.map((block, index) => {
                 if (block.type === 'heading') {
                   const className =
                     block.level === 2
-                      ? 'mt-[12px] border-t border-white/10 pt-[24px] text-[22px] font-[600] leading-snug text-white'
-                      : 'mt-[8px] text-[18px] font-[600] leading-snug text-white';
+                      ? 'mt-[40px] pt-[32px] text-[28px] font-[600] leading-snug text-white border-t border-white/5'
+                      : 'mt-[24px] text-[20px] font-[600] leading-snug text-white/90';
 
                   return (
                     <h2 key={`${block.text}-${index}`} className={className}>
@@ -175,17 +180,22 @@ export function LegalDocument({ content }: { content: string }) {
                   return (
                     <ul
                       key={`list-${index}`}
-                      className="list-disc space-y-[8px] ps-[22px]"
+                      className="list-none space-y-[12px] ps-0"
                     >
                       {block.items.map((item) => (
-                        <li key={item}>{renderInline(item)}</li>
+                        <li key={item} className="flex gap-[12px] items-start">
+                          <span className="text-purple-400 font-[600] mt-[2px] flex-shrink-0">→</span>
+                          <span className="text-slate-300">{renderInline(item)}</span>
+                        </li>
                       ))}
                     </ul>
                   );
                 }
 
                 return (
-                  <p key={`${block.text}-${index}`}>{renderInline(block.text)}</p>
+                  <p key={`${block.text}-${index}`} className="text-slate-300">
+                    {renderInline(block.text)}
+                  </p>
                 );
               })}
             </div>
@@ -194,11 +204,19 @@ export function LegalDocument({ content }: { content: string }) {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 mt-auto">
-        <div className="mx-auto max-w-[920px] px-[20px] py-[32px] md:px-[32px] text-center">
-          <p className="text-[14px] text-white/60">
-            TrendPostiz © 2026. Todos os direitos reservados.
-          </p>
+      <footer className="border-t border-white/5 backdrop-blur-md bg-slate-950/50">
+        <div className="mx-auto max-w-[1200px] px-[20px] py-[40px] md:px-[40px]">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-[24px]">
+            <p className="text-[14px] text-slate-400">
+              © 2026 TrendPostiz. Todos os direitos reservados.
+            </p>
+            <Link 
+              href="/" 
+              className="text-[14px] text-slate-400 hover:text-white transition-colors duration-300"
+            >
+              Voltar ao início
+            </Link>
+          </div>
         </div>
       </footer>
     </main>
