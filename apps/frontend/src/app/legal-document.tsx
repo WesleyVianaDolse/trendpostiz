@@ -100,7 +100,7 @@ function renderInline(text: string): ReactNode[] {
         <a
           key={`${match.index}-link`}
           href={match[4]}
-          className="underline hover:text-white"
+          className="text-blue-400 hover:text-blue-300"
         >
           {match[3]}
         </a>
