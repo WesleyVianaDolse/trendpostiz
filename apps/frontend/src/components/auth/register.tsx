@@ -218,20 +218,24 @@ export function RegisterAfter({
                   'By registering you agree to our'
                 )}
                 &nbsp;
-                <Link
+                <a
                   href="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="underline hover:font-bold"
                 >
                   {t('terms_of_service', 'Terms of Service')}
-                </Link>
+                </a>
                 &nbsp;
                 {t('and', 'and')}&nbsp;
-                <Link
+                <a
                   href="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="underline hover:font-bold"
                 >
                   {t('privacy_policy', 'Privacy Policy')}
-                </Link>
+                </a>
                 &nbsp;
               </div>
               <div className="text-center mt-6">
