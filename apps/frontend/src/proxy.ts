@@ -160,15 +160,7 @@ export async function proxy(request: NextRequest) {
       }
       return redirect;
     }
-    if (nextUrl.pathname === '/') {
-      return NextResponse.redirect(
-        new URL(
-          !!process.env.IS_GENERAL ? '/launches' : `/analytics`,
-          nextUrl.href
-        )
-      );
-    }
-
+    // Allow public access to root path for landing page
     return topResponse;
   } catch (err) {
     console.log('err', err);
