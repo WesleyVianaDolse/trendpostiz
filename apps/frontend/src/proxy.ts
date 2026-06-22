@@ -91,6 +91,7 @@ export async function proxy(request: NextRequest) {
   if (!nextUrl.pathname.startsWith('/auth') && 
       !nextUrl.pathname.startsWith('/terms') && 
       !nextUrl.pathname.startsWith('/privacy') && 
+      nextUrl.pathname !== '/' &&
       !authCookie) {
     const providers = ['google', 'settings'];
     const findIndex = providers.find((p) => nextUrl.href.indexOf(p) > -1);
