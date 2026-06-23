@@ -19,11 +19,11 @@ services:
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.postiz.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.postiz.rule=Host(`trendpostiz.com.br`)"
       - "traefik.http.routers.postiz.entrypoints=websecure"
       - "traefik.http.routers.postiz.tls=true"
       - "traefik.http.routers.postiz.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.postiz-http.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.postiz-http.rule=Host(`trendpostiz.com.br`)"
       - "traefik.http.routers.postiz-http.entrypoints=web"
       - "traefik.http.routers.postiz-http.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
@@ -41,12 +41,11 @@ services:
       TEMPORAL_ADDRESS: "postiz-temporal:7233"
       IS_GENERAL: "true"
       DISABLE_REGISTRATION: "false"
-      PORT: "3000"
 
       EMAIL_PROVIDER: "resend"
       EMAIL_FROM_NAME: "TrendPostiz"
       EMAIL_FROM_ADDRESS: "notification@trendpostiz.com.br"
-      RESEND_API_KEY: "${RESEND_API_KEY}"
+      RESEND_API_KEY: "re_91QmETzW_Ph5e6t55jtCJ4iiQnccHVGrH"
 
       STORAGE_PROVIDER: "local"
       UPLOAD_DIRECTORY: "/uploads"
@@ -58,6 +57,15 @@ services:
       CLOUDFLARE_BUCKETNAME: ""
       CLOUDFLARE_BUCKET_URL: ""
       CLOUDFLARE_REGION: "auto"
+
+      FACEBOOK_APP_ID: "992677206544265"
+      FACEBOOK_APP_SECRET: "4e762ae208f5051f9560dc6b32af3737"
+      GOOGLE_GMB_CLIENT_ID: "962777160135-qd363mprnk46d6668lqkj0sddere3tvl.apps.googleusercontent.com"
+      GOOGLE_GMB_CLIENT_SECRET: "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"
+      YOUTUBE_CLIENT_ID: "962777160135-mj40hb4015pubmg3r3nj2imm2cqq0soe.apps.googleusercontent.com"
+      YOUTUBE_CLIENT_SECRET: "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"
+      TIKTOK_CLIENT_ID: "sbawwot9d19u6ybuo1"
+      TIKTOK_CLIENT_SECRET: "rW0W8tDGxzPdEKwfxKIVuEKIsizUX38I"
 
       OPENAI_API_KEY: ""
       NEXT_PUBLIC_DISCORD_SUPPORT: ""
