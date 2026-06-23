@@ -42,13 +42,18 @@ const platformCards = [
     icon: '/icons/platforms/youtube.png',
     detail: 'Official API',
   },
+  {
+    name: 'Google My Business',
+    icon: '/icons/platforms/gmb.png',
+    detail: 'Official API',
+  },
 ];
 
 const featureCards = [
   {
     title: 'Connect Social Accounts',
     description:
-      'Securely connect TikTok, Facebook, Instagram and YouTube using official APIs.',
+      'Securely connect TikTok, Facebook, Instagram, YouTube and Google My Business using official APIs.',
     icon: ShieldCheck,
   },
   {
@@ -128,6 +133,12 @@ const floatingPosts = [
     title: 'Video publishing',
     position: 'lg:right-12 lg:bottom-14',
     icon: '/icons/platforms/youtube.png',
+  },
+  {
+    label: 'Google My Business',
+    title: 'Business post queued',
+    position: 'lg:right-36 lg:top-[48%]',
+    icon: '/icons/platforms/gmb.png',
   },
 ];
 
@@ -229,7 +240,7 @@ export function LandingPage() {
               </div>
               <div className="mt-9 grid max-w-xl grid-cols-3 gap-3 text-sm text-white/60">
                 <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-                  <strong className="block text-xl text-white">4</strong>
+                  <strong className="block text-xl text-white">5</strong>
                   Core platforms
                 </div>
                 <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
@@ -284,7 +295,7 @@ export function LandingPage() {
                 aligned with platform security expectations.
               </p>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {platformCards.map((platform) => (
                 <div
                   key={platform.name}

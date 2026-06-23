@@ -19,6 +19,11 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import clsx from 'clsx';
 import copy from 'copy-to-clipboard';
 import { capitalize } from 'lodash';
+import {
+  comparePlatforms,
+  getPlatformDisplayName,
+  usePlatformVisibilitySettings,
+} from '@gitroom/frontend/components/platforms/platform.visibility';
 const resolver = classValidatorResolver(ApiKeyDto);
 
 export const useAddProvider = (update?: () => void, invite?: boolean) => {
@@ -389,6 +394,7 @@ export const AddProviderComponent: FC<{
   const router = useRouter();
   const fetch = useFetch();
   const modal = useModals();
+  const { isEnabled } = usePlatformVisibilitySettings();
   const getSocialLink = useCallback(
     (
         invite: boolean,
@@ -645,6 +651,25 @@ export const AddProviderComponent: FC<{
   );
 
   const t = useT();
+  const visibleSocial = useMemo(
+    () =>
+      social
+        .filter((item) => isEnabled(item.identifier))
+        .filter((item) => {
+          if (!props.invite) {
+            return true;
+          }
+
+          return (
+            !item.isExternal &&
+            !item.isWeb3 &&
+            !item.isChromeExtension &&
+            !item.customFields
+          );
+        })
+        .sort(comparePlatforms),
+    [social, isEnabled, props.invite]
+  );
 
   return (
     <div className="w-full flex flex-col gap-[20px] rounded-[4px] relative]">
@@ -657,20 +682,7 @@ export const AddProviderComponent: FC<{
             isMobile ? {} : onboarding ? 'grid-cols-9' : 'grid-cols-5'
           )}
         >
-          {social
-            .filter((item) => {
-              if (!props.invite) {
-                return true;
-              }
-
-              return (
-                !item.isExternal &&
-                !item.isWeb3 &&
-                !item.isChromeExtension &&
-                !item.customFields
-              );
-            })
-            .map((item) => (
+          {visibleSocial.map((item) => (
               <div
                 key={item.identifier}
                 onClick={getSocialLink(
@@ -714,7 +726,7 @@ export const AddProviderComponent: FC<{
                     'text-center'
                   )}
                 >
-                  {item.name}
+                  {getPlatformDisplayName(item.identifier, item.name)}
                   {!!item.toolTip && !isMobile && (
                     <svg
                       width="15"
@@ -733,6 +745,14 @@ export const AddProviderComponent: FC<{
                 </div>
               </div>
             ))}
+          {!visibleSocial.length && (
+            <div className="col-span-full text-center text-[14px] text-customColor18 py-[24px]">
+              {t(
+                'no_platforms_enabled',
+                'No platforms are enabled. Enable platforms in Settings > Platforms.'
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
