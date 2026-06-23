@@ -76,7 +76,7 @@ function LayoutContextInner(params: { children: ReactNode }) {
       }
 
       if (response?.headers?.get('reload')) {
-        window.location.reload();
+        window.location.href = isGeneral ? '/launches' : '/analytics';
         return true;
       }
 
