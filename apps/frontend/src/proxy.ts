@@ -52,6 +52,10 @@ export async function proxy(request: NextRequest) {
     return topResponse;
   }
 
+  if (nextUrl.pathname === '/' && authCookie) {
+    return NextResponse.redirect(new URL('/launches', nextUrl.href));
+  }
+
   if (
     nextUrl.pathname.startsWith('/integrations/social/') &&
     nextUrl.href.indexOf('state=login') === -1
