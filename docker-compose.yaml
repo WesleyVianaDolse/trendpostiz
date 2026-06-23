@@ -44,8 +44,8 @@ services:
 
       EMAIL_PROVIDER: "resend"
       EMAIL_FROM_NAME: "TrendPostiz"
-      EMAIL_FROM_ADDRESS: "notification@trendpostiz.com.br"
-      RESEND_API_KEY: "re_91QmETzW_Ph5e6t55jtCJ4iiQnccHVGrH"
+      EMAIL_FROM_ADDRESS: ""
+      RESEND_API_KEY: ""
 
       STORAGE_PROVIDER: "local"
       UPLOAD_DIRECTORY: "/uploads"
