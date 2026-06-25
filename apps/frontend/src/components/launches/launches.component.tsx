@@ -499,7 +499,7 @@ export const LaunchesComponent = () => {
       <CalendarWeekProvider integrations={sortedIntegrations}>
         <div
           className={clsx(
-            'flex relative flex-col',
+            'flex relative flex-col mobile:hidden',
             collapseMenu === '1' ? 'group sidebar w-[100px]' : 'w-[260px]'
           )}
         >
@@ -592,9 +592,26 @@ export const LaunchesComponent = () => {
             </div>
           </div>
         </div>
-        <div className="bg-newBgColorInner flex-1 flex-col flex p-[20px] gap-[12px]">
+        <div className="bg-newBgColorInner flex-1 flex-col flex p-[20px] gap-[12px] mobile:p-[12px] mobile:min-w-0 mobile:min-h-0">
+          <div className="hidden mobile:flex gap-[8px] overflow-x-auto pb-[2px] scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
+            <div className="min-w-[172px] flex">
+              <AddProviderButton update={() => update(true)} />
+            </div>
+            {sortedIntegrations?.length > 0 && (
+              <div className="min-w-[172px] flex">
+                <NewPost />
+              </div>
+            )}
+            {sortedIntegrations?.length > 0 &&
+              user?.tier?.ai &&
+              billingEnabled && (
+                <div className="min-w-[54px] flex">
+                  <GeneratorComponent />
+                </div>
+              )}
+          </div>
           <Filters />
-          <div className="flex-1 flex">
+          <div className="flex-1 flex mobile:min-h-0 mobile:min-w-0">
             <Calendar />
           </div>
         </div>

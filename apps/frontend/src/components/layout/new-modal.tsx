@@ -151,7 +151,7 @@ export const Component: FC<{
           >
             <div
               className={clsx(
-                modal.fullScreen ? 'w-full h-full flex-1' : 'mx-auto py-[48px]'
+                modal.fullScreen ? 'w-full h-full flex-1 mobile:!w-full' : 'mx-auto py-[48px] mobile:!w-full mobile:py-0'
               )}
               {...(modal.size && { style: { width: modal.size } })}
             >
@@ -197,9 +197,10 @@ export const Component: FC<{
             <div
               className={clsx(
                 !modal.removeLayout && 'gap-[40px] p-[32px]',
-                'bg-newBgColorInner mx-auto flex flex-col w-fit rounded-[24px] relative',
+                'bg-newBgColorInner mx-auto flex flex-col w-fit rounded-[24px] relative mobile:!w-full mobile:!max-w-full mobile:rounded-none mobile:p-[18px]',
                 modal.size ? '' : 'min-w-[600px]',
-                modal.fullScreen && 'h-full'
+                modal.fullScreen && 'h-full',
+                'mobile:min-w-0'
               )}
               {...((!!modal.size || !!modal.height || !!modal.maxSize) && {
                 style: {

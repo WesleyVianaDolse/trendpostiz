@@ -90,7 +90,7 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
             <ContinueProvider />
             <div
               className={clsx(
-                'flex flex-col min-h-screen min-w-screen text-newTextColor p-[12px]',
+                'flex flex-col min-h-screen min-w-screen text-newTextColor p-[12px] mobile:p-0',
                 jakartaSans.className
               )}
             >
@@ -100,9 +100,9 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
               ) : (
                 <>
                   <AnnouncementBanner />
-                  <div className="flex-1 flex gap-[8px]">
+                  <div className="flex-1 flex gap-[8px] mobile:gap-0 mobile:min-w-0">
                     <Support />
-                    <div className="flex flex-col bg-newBgColorInner w-[80px] rounded-[12px]">
+                    <div className="flex flex-col bg-newBgColorInner w-[80px] rounded-[12px] mobile:hidden">
                       <div
                         id="left-menu"
                         className={clsx(
@@ -116,27 +116,37 @@ export const LayoutComponent = ({ children }: { children: ReactNode }) => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex-1 bg-newBgLineColor rounded-[12px] overflow-hidden flex flex-col gap-[1px] blurMe">
-                      <div className="flex bg-newBgColorInner h-[80px] px-[20px] items-center">
-                        <div className="text-[24px] font-[600] flex flex-1">
+                    <div className="flex-1 bg-newBgLineColor rounded-[12px] overflow-hidden flex flex-col gap-[1px] blurMe mobile:rounded-none mobile:min-w-0">
+                      <div className="flex bg-newBgColorInner h-[80px] px-[20px] items-center mobile:h-auto mobile:min-h-[64px] mobile:px-[14px] mobile:gap-[12px]">
+                        <div className="text-[24px] font-[600] flex flex-1 mobile:text-[20px] mobile:min-w-0 mobile:truncate">
                           <Title />
                         </div>
-                        <div className="flex gap-[20px] text-textItemBlur">
-                          <StreakComponent />
-                          <div className="w-[1px] h-[20px] bg-blockSeparator" />
-                          <OrganizationSelector />
+                        <div className="flex gap-[20px] text-textItemBlur mobile:gap-[12px] mobile:items-center mobile:shrink-0">
+                          <div className="mobile:hidden">
+                            <StreakComponent />
+                          </div>
+                          <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
+                          <div className="mobile:hidden">
+                            <OrganizationSelector />
+                          </div>
                           <div className="hover:text-newTextColor">
                             <ModeComponent />
                           </div>
-                          <div className="w-[1px] h-[20px] bg-blockSeparator" />
+                          <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
                           <LanguageComponent />
-                          <ChromeExtensionComponent />
-                          <div className="w-[1px] h-[20px] bg-blockSeparator" />
-                          <AttachToFeedbackIcon />
-                          <NotificationComponent />
+                          <div className="mobile:hidden">
+                            <ChromeExtensionComponent />
+                          </div>
+                          <div className="w-[1px] h-[20px] bg-blockSeparator mobile:hidden" />
+                          <div className="mobile:hidden">
+                            <AttachToFeedbackIcon />
+                          </div>
+                          <div className="mobile:hidden">
+                            <NotificationComponent />
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-1 gap-[1px]">{children}</div>
+                      <div className="flex flex-1 gap-[1px] mobile:min-h-0 mobile:min-w-0">{children}</div>
                     </div>
                   </div>
                 </>

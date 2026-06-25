@@ -364,21 +364,21 @@ export const WeekView = () => {
   }, [i18next.resolvedLanguage, startDate]);
 
   return (
-    <div className="flex flex-col text-textColor flex-1">
-      <div className="flex-1 relative">
-        <div className="grid [grid-template-columns:136px_repeat(7,_minmax(0,_1fr))] gap-[4px] rounded-[10px] absolute h-full start-0 top-0 w-full overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
-          <div className="z-10 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0"></div>
+    <div className="flex flex-col text-textColor flex-1 mobile:min-w-0">
+      <div className="flex-1 relative mobile:min-w-0">
+        <div className="grid [grid-template-columns:136px_repeat(7,_minmax(0,_1fr))] mobile:[grid-template-columns:58px_repeat(7,_104px)] mobile:min-w-[786px] gap-[4px] rounded-[10px] absolute h-full start-0 top-0 w-full overflow-auto scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
+          <div className="z-10 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 start-0 mobile:h-[54px]"></div>
           {localizedDays.map((day, index) => (
             <div
               key={day.name}
-              className="p-2 text-center bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 z-[20]"
+              className="p-2 text-center bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 z-[20] mobile:h-[54px] mobile:px-[4px]"
             >
-              <div className="text-[14px] font-[500] text-newTableText">
+              <div className="text-[14px] font-[500] text-newTableText mobile:text-[11px] mobile:truncate mobile:w-full">
                 {day.name}
               </div>
               <div
                 className={clsx(
-                  'text-[14px] font-[600] flex items-center justify-center gap-[6px]',
+                  'text-[14px] font-[600] flex items-center justify-center gap-[6px] mobile:text-[11px] mobile:gap-[4px]',
                   day.day === newDayjs().format('L') &&
                     'text-newTableTextFocused'
                 )}
@@ -392,7 +392,7 @@ export const WeekView = () => {
           ))}
           {hours.map((hour) => (
             <Fragment key={hour}>
-              <div className="p-2 pe-4 text-center items-center justify-center flex text-[14px] text-newTableText">
+              <div className="p-2 pe-4 text-center items-center justify-center flex text-[14px] text-newTableText sticky start-0 z-[10] bg-newBgColorInner mobile:text-[12px] mobile:px-[4px]">
                 {convertTimeFormatBasedOnLocality(hour)}
               </div>
               {localizedDays.map((day, indexDay) => (
@@ -463,13 +463,13 @@ export const MonthView = () => {
   }, [startDate]);
 
   return (
-    <div className="flex flex-col text-textColor flex-1">
-      <div className="flex-1 flex relative">
-        <div className="grid grid-cols-7 grid-rows-[62px_auto] gap-[4px] rounded-[10px] absolute start-0 top-0 overflow-auto w-full h-full scrollbar scrollbar-thumb-tableBorder scrollbar-track-secondary">
+    <div className="flex flex-col text-textColor flex-1 mobile:min-w-0">
+      <div className="flex-1 flex relative mobile:min-w-0">
+        <div className="grid grid-cols-7 grid-rows-[62px_auto] mobile:[grid-template-columns:repeat(7,_104px)] mobile:min-w-[728px] gap-[4px] rounded-[10px] absolute start-0 top-0 overflow-auto w-full h-full scrollbar scrollbar-thumb-tableBorder scrollbar-track-secondary">
           {localizedDays.map((day) => (
             <div
               key={day}
-              className="z-[20] p-2 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0"
+              className="z-[20] p-2 bg-newTableHeader flex justify-center items-center flex-col h-[62px] rounded-[8px] sticky top-0 mobile:h-[54px] mobile:text-[11px] mobile:px-[4px]"
             >
               <div>{day}</div>
             </div>
