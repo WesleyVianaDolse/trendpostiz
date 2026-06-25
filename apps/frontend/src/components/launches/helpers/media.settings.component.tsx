@@ -1,12 +1,20 @@
 'use client';
 
 import { EventEmitter } from 'events';
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  ChangeEvent,
+  FC,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { TopTitle } from '@gitroom/frontend/components/launches/helpers/top.title.component';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { hasExtension } from '@gitroom/helpers/utils/has.extension';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
+import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
 const postUrlEmitter = new EventEmitter();
 
 export const MediaSettingsLayout = () => {
@@ -311,6 +319,8 @@ export const MediaComponentInner: FC<{
   const { onClose, onSelect, media } = props;
   const setActivateExitButton = useLaunchStore((e) => e.setActivateExitButton);
   const newFetch = useFetch();
+  const mediaDirectory = useMediaDirectory();
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
   const [newThumbnail, setNewThumbnail] = useState<string | null>(null);
   const [isEditingThumbnail, setIsEditingThumbnail] = useState(false);
   const [altText, setAltText] = useState<string>(media?.alt || '');
@@ -326,8 +336,46 @@ export const MediaComponentInner: FC<{
     setActivateExitButton(false);
     return () => {
       setActivateExitButton(true);
+      if (newThumbnail?.startsWith('blob:')) {
+        URL.revokeObjectURL(newThumbnail);
+      }
     };
-  }, []);
+  }, [newThumbnail]);
+
+  const setThumbnailPreview = useCallback(
+    (url: string, timestamp: number | null) => {
+      setNewThumbnail((current) => {
+        if (current?.startsWith('blob:')) {
+          URL.revokeObjectURL(current);
+        }
+
+        return url;
+      });
+      setThumbnailTimestamp(timestamp);
+      setIsEditingThumbnail(false);
+    },
+    []
+  );
+
+  const uploadThumbnailImage = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      event.target.value = '';
+
+      if (!file) {
+        return;
+      }
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file.');
+        return;
+      }
+
+      const url = URL.createObjectURL(file);
+      setThumbnailPreview(url, null);
+    },
+    [setThumbnailPreview]
+  );
 
   const save = useCallback(async () => {
     setLoading(true);
@@ -362,6 +410,13 @@ export const MediaComponentInner: FC<{
     onClose();
   }, [altText, newThumbnail, thumbnail, thumbnailTimestamp]);
 
+  const currentThumbnail = newThumbnail || thumbnail;
+  const currentThumbnailSrc = currentThumbnail?.startsWith('blob:')
+    ? currentThumbnail
+    : currentThumbnail
+    ? mediaDirectory.set(currentThumbnail)
+    : '';
+
   return (
     <div className="mt-[10px] flex flex-col gap-[20px]">
       <div className="flex flex-col space-y-2">
@@ -383,13 +438,13 @@ export const MediaComponentInner: FC<{
             {!isEditingThumbnail ? (
               <div className="flex flex-col">
                 {/* Show existing thumbnail if it exists */}
-                {(newThumbnail || thumbnail) && (
+                {currentThumbnail && (
                   <div className="flex flex-col space-y-2">
                     <span className="text-sm text-textColor">
                       Current Thumbnail:
                     </span>
                     <img
-                      src={newThumbnail || thumbnail}
+                      src={currentThumbnailSrc}
                       alt="Current thumbnail"
                       className="max-w-full max-h-[500px] object-contain rounded-lg border border-tableBorder"
                     />
@@ -397,24 +452,45 @@ export const MediaComponentInner: FC<{
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex space-x-2">
+                <input
+                  ref={thumbnailInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={uploadThumbnailImage}
+                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   <button
                     disabled={loading}
                     onClick={() => setIsEditingThumbnail(true)}
-                    className="bg-third text-textColor px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all flex-1 border border-tableBorder"
+                    className="bg-third text-textColor px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all border border-tableBorder"
                   >
                     {media.thumbnail || newThumbnail
-                      ? 'Edit Thumbnail'
-                      : 'Create Thumbnail'}
+                      ? 'Select Video Frame'
+                      : 'Create From Video Frame'}
                   </button>
-                  {(thumbnail || newThumbnail) && (
+                  <button
+                    disabled={loading}
+                    onClick={() => thumbnailInputRef.current?.click()}
+                    className="bg-third text-textColor px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all border border-tableBorder"
+                  >
+                    Upload Thumbnail Image
+                  </button>
+                  {currentThumbnail && (
                     <button
                       disabled={loading}
                       onClick={() => {
-                        setNewThumbnail(null);
+                        setNewThumbnail((current) => {
+                          if (current?.startsWith('blob:')) {
+                            URL.revokeObjectURL(current);
+                          }
+
+                          return null;
+                        });
                         setThumbnail(null);
+                        setThumbnailTimestamp(null);
                       }}
-                      className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all flex-1 border border-red-700"
+                      className="bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all border border-red-700 md:col-span-2"
                     >
                       Clear Thumbnail
                     </button>
@@ -451,16 +527,7 @@ export const MediaComponentInner: FC<{
                 {/* Thumbnail Editor */}
                 <CreateThumbnail
                   onSelect={(blob: Blob, timestampMs: number) => {
-                    // Convert blob to base64 or handle as needed
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      // You can handle the result here - for now just call onSelect with the blob URL
-                      const url = URL.createObjectURL(blob);
-                      setNewThumbnail(url);
-                      setThumbnailTimestamp(timestampMs);
-                      setIsEditingThumbnail(false);
-                    };
-                    reader.readAsDataURL(blob);
+                    setThumbnailPreview(URL.createObjectURL(blob), timestampMs);
                   }}
                   media={media}
                   altText={altText}
