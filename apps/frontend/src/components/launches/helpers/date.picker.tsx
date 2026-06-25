@@ -35,20 +35,20 @@ export const DatePicker: FC<{
   );
   return (
     <div
-      className="px-[16px] border border-newTextColor/10 rounded-[8px] justify-center flex gap-[8px] items-center relative h-[44px] text-[15px] font-[600] ml-[7px] select-none flex-1"
+      className="px-[16px] border border-newTextColor/10 rounded-[8px] justify-center flex gap-[8px] items-center relative h-[44px] text-[15px] font-[600] ml-[7px] select-none flex-1 mobile:ml-0 mobile:min-w-0 mobile:px-[10px]"
       onClick={changeShow}
       ref={ref}
     >
-      <div className="cursor-pointer">
+      <div className="cursor-pointer shrink-0">
         <CalendarIcon />
       </div>
-      <div className="cursor-pointer">
+      <div className="cursor-pointer text-center mobile:min-w-0 mobile:truncate">
         {date.format(isUSCitizen() ? 'MM/DD/YYYY hh:mm A' : 'DD/MM/YYYY HH:mm')}
       </div>
       {open && (
         <div
           onClick={(e) => e.stopPropagation()}
-          className="animate-fadeIn absolute bottom-[100%] mb-[16px] start-[50%] -translate-x-[50%] bg-sixth border border-tableBorder text-textColor rounded-[16px] z-[300] p-[16px] flex flex-col"
+          className="animate-fadeIn absolute bottom-[100%] mb-[16px] start-[50%] -translate-x-[50%] bg-sixth border border-tableBorder text-textColor rounded-[16px] z-[300] p-[16px] flex flex-col mobile:start-0 mobile:translate-x-0 mobile:w-[calc(100vw-24px)] mobile:max-w-[360px]"
         >
           <Calendar
             onChange={changeDate('date')}

@@ -161,27 +161,27 @@ export const TagsComponentInner: FC<{
     <div
       ref={ref}
       className={clsx(
-        'border rounded-[8px] justify-center flex items-center relative h-[44px] text-[15px] font-[600] select-none',
+        'border rounded-[8px] justify-center flex items-center relative h-[44px] text-[15px] font-[600] select-none mobile:w-full mobile:min-w-0',
         isOpen ? 'border-[#612BD3]' : 'border-newTextColor/10'
       )}
     >
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="px-[16px] justify-center flex gap-[8px] items-center h-full select-none flex-1"
+        className="px-[16px] justify-center flex gap-[8px] items-center h-full select-none flex-1 mobile:min-w-0"
       >
-        <div className="cursor-pointer">
+        <div className="cursor-pointer shrink-0">
           <TagIcon />
         </div>
-        <div className="cursor-pointer flex gap-[4px]">
+        <div className="cursor-pointer flex gap-[4px] mobile:min-w-0 mobile:flex-1 mobile:justify-center">
           {tagValue.length === 0 ? (
-            t('add_new_tag', 'Add New Tag')
+            <span className="truncate">{t('add_new_tag', 'Add New Tag')}</span>
           ) : (
             <>
               <div
-                className="h-full flex justify-center items-center px-[8px] rounded-[4px]"
+                className="h-full flex justify-center items-center px-[8px] rounded-[4px] mobile:min-w-0"
                 style={{ backgroundColor: tagValue[0].color }}
               >
-                <span className="text-shadow-tags text-[#fff]">
+                <span className="text-shadow-tags text-[#fff] truncate">
                   {tagValue[0].name}
                 </span>
               </div>
@@ -189,12 +189,12 @@ export const TagsComponentInner: FC<{
             </>
           )}
         </div>
-        <div className="cursor-pointer">
+        <div className="cursor-pointer shrink-0">
           <DropdownArrowIcon rotated={isOpen} />
         </div>
       </div>
       {isOpen && (
-        <div className="z-[300] absolute start-0 bottom-[100%] w-[240px] bg-newBgColorInner p-[12px] menu-shadow -translate-y-[10px] flex flex-col">
+        <div className="z-[300] absolute start-0 bottom-[100%] w-[240px] bg-newBgColorInner p-[12px] menu-shadow -translate-y-[10px] flex flex-col mobile:w-full mobile:max-h-[45vh] mobile:overflow-y-auto">
           {(data?.tags || []).map((p: any) => (
             <div
               onClick={() => {

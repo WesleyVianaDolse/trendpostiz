@@ -76,28 +76,28 @@ export const RepeatComponent: FC<{
     <div
       ref={ref}
       className={clsx(
-        'border rounded-[8px] justify-center flex items-center relative h-[44px] text-[15px] font-[600] select-none',
+        'border rounded-[8px] justify-center flex items-center relative h-[44px] text-[15px] font-[600] select-none mobile:w-full mobile:min-w-0',
         isOpen ? 'border-[#612BD3]' : 'border-newTextColor/10',
       )}
     >
       <div
         onClick={() => setIsOpen(!isOpen)}
-        className="px-[16px] justify-center flex gap-[8px] items-center h-full select-none flex-1"
+        className="px-[16px] justify-center flex gap-[8px] items-center h-full select-none flex-1 mobile:min-w-0"
       >
-        <div className="cursor-pointer">
+        <div className="cursor-pointer shrink-0">
           <RepeatIcon />
         </div>
-        <div className="cursor-pointer">
+        <div className="cursor-pointer mobile:flex-1 mobile:min-w-0 mobile:text-center mobile:truncate">
           {repeat
             ? `${t('repeat_post_every_label', 'Repeat Post Every')} ${everyLabel}`
             : t('repeat_post_every', 'Repeat Post Every...')}
         </div>
-        <div className="cursor-pointer">
+        <div className="cursor-pointer shrink-0">
           <DropdownArrowIcon rotated={isOpen} />
         </div>
       </div>
       {isOpen && (
-        <div className="z-[300] absolute start-0 bottom-[100%] w-[240px] bg-newBgColorInner p-[12px] menu-shadow -translate-y-[10px] flex flex-col">
+        <div className="z-[300] absolute start-0 bottom-[100%] w-[240px] bg-newBgColorInner p-[12px] menu-shadow -translate-y-[10px] flex flex-col mobile:w-full mobile:max-h-[45vh] mobile:overflow-y-auto">
           {list.map((p) => (
             <div
               onClick={() => {

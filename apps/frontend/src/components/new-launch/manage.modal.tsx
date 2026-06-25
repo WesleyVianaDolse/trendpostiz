@@ -565,7 +565,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
           </div>
         </div>
         <div className="select-none h-[84px] py-[20px] border-t border-newBorder flex items-center mobile:h-auto mobile:p-[12px] mobile:flex-col mobile:items-stretch mobile:gap-[10px] mobile:shrink-0">
-          <div className="flex-1 flex ps-[20px] gap-[8px] mobile:ps-0 mobile:w-full mobile:overflow-x-auto mobile:pb-[2px]">
+          <div className="flex-1 flex ps-[20px] gap-[8px] mobile:ps-0 mobile:w-full mobile:flex-none mobile:flex-col">
             {!dummy && (
               <TagsComponent
                 name="tags"
@@ -581,7 +581,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
               <RepeatComponent repeat={repeater} onChange={setRepeater} />
             )}
           </div>
-          <div className="pe-[20px] flex items-center justify-end gap-[8px] mobile:pe-0 mobile:w-full mobile:flex-wrap mobile:justify-stretch">
+          <div className="pe-[20px] flex items-center justify-end gap-[8px] mobile:pe-0 mobile:w-full mobile:grid mobile:grid-cols-2">
             {existingData?.integration && (
               <button
                 onClick={deletePost}
@@ -600,7 +600,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                   selectedIntegrations.length === 0 || loading || locked
                 }
                 onClick={schedule('draft')}
-                className="relative cursor-pointer disabled:cursor-not-allowed px-[20px] h-[44px] bg-btnSimple justify-center items-center flex rounded-[8px] text-[15px] font-[600] mobile:flex-1 mobile:min-w-[140px]"
+                className="relative cursor-pointer disabled:cursor-not-allowed px-[20px] h-[44px] bg-btnSimple justify-center items-center flex rounded-[8px] text-[15px] font-[600] mobile:min-w-0"
               >
                 {loading && (
                   <div className="absolute left-[50%] top-[50%] -translate-y-[50%] -translate-x-[50%]">
@@ -624,13 +624,13 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
               </button>
             )}
             {!addEditSets && (
-              <div className="group cursor-pointer relative mobile:flex-1 mobile:min-w-[180px]">
+              <div className="group cursor-pointer relative mobile:col-span-2 mobile:min-w-0">
                 <button
                   disabled={
                     selectedIntegrations.length === 0 || loading || locked
                   }
                   onClick={schedule('schedule')}
-                  className="text-white relative min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] bg-[#612BD3] ps-[20px] pe-[16px] mobile:w-full"
+                  className="text-white relative min-w-[180px] btnSub disabled:cursor-not-allowed disabled:opacity-80 outline-none gap-[8px] flex justify-center items-center h-[44px] rounded-[8px] bg-[#612BD3] ps-[20px] pe-[16px] mobile:w-full mobile:min-w-0"
                 >
                   {loading && (
                     <div className="absolute left-[50%] top-[50%] -translate-y-[50%] -translate-x-[50%]">
