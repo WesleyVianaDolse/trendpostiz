@@ -447,10 +447,10 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   );
 
   return (
-    <div className="w-full h-full flex-1 p-[40px] flex relative mobile:p-0 mobile:min-h-0">
+    <div className="w-full h-full flex-1 p-[40px] flex relative mobile:p-0 mobile:min-h-0 mobile:h-[100dvh] mobile:max-h-[100dvh]">
       <div className="flex flex-1 bg-newBgColorInner rounded-[20px] flex-col mobile:rounded-none mobile:min-h-0 mobile:h-full">
-        <div className="flex-1 flex mobile:flex-col mobile:min-h-0">
-          <div className="flex flex-col flex-1 border-e border-newBorder mobile:border-e-0 mobile:min-h-[58vh]">
+        <div className="flex-1 flex mobile:flex-col mobile:min-h-0 mobile:overflow-y-auto">
+          <div className="flex flex-col flex-1 border-e border-newBorder mobile:border-e-0 mobile:flex-none mobile:h-[330px] mobile:shrink-0">
             <div className="bg-newBgColor h-[65px] rounded-s-[20px] !rounded-b-[0] flex items-center gap-[12px] px-[20px] text-[20px] font-[600] mobile:rounded-none mobile:h-[56px] mobile:px-[14px] mobile:text-[18px] mobile:shrink-0">
               {t('create_post_title', 'Create Post')}
               <CreationMethodBadge
@@ -486,7 +486,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-1 gap-[6px] flex-col mobile:min-h-[360px]">
+                  <div className="flex flex-1 gap-[6px] flex-col mobile:min-h-0">
                     <div>{!existingData.integration && <SelectCurrent />}</div>
                     <div className="flex-1 flex">
                       {!hide && <EditorWrapper totalPosts={1} value="" />}
@@ -547,7 +547,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
               </div>
             </div>
           </div>
-          <div className="w-[580px] flex flex-col mobile:w-full mobile:min-h-[42vh] mobile:border-t mobile:border-newBorder">
+          <div className="w-[580px] flex flex-col mobile:w-full mobile:h-[150px] mobile:flex-none mobile:border-t mobile:border-newBorder mobile:shrink-0">
             <div className="bg-newBgColor h-[65px] rounded-e-[20px] !rounded-b-[0] flex items-center px-[20px] text-[20px] font-[600] mobile:h-[48px] mobile:rounded-none mobile:px-[14px] mobile:text-[16px] mobile:shrink-0">
               <div className="flex-1">{t('post_preview', 'Post Preview')}</div>
               <div className="cursor-pointer mobile:hidden">
@@ -700,6 +700,16 @@ After using the addPostFor{num} it will create a new addPostContentFor{num+ 1} f
           ),
         }}
       />
+      <style>
+        {`
+          @media (max-width: 1025px) {
+            .copilotKitPopup,
+            .copilotKitButton {
+              display: none !important;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 };
