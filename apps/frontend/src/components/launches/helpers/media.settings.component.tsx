@@ -115,14 +115,24 @@ export const CreateThumbnail: FC<{
   const [duration, setDuration] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
-  const handleLoadedMetadata = useCallback(() => {
-    setDuration(videoRef?.current?.duration);
-    setIsLoaded(true);
+  const markVideoLoaded = useCallback(() => {
+    const video = videoRef.current;
+
+    if (!video) {
+      return;
+    }
+
+    const nextDuration = Number.isFinite(video.duration) ? video.duration : 0;
+    setDuration(nextDuration);
+    setCurrentTime(video.currentTime || 0);
+    setIsLoaded(video.readyState >= 1);
+    setLoadError(false);
   }, []);
 
   const handleTimeUpdate = useCallback(() => {
-    setCurrentTime(videoRef?.current?.currentTime);
+    setCurrentTime(videoRef?.current?.currentTime || 0);
   }, []);
 
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -139,9 +149,9 @@ export const CreateThumbnail: FC<{
     try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas?.getContext('2d');
 
-      if (!ctx) {
+      if (!video || !canvas || !ctx || !video.videoWidth || !video.videoHeight) {
         setIsCapturing(false);
         return;
       }
@@ -215,6 +225,20 @@ export const CreateThumbnail: FC<{
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
+  const videoSrc = media
+    ? backendUrl + '/public/stream?url=' + encodeURIComponent(media.path)
+    : '';
+
+  useEffect(() => {
+    setIsLoaded(false);
+    setLoadError(false);
+    setCurrentTime(0);
+    setDuration(0);
+
+    const timeout = setTimeout(markVideoLoaded, 250);
+    return () => clearTimeout(timeout);
+  }, [videoSrc, markVideoLoaded]);
+
   if (!media) return null;
 
   return (
@@ -222,17 +246,26 @@ export const CreateThumbnail: FC<{
       <div className="relative bg-black rounded-lg overflow-hidden">
         <video
           ref={videoRef}
-          src={
-            backendUrl + '/public/stream?url=' + encodeURIComponent(media.path)
-          }
+          src={videoSrc}
           className="w-full h-[200px] object-contain"
-          onLoadedMetadata={handleLoadedMetadata}
+          onLoadedMetadata={markVideoLoaded}
+          onLoadedData={markVideoLoaded}
+          onCanPlay={markVideoLoaded}
           onTimeUpdate={handleTimeUpdate}
+          onError={() => setLoadError(true)}
           muted
-          preload="metadata"
+          playsInline
+          preload="auto"
           crossOrigin="anonymous"
         />
         <canvas ref={canvasRef} className="hidden" />
+        {!isLoaded && (
+          <div className="absolute inset-0 flex items-center justify-center text-sm text-textColor bg-black">
+            {loadError
+              ? 'Unable to load this video preview.'
+              : 'Loading video preview...'}
+          </div>
+        )}
       </div>
 
       {isLoaded && (
@@ -248,8 +281,10 @@ export const CreateThumbnail: FC<{
               className="w-full h-2 bg-fifth rounded-lg appearance-none cursor-pointer slider"
               style={{
                 background: `linear-gradient(to right, #4f46e5 0%, #4f46e5 ${
-                  (currentTime / duration) * 100
-                }%, #374151 ${(currentTime / duration) * 100}%, #374151 100%)`,
+                  duration ? (currentTime / duration) * 100 : 0
+                }%, #374151 ${
+                  duration ? (currentTime / duration) * 100 : 0
+                }%, #374151 100%)`,
               }}
             />
             <div className="flex justify-between text-sm text-textColor">
