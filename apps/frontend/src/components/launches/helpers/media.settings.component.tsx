@@ -11,7 +11,7 @@ import React, {
 } from 'react';
 import { TopTitle } from '@gitroom/frontend/components/launches/helpers/top.title.component';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
-import { hasExtension } from '@gitroom/helpers/utils/has.extension';
+import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
@@ -466,7 +466,7 @@ export const MediaComponentInner: FC<{
           className="w-full px-3 py-2 bg-fifth border border-tableBorder rounded-lg text-textColor placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-forth focus:border-transparent"
         />
       </div>
-      {hasExtension(media?.path, 'mp4') && (
+      {isVideoExtension(media?.path) && (
         <>
           {/* Alt Text Input */}
           <div>

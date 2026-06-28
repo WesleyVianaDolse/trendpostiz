@@ -47,6 +47,7 @@ const PUBLIC_API_ALLOWED_MIME = new Set<string>([
   'image/bmp',
   'image/tiff',
   'video/mp4',
+  'video/quicktime',
 ]);
 import * as Sentry from '@sentry/nestjs';
 import {

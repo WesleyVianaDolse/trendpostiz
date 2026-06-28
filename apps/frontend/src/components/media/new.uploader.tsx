@@ -14,6 +14,9 @@ import { useToaster } from '@gitroom/react/toaster/toaster';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { uniqBy } from 'lodash';
 
+const VIDEO_MIME_TYPES = ['video/mp4', 'video/mpeg', 'video/quicktime'];
+const VIDEO_EXTENSIONS = ['.mp4', '.mov'];
+
 export class CompressionWrapper<M = any, B = any> extends Compressor<any, any> {
   override async prepareUpload(fileIDs: string[]) {
     const { files } = this.uppy.getState();
@@ -82,10 +85,10 @@ export function useUppyUploader(props: {
             ];
           }
           if (type === 'video/*') {
-            return ['video/mp4', 'video/mpeg', 'video/quicktime'];
+            return VIDEO_MIME_TYPES;
           }
-          if (type === 'video/mp4' && transloadit && transloadit.length > 0) {
-            return ['video/mp4', 'video/mpeg', 'video/quicktime'];
+          if (type === 'video/mp4') {
+            return VIDEO_MIME_TYPES;
           }
           return [type];
         });
@@ -93,9 +96,16 @@ export function useUppyUploader(props: {
         for (const file of files) {
           if (fileIDs.includes(file.id)) {
             const fileType = file.type;
+            const fileName = (file.name || '').toLowerCase();
 
             // Check if file type is allowed
             const isAllowed = expandedTypes.some((allowedType) => {
+              if (
+                VIDEO_MIME_TYPES.includes(allowedType) &&
+                VIDEO_EXTENSIONS.some((extension) => fileName.endsWith(extension))
+              ) {
+                return true;
+              }
               if (allowedType.endsWith('/*')) {
                 const baseType = allowedType.replace('/*', '/');
                 return fileType?.startsWith(baseType);
@@ -193,10 +203,8 @@ export function useUppyUploader(props: {
       });
     });
     uppy2.on('error', (result) => {
-      uppy2.clear();
       setLocked(false);
       props.onEnd();
-      fileOrderIndex = 0;
     });
     uppy2.on('upload-start', () => {
       props.onStart();

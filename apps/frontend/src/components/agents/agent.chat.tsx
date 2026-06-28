@@ -33,7 +33,7 @@ import dayjs from 'dayjs';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { ExistingDataContextProvider } from '@gitroom/frontend/components/launches/helpers/use.existing.data';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
-import { hasExtension } from '@gitroom/helpers/utils/has.extension';
+import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
 
 export const AgentChat: FC = () => {
   const { backendUrl } = useVariables();
@@ -119,8 +119,8 @@ const LoadMessages: FC<{ id: string }> = ({ id }) => {
 const Message: FC<UserMessageProps> = (props) => {
   const convertContentToImagesAndVideo = useMemo(() => {
     return (props.message?.content || '')
-      .replace(/Video: (http.*mp4\n)/g, (match, p1) => {
-        return `<video controls class="h-[150px] w-[150px] rounded-[8px] mb-[10px]"><source src="${p1.trim()}" type="video/mp4">Your browser does not support the video tag.</video>`;
+      .replace(/Video: (http.*(?:mp4|mov)\n)/g, (match, p1) => {
+        return `<video controls class="h-[150px] w-[150px] rounded-[8px] mb-[10px]"><source src="${p1.trim()}">Your browser does not support the video tag.</video>`;
       })
       .replace(/Image: (http.*\n)/g, (match, p1) => {
         return `<img src="${p1.trim()}" class="h-[150px] w-[150px] max-w-full border border-newBgColorInner" />`;
@@ -163,7 +163,7 @@ const NewInput: FC<InputProps> = (props) => {
                 ? '\n[--Media--]' +
                   media
                     .map((m) =>
-                      hasExtension(m.path, 'mp4')
+                      isVideoExtension(m.path)
                         ? `Video: ${m.path}`
                         : `Image: ${m.path}`
                     )

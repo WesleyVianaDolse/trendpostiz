@@ -98,6 +98,7 @@ export const getUppyUploadPlugin = (
         options: {
           endpoint: `${backendUrl}/media/upload-server`,
           withCredentials: true,
+          timeout: 600_000,
         },
       };
 

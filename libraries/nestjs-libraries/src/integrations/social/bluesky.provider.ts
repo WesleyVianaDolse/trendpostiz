@@ -27,7 +27,7 @@ import { timer } from '@gitroom/helpers/utils/timer';
 import axios from 'axios';
 import { stripHtmlValidation } from '@gitroom/helpers/utils/strip.html.validation';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
-import { hasExtension } from '@gitroom/helpers/utils/has.extension';
+import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
 
 async function reduceImageBySize(url: string, maxSizeKB = 976) {
   try {
@@ -267,9 +267,9 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
   ): Promise<{ embed: any; images: any[] }> {
     // Separate images and videos
     const imageMedia =
-      post.media?.filter((p) => !hasExtension(p.path, 'mp4')) || [];
+      post.media?.filter((p) => !isVideoExtension(p.path)) || [];
     const videoMedia =
-      post.media?.filter((p) => hasExtension(p.path, 'mp4')) || [];
+      post.media?.filter((p) => isVideoExtension(p.path)) || [];
 
     // Upload images
     const images = await Promise.all(

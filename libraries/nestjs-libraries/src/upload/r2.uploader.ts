@@ -28,6 +28,7 @@ const ALLOWED_EXT_TO_MIME: Record<string, string> = {
   '.tif': 'image/tiff',
   '.tiff': 'image/tiff',
   '.mp4': 'video/mp4',
+  '.mov': 'video/quicktime',
 };
 
 function normalizeExtension(filename: string): string | null {
