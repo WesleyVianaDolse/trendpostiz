@@ -3,9 +3,16 @@
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useSettings } from '@gitroom/frontend/components/launches/helpers/use.values';
 import { ReactTags } from 'react-tag-autocomplete';
-import { useIntegration } from '@gitroom/frontend/components/launches/helpers/use.integration';
 import clsx from 'clsx';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
+
+const normalizeInstagramUsername = (value: string) =>
+  value
+    .trim()
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
+    .replace(/^@+/, '')
+    .split(/[/?#]/)[0]
+    .trim();
 
 export const InstagramCollaboratorsTags: FC<{
   name: string;
@@ -19,7 +26,6 @@ export const InstagramCollaboratorsTags: FC<{
 }> = (props) => {
   const { onChange, name, label } = props;
   const { getValues } = useSettings();
-  const { integration } = useIntegration();
   const [tagValue, setTagValue] = useState<any[]>([]);
   const [suggestions, setSuggestions] = useState<string>('');
   const t = useT();
@@ -35,14 +41,20 @@ export const InstagramCollaboratorsTags: FC<{
         },
       });
     },
-    [tagValue]
+    [name, onChange, tagValue]
   );
   const onAddition = useCallback(
     (newTag: any) => {
       if (tagValue.length >= 3) {
         return;
       }
-      const modify = [...tagValue, newTag];
+      const label = normalizeInstagramUsername(
+        newTag.label || newTag.value || ''
+      );
+      if (!label || tagValue.some((tag) => tag.label === label)) {
+        return;
+      }
+      const modify = [...tagValue, { ...newTag, label, value: label }];
       setTagValue(modify);
       onChange({
         target: {
@@ -51,20 +63,30 @@ export const InstagramCollaboratorsTags: FC<{
         },
       });
     },
-    [tagValue]
+    [name, onChange, tagValue]
   );
   useEffect(() => {
     const settings = getValues()[props.name];
     if (settings) {
-      setTagValue(settings);
+      setTagValue(
+        settings
+          .map((tag: any) => {
+            const label = normalizeInstagramUsername(
+              tag.label || tag.value || ''
+            );
+            return label ? { ...tag, label, value: label } : false;
+          })
+          .filter(Boolean)
+      );
     }
-  }, []);
+  }, [getValues, props.name]);
   const suggestionsArray = useMemo(() => {
+    const label = normalizeInstagramUsername(suggestions);
     return [
       ...tagValue,
       {
-        label: suggestions,
-        value: suggestions,
+        label,
+        value: label,
       },
     ].filter((f) => f.label);
   }, [suggestions, tagValue]);

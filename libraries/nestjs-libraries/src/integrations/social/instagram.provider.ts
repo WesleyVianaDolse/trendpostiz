@@ -14,6 +14,14 @@ import { Integration } from '@prisma/client';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
 import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
 
+const normalizeInstagramUsername = (value: string) =>
+  value
+    .trim()
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
+    .replace(/^@+/, '')
+    .split(/[/?#]/)[0]
+    .trim();
+
 @Rules(
   "Instagram should have at least one attachment, if it's a story, it can have only one picture"
 )
@@ -570,10 +578,14 @@ export class InstagramProvider
             )}`
           : ``;
 
+        const collaboratorUsernames =
+          firstPost?.settings?.collaborators
+            ?.map((p) => normalizeInstagramUsername(p.label))
+            .filter(Boolean) || [];
         const collaborators =
-          firstPost?.settings?.collaborators?.length && !isStory
-            ? `&collaborators=${JSON.stringify(
-                firstPost?.settings?.collaborators.map((p) => p.label)
+          collaboratorUsernames.length && !isStory
+            ? `&collaborators=${encodeURIComponent(
+                JSON.stringify(collaboratorUsernames)
               )}`
             : ``;
 
