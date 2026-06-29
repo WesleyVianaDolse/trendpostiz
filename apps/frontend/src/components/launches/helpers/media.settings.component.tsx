@@ -235,6 +235,8 @@ export const CreateThumbnail: FC<{
     setCurrentTime(0);
     setDuration(0);
 
+    videoRef.current?.load();
+
     const timeout = setTimeout(markVideoLoaded, 250);
     return () => clearTimeout(timeout);
   }, [videoSrc, markVideoLoaded]);
@@ -252,7 +254,10 @@ export const CreateThumbnail: FC<{
           onLoadedData={markVideoLoaded}
           onCanPlay={markVideoLoaded}
           onTimeUpdate={handleTimeUpdate}
-          onError={() => setLoadError(true)}
+          onError={() => {
+            setIsLoaded(false);
+            setLoadError(true);
+          }}
           muted
           playsInline
           preload="auto"

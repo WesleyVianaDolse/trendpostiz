@@ -189,7 +189,14 @@ export class PublicController {
         return res.status(400).send('Blocked URL');
       }
 
+      const headers: HeadersInit = {};
+      const range = req.headers.range;
+      if (typeof range === 'string') {
+        headers.Range = range;
+      }
+
       r = await fetch(currentUrl, {
+        headers,
         signal: ac.signal,
         redirect: 'manual',
         // @ts-ignore — undici option, not in lib.dom fetch types
@@ -236,6 +243,12 @@ export class PublicController {
 
     const acceptRanges = r.headers.get('accept-ranges') ?? 'bytes';
     res.setHeader('Accept-Ranges', acceptRanges);
+
+    const etag = r.headers.get('etag');
+    if (etag) res.setHeader('ETag', etag);
+
+    const lastModified = r.headers.get('last-modified');
+    if (lastModified) res.setHeader('Last-Modified', lastModified);
 
     if (r.status === 206) res.status(206); // Partial Content for range responses
 
