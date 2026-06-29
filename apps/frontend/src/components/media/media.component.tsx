@@ -399,7 +399,7 @@ export const MediaBox: FC<{
       <button
         disabled={loading}
         onClick={() => uploaderRef?.current?.click()}
-        className="relative cursor-pointer bg-btnSimple changeColor flex gap-[8px] h-[44px] px-[18px] justify-center items-center rounded-[8px]"
+        className="relative cursor-pointer bg-btnSimple changeColor flex gap-[8px] h-[44px] px-[18px] justify-center items-center rounded-[8px] mobile:w-full"
       >
         {loading ? (
           <div className="absolute left-[50%] top-[50%] -translate-y-[50%] -translate-x-[50%]">
@@ -418,7 +418,7 @@ export const MediaBox: FC<{
       <div className="flex flex-col flex-1">
         <div
           className={clsx(
-            'flex items-center gap-[12px]',
+            'flex items-center gap-[12px] mobile:flex-col mobile:items-stretch',
             !isLoading &&
               !data?.results?.length &&
               !debouncedSearch &&
@@ -441,7 +441,7 @@ export const MediaBox: FC<{
             className="hidden"
             multiple={true}
           />
-          <div className="flex gap-[8px]">
+          <div className="flex gap-[8px] mobile:w-full mobile:[&>*]:flex-1">
             {btn}
             <ThirdPartyMediaLibrary onImported={() => mutate()} />
           </div>
@@ -472,10 +472,12 @@ export const MediaBox: FC<{
         >
           <div
             className={clsx(
-              'absolute -left-[3px] -top-[3px] withp3 h-full overflow-x-hidden overflow-y-auto scrollbar scrollbar-thumb-newColColor scrollbar-track-newBgColorInner',
+              'absolute inset-0 p-[3px] overflow-x-hidden overflow-y-auto scrollbar scrollbar-thumb-newColColor scrollbar-track-newBgColorInner',
               !isLoading &&
                 !data?.results?.length &&
-                'flex justify-center items-center gap-[20px] flex-col'
+                'flex justify-center items-center gap-[20px] flex-col',
+              (isLoading || !!data?.results?.length) &&
+                'grid grid-cols-[repeat(auto-fill,minmax(112px,1fr))] mobile:grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-[10px] content-start'
             )}
           >
             {!isLoading && !data?.results?.length && (
@@ -514,7 +516,7 @@ export const MediaBox: FC<{
                 {[...new Array(16)].map((_, i) => (
                   <div
                     className={clsx(
-                      'px-[3px] py-[3px] float-left rounded-[6px] cursor-pointer w8-max aspect-square'
+                      'rounded-[8px] cursor-pointer aspect-[1/1.24]'
                     )}
                     key={i}
                   >
@@ -535,14 +537,14 @@ export const MediaBox: FC<{
               .map((media: any) => (
                 <div
                   className={clsx(
-                    'group px-[3px] py-[3px] float-left rounded-[6px] w8-max aspect-square',
+                    'group min-w-0 rounded-[8px]',
                     !standalone && 'cursor-pointer'
                   )}
                   key={media.id}
                 >
                   <div
                     className={clsx(
-                      'w-full h-full rounded-[6px] border-[4px] relative',
+                      'w-full min-w-0 rounded-[8px] border-[2px] relative bg-newBgColorInner p-[4px]',
                       !!selected.find((p) => p.id === media.id)
                         ? 'border-[#612BD3]'
                         : 'border-transparent'
@@ -555,12 +557,11 @@ export const MediaBox: FC<{
                       </div>
                     ) : (
                       <DeleteCircleIcon
-                        className="cursor-pointer hidden z-[100] group-hover:block absolute -top-[5px] -end-[5px]"
+                        className="cursor-pointer hidden z-[100] group-hover:block mobile:block absolute -top-[7px] -end-[7px]"
                         onClick={deleteImage(media)}
                       />
                     )}
-                    <div className="absolute bottom-[10px] end-[10px] z-[100]">{media.originalName}</div>
-                    <div className="w-full h-full rounded-[6px] overflow-hidden relative">
+                    <div className="w-full aspect-square rounded-[6px] overflow-hidden relative">
                       <div className="absolute z-[20] left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%]">
                         <div
                           onClick={maximize(media)}
@@ -592,6 +593,14 @@ export const MediaBox: FC<{
                         />
                       )}
                     </div>
+                    <div
+                      title={media.originalName || media.name || media.path}
+                      className="mt-[5px] min-h-[32px] text-[11px] leading-[16px] text-newTextColor/80 line-clamp-2 break-all"
+                    >
+                      {media.originalName ||
+                        media.name ||
+                        media.path?.split('/').pop()}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -605,10 +614,10 @@ export const MediaBox: FC<{
           />
         )}
         {!standalone && (
-          <div className="flex justify-end mt-[32px] gap-[8px]">
+          <div className="flex justify-end mt-[32px] gap-[8px] mobile:sticky mobile:bottom-0 mobile:bg-newBgColor mobile:py-[10px] mobile:flex-col">
             <button
               onClick={() => modals.closeCurrent()}
-              className="cursor-pointer h-[52px] px-[20px] items-center justify-center border border-newTextColor/10 flex rounded-[10px]"
+              className="cursor-pointer h-[52px] px-[20px] items-center justify-center border border-newTextColor/10 flex rounded-[10px] mobile:w-full"
             >
               {t('cancel', 'Cancel')}
             </button>
@@ -616,7 +625,7 @@ export const MediaBox: FC<{
               <button
                 onClick={standalone ? () => {} : addMedia}
                 disabled={selected.length === 0}
-                className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center bg-[#612BD3] flex rounded-[10px]"
+                className="cursor-pointer text-white disabled:opacity-80 disabled:cursor-not-allowed h-[52px] px-[20px] items-center justify-center bg-[#612BD3] flex rounded-[10px] mobile:w-full"
               >
                 {t('add_selected_media', 'Add selected media')}
               </button>
