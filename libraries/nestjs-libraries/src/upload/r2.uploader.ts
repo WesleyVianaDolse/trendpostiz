@@ -31,9 +31,19 @@ const ALLOWED_EXT_TO_MIME: Record<string, string> = {
   '.mov': 'video/quicktime',
 };
 
-function normalizeExtension(filename: string): string | null {
+const ALLOWED_MIME_TO_EXT: Record<string, string> = Object.entries(
+  ALLOWED_EXT_TO_MIME
+).reduce((acc, [ext, mime]) => {
+  acc[mime] ??= ext;
+  return acc;
+}, {} as Record<string, string>);
+
+function normalizeExtension(filename: string, contentType?: string): string | null {
   const ext = path.extname(filename || '').toLowerCase();
-  return ALLOWED_EXT_TO_MIME[ext] ? ext : null;
+  if (ALLOWED_EXT_TO_MIME[ext]) {
+    return ext;
+  }
+  return contentType ? ALLOWED_MIME_TO_EXT[contentType] || null : null;
 }
 
 const {
@@ -107,8 +117,8 @@ export async function simpleUpload(
 }
 
 export async function createMultipartUpload(req: Request, res: Response) {
-  const { file, fileHash } = req.body;
-  const safeExt = normalizeExtension(file?.name || '');
+  const { file, fileHash, contentType } = req.body;
+  const safeExt = normalizeExtension(file?.name || '', contentType || file?.type);
   if (!safeExt) {
     return res.status(400).json({ message: 'Unsupported file type.' });
   }

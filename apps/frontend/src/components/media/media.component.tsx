@@ -231,6 +231,15 @@ export const MediaBox: FC<{
   const uploaderRef = useRef<any>(null);
   const mediaDirectory = useMediaDirectory();
   const [loading, setLoading] = useState(false);
+  const uploadAccept = useMemo(() => {
+    if (type === 'image') {
+      return 'image/*';
+    }
+    if (type === 'video') {
+      return 'video/mp4,video/quicktime,.mp4,.mov';
+    }
+    return 'image/*,video/mp4,video/quicktime,.mp4,.mov';
+  }, [type]);
 
   const uppy = useUppyUploader({
     allowedFileTypes:
@@ -279,6 +288,9 @@ export const MediaBox: FC<{
   const addToUpload = useCallback(
     async (e: ChangeEvent<HTMLInputElement>) => {
       const files = Array.from(e.target.files || []);
+      if (!files.length) {
+        return;
+      }
       const totalSize = files.reduce((acc, file) => acc + file.size, 0);
 
       if (totalSize > MAX_UPLOAD_SIZE) {
@@ -289,6 +301,7 @@ export const MediaBox: FC<{
           ),
           'warning'
         );
+        e.target.value = '';
         return;
       }
 
@@ -296,6 +309,7 @@ export const MediaBox: FC<{
 
       // @ts-ignore
       uppy.addFiles(files);
+      e.target.value = '';
     },
     [toaster, t]
   );
@@ -438,6 +452,7 @@ export const MediaBox: FC<{
             type="file"
             ref={uploaderRef}
             onChange={addToUpload}
+            accept={uploadAccept}
             className="hidden"
             multiple={true}
           />

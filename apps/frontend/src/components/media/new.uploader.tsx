@@ -17,6 +17,11 @@ import { uniqBy } from 'lodash';
 const VIDEO_MIME_TYPES = ['video/mp4', 'video/mpeg', 'video/quicktime'];
 const VIDEO_EXTENSIONS = ['.mp4', '.mov'];
 
+const getSavedMediaFromResponse = (file: UppyFile<any, any>) => {
+  const body = file.response?.body as any;
+  return body?.saved || body;
+};
+
 export class CompressionWrapper<M = any, B = any> extends Compressor<any, any> {
   override async prepareUpload(fileIDs: string[]) {
     const { files } = this.uppy.getState();
@@ -211,11 +216,12 @@ export function useUppyUploader(props: {
     });
     uppy2.on('complete', async (result) => {
       console.log(result);
-      for (const file of [...result.successful]) {
-        uppy2.removeFile(file.id);
+      if (result.failed?.length) {
+        toast.show(
+          String(result.failed[0]?.error || 'One or more files failed to upload.'),
+          'warning'
+        );
       }
-
-      props.onEnd();
       // Sort results by original add order to maintain file sequence
       const sortedSuccessful = [...result.successful].sort((a, b) => {
         const orderA = +((a.meta as any)?.addedOrder ?? 0);
@@ -224,9 +230,20 @@ export function useUppyUploader(props: {
       });
 
       if (storageProvider === 'local') {
+        const savedMedia = sortedSuccessful
+          .map(getSavedMediaFromResponse)
+          .filter(Boolean);
         setLocked(false);
         fileOrderIndex = 0;
-        onUploadSuccess(sortedSuccessful.map((p) => p.response.body));
+        props.onEnd();
+        if (!savedMedia.length && sortedSuccessful.length > 0) {
+          toast.show('Upload finished, but the media was not saved.', 'warning');
+          return;
+        }
+        for (const file of sortedSuccessful) {
+          uppy2.removeFile(file.id);
+        }
+        onUploadSuccess(savedMedia);
         return;
       }
 
@@ -268,13 +285,28 @@ export function useUppyUploader(props: {
 
         setLocked(false);
         fileOrderIndex = 0;
+        props.onEnd();
+        for (const file of sortedSuccessful) {
+          uppy2.removeFile(file.id);
+        }
         onUploadSuccess(loadAllMedia);
         return;
       }
 
+      const savedMedia = sortedSuccessful
+        .map(getSavedMediaFromResponse)
+        .filter(Boolean);
       setLocked(false);
       fileOrderIndex = 0;
-      onUploadSuccess(sortedSuccessful.map((p) => p.response.body.saved));
+      props.onEnd();
+      if (!savedMedia.length && sortedSuccessful.length > 0) {
+        toast.show('Upload finished, but the media was not saved.', 'warning');
+        return;
+      }
+      for (const file of sortedSuccessful) {
+        uppy2.removeFile(file.id);
+      }
+      onUploadSuccess(savedMedia);
     });
     uppy2.on('upload-success', (file, response) => {
       // @ts-ignore
