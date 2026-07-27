@@ -193,6 +193,14 @@ export class UsersController {
       return response.status(200).json({ id: null });
     }
 
+    if (
+      getOrgFromCookie.email &&
+      getOrgFromCookie.email.trim().toLowerCase() !==
+        user.email.trim().toLowerCase()
+    ) {
+      return response.status(200).json({ id: null });
+    }
+
     const addedOrg = await this._orgService.addUserToOrg(
       user.id,
       getOrgFromCookie.id,

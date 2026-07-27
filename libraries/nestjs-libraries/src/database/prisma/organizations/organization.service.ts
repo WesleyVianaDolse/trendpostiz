@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { Organization, ShortLinkPreference } from '@prisma/client';
 import { AutopostService } from '@gitroom/nestjs-libraries/database/prisma/autopost/autopost.service';
+import { CreateTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/create.team.member.dto';
 
 @Injectable()
 export class OrganizationService {
@@ -32,8 +33,18 @@ export class OrganizationService {
     return this._organizationRepository.getCount();
   }
 
-  async createMaxUser(id: string, name: string, saasName: string, email: string) {
-    return this._organizationRepository.createMaxUser(id, name, saasName, email);
+  async createMaxUser(
+    id: string,
+    name: string,
+    saasName: string,
+    email: string
+  ) {
+    return this._organizationRepository.createMaxUser(
+      id,
+      name,
+      saasName,
+      email
+    );
   }
 
   addUserToOrg(
@@ -77,12 +88,20 @@ export class OrganizationService {
     return this._organizationRepository.getOrgByCustomerId(customerId);
   }
 
-  async inviteTeamMember(orgId: string, body: AddTeamMemberDto) {
+  async inviteTeamMember(
+    orgId: string,
+    body: AddTeamMemberDto,
+    actorRole?: string
+  ) {
+    if (actorRole === 'USER' && body.role === 'ADMIN') {
+      throw new Error('You cannot invite a member with a higher role');
+    }
+
     const timeLimit = dayjs().add(1, 'hour').format('YYYY-MM-DD HH:mm:ss');
     const id = makeId(5);
+    const token = AuthService.signJWT({ ...body, orgId, timeLimit, id });
     const url =
-      process.env.FRONTEND_URL +
-      `/?org=${AuthService.signJWT({ ...body, orgId, timeLimit, id })}`;
+      process.env.FRONTEND_URL + `/auth?org=${encodeURIComponent(token)}`;
     if (body.sendEmail) {
       await this._notificationsService.sendEmail(
         body.email,
@@ -91,6 +110,36 @@ export class OrganizationService {
       );
     }
     return { url };
+  }
+
+  createTeamMember(
+    orgId: string,
+    body: CreateTeamMemberDto,
+    actorRole?: string
+  ) {
+    if (actorRole === 'USER' && body.role === 'ADMIN') {
+      throw new Error('You cannot create a member with a higher role');
+    }
+
+    return this._organizationRepository.createTeamMember(orgId, body);
+  }
+
+  createInvitedUser(
+    body: CreateOrgUserDto,
+    invitation: { orgId: string; role: 'USER' | 'ADMIN'; id: string },
+    activated: boolean,
+    ip: string,
+    userAgent: string
+  ) {
+    return this._organizationRepository.createInvitedUser(
+      invitation.orgId,
+      invitation.id,
+      invitation.role,
+      body,
+      activated,
+      ip,
+      userAgent
+    );
   }
 
   async deleteTeamMember(org: Organization, userId: string) {

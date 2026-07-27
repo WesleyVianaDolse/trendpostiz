@@ -101,7 +101,8 @@ const InterceptUnderlineShortcut = Extension.create({
 export const EditorWrapper: FC<{
   totalPosts: number;
   value: string;
-}> = () => {
+  mobileStep?: number;
+}> = ({ mobileStep }) => {
   const t = useT();
   const {
     setGlobalValueText,
@@ -434,6 +435,7 @@ export const EditorWrapper: FC<{
                 </div>
               )}
               <Editor
+                mobileStep={mobileStep}
                 comments={comments}
                 editorType={editor}
                 allValues={items}
@@ -526,6 +528,7 @@ export const EditorWrapper: FC<{
 };
 
 export const Editor: FC<{
+  mobileStep?: number;
   editorType?: 'none' | 'normal' | 'markdown' | 'html';
   totalPosts: number;
   value: string;
@@ -557,6 +560,7 @@ export const Editor: FC<{
     chars,
     childButton,
     comments,
+    mobileStep,
   } = props;
   const [id] = useState(makeId(10));
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -713,7 +717,14 @@ export const Editor: FC<{
             >
               {t('drop_files_here_to_upload', 'Drop your files here to upload')}
             </div>
-            <div className="px-[10px] pt-[10px] bg-newBgColorInner rounded-t-[6px] relative z-[99]">
+            <div
+              className={clsx(
+                'px-[10px] pt-[10px] bg-newBgColorInner rounded-t-[6px] relative z-[99]',
+                mobileStep !== undefined &&
+                  mobileStep !== 3 &&
+                  'mobile:hidden'
+              )}
+            >
               <OnlyEditor
                 value={props.value}
                 editorType={editorType}
@@ -723,7 +734,12 @@ export const Editor: FC<{
               />
             </div>
             <div
-              className="bg-newBgColorInner flex-1"
+              className={clsx(
+                'bg-newBgColorInner flex-1',
+                mobileStep !== undefined &&
+                  mobileStep !== 3 &&
+                  'mobile:hidden'
+              )}
               onClick={() => {
                 if (editorRef?.current?.editor?.isFocused) {
                   return;
@@ -731,7 +747,14 @@ export const Editor: FC<{
                 editorRef?.current?.editor?.commands?.focus('end');
               }}
             />
-            <div className="w-full pointer-events-none">
+            <div
+              className={clsx(
+                'w-full pointer-events-none',
+                mobileStep !== undefined &&
+                  mobileStep !== 0 &&
+                  'mobile:hidden'
+              )}
+            >
               <div className="w-full h-[46px] overflow-hidden absolute left-0 bg-newBgColorInner uppyChange">
                 <Dashboard
                   height={46}
@@ -747,7 +770,12 @@ export const Editor: FC<{
               </div>
             </div>
             <div
-              className="w-full h-[46px] bg-newBgColorInner cursor-text"
+              className={clsx(
+                'w-full h-[46px] bg-newBgColorInner cursor-text',
+                mobileStep !== undefined &&
+                  mobileStep !== 0 &&
+                  'mobile:hidden'
+              )}
               onClick={() => {
                 if (editorRef?.current?.editor?.isFocused) {
                   return;
@@ -755,10 +783,20 @@ export const Editor: FC<{
                 editorRef?.current?.editor?.commands?.focus('end');
               }}
             />
-            <div className="flex bg-newBgColorInner rounded-b-[6px] cursor-default">
+            <div
+              className={clsx(
+                'flex bg-newBgColorInner rounded-b-[6px] cursor-default',
+                mobileStep !== undefined &&
+                  mobileStep !== 0 &&
+                  mobileStep !== 3 &&
+                  'mobile:hidden'
+              )}
+            >
               {setImages && (
                 <MultiMediaComponent
                   mediaNotAvailable={num > 0 && comments === 'no-media'}
+                  hideMediaPreview={mobileStep === 3}
+                  hideMediaActions={mobileStep === 3}
                   allData={allValues}
                   text={valueWithoutHtml}
                   label={t('attachments', 'Attachments')}
@@ -848,7 +886,15 @@ export const Editor: FC<{
                 />
               )}
             </div>
-            <div>{childButton}</div>
+            <div
+              className={clsx(
+                mobileStep !== undefined &&
+                  mobileStep !== 3 &&
+                  'mobile:hidden'
+              )}
+            >
+              {childButton}
+            </div>
           </div>
         </div>
       </div>

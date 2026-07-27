@@ -37,7 +37,7 @@ type Inputs = {
   providerToken: string;
   provider: string;
 };
-export function Register() {
+export function Register({ invitation = false }: { invitation?: boolean }) {
   const getQuery = useSearchParams();
   const fetch = useFetch();
   const [provider] = useState(getQuery?.get('provider')?.toUpperCase());
@@ -63,13 +63,17 @@ export function Register() {
     }
   }, [provider, code]);
   if (!code && !provider) {
-    return <RegisterAfter token="" provider="LOCAL" />;
+    return <RegisterAfter token="" provider="LOCAL" invitation={invitation} />;
   }
   if (!show) {
     return <LoadingComponent />;
   }
   return (
-    <RegisterAfter token={code} provider={provider?.toUpperCase() || 'LOCAL'} />
+    <RegisterAfter
+      token={code}
+      provider={provider?.toUpperCase() || 'LOCAL'}
+      invitation={invitation}
+    />
   );
 }
 function getHelpfulReasonForRegistrationFailure(httpCode: number) {
@@ -84,9 +88,11 @@ function getHelpfulReasonForRegistrationFailure(httpCode: number) {
 export function RegisterAfter({
   token,
   provider,
+  invitation = false,
 }: {
   token: string;
   provider: string;
+  invitation?: boolean;
 }) {
   const t = useT();
   const { isGeneral, genericOauth, neynarClientId, billingEnabled } =
@@ -151,14 +157,26 @@ export function RegisterAfter({
         <div className="flex flex-col flex-1">
           <div>
             <h1 className="text-[40px] font-[500] -tracking-[0.8px] text-start cursor-pointer">
-              {t('sign_up', 'Sign Up')}
+              {invitation
+                ? t('join_team', 'Join the team')
+                : t('sign_up', 'Sign Up')}
             </h1>
           </div>
-          <div className="text-[14px] mt-[32px] mb-[12px]">
-            {t('continue_with', 'Continue With')}
-          </div>
+          {invitation ? (
+            <div className="text-[14px] mt-[12px] mb-[24px] text-customColor18">
+              {t(
+                'create_account_for_invited_organization',
+                'Create your account to access the organization that invited you.'
+              )}
+            </div>
+          ) : (
+            <div className="text-[14px] mt-[32px] mb-[12px]">
+              {t('continue_with', 'Continue With')}
+            </div>
+          )}
           <div className="flex flex-col">
-            {!isAfterProvider &&
+            {!invitation &&
+              !isAfterProvider &&
               (!isGeneral ? (
                 <GithubProvider />
               ) : (
@@ -172,7 +190,7 @@ export function RegisterAfter({
                   {billingEnabled && <WalletProvider />}
                 </div>
               ))}
-            {!isAfterProvider && (
+            {!invitation && !isAfterProvider && (
               <div className="h-[20px] mb-[24px] mt-[24px] relative">
                 <div className="absolute w-full h-[1px] bg-fifth top-[50%] -translate-y-[50%]" />
                 <div
@@ -204,12 +222,16 @@ export function RegisterAfter({
                   </>
                 )}
                 <Input
-                  label="Company"
-                  translationKey="label_company"
+                  label={invitation ? 'Name' : 'Company'}
+                  translationKey={invitation ? 'label_name' : 'label_company'}
                   {...form.register('company')}
                   autoComplete="off"
                   type="text"
-                  placeholder={t('label_company', 'Company')}
+                  placeholder={
+                    invitation
+                      ? t('label_name', 'Name')
+                      : t('label_company', 'Company')
+                  }
                 />
               </div>
               <div className={clsx('text-[12px]')}>
@@ -245,7 +267,9 @@ export function RegisterAfter({
                     className="flex-1 rounded-[10px] !h-[52px]"
                     loading={loading}
                   >
-                    {t('create_account', 'Create Account')}
+                    {invitation
+                      ? t('create_account_and_join', 'Create account and join')
+                      : t('create_account', 'Create Account')}
                   </Button>
                 </div>
                 <p className="mt-4 text-sm">

@@ -52,10 +52,6 @@ export async function proxy(request: NextRequest) {
     return topResponse;
   }
 
-  if (nextUrl.pathname === '/' && authCookie) {
-    return NextResponse.redirect(new URL('/launches', nextUrl.href));
-  }
-
   if (
     nextUrl.pathname.startsWith('/integrations/social/') &&
     nextUrl.href.indexOf('state=login') === -1
@@ -83,6 +79,62 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  const org = nextUrl.searchParams.get('org');
+  if (org) {
+    if (authCookie) {
+      try {
+        const { id } = await (
+          await internalFetch('/user/join-org', {
+            body: JSON.stringify({
+              org,
+            }),
+            method: 'POST',
+          })
+        ).json();
+        const redirect = NextResponse.redirect(
+          new URL('/launches?added=true', nextUrl.href)
+        );
+        if (id) {
+          redirect.cookies.set('showorg', id, {
+            path: '/',
+            ...(!process.env.NOT_SECURED
+              ? {
+                  domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+                  secure: true,
+                  httpOnly: true,
+                  sameSite: 'none',
+                }
+              : {}),
+            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+          });
+        }
+        return redirect;
+      } catch (err) {
+        console.log('Could not accept organization invitation', err);
+        return NextResponse.redirect(new URL('/launches', nextUrl.href));
+      }
+    }
+
+    const redirect = NextResponse.redirect(new URL('/auth', nextUrl.href));
+    redirect.cookies.set('org', org, {
+      path: '/',
+      ...(!process.env.NOT_SECURED
+        ? {
+            domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+            secure: true,
+            httpOnly: true,
+            sameSite: 'none',
+          }
+        : {}),
+      expires: new Date(Date.now() + 60 * 60 * 1000),
+    });
+    return redirect;
+  }
+
+  if (nextUrl.pathname === '/' && authCookie) {
+    return NextResponse.redirect(new URL('/launches', nextUrl.href));
+  }
+
   if (
     nextUrl.pathname.startsWith('/auth/register') &&
     process.env.DISABLE_REGISTRATION === 'true'
@@ -90,13 +142,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login', nextUrl.href));
   }
 
-  const org = nextUrl.searchParams.get('org');
   const url = new URL(nextUrl).search;
-  if (!nextUrl.pathname.startsWith('/auth') && 
-      !nextUrl.pathname.startsWith('/terms') && 
-      !nextUrl.pathname.startsWith('/privacy') && 
-      nextUrl.pathname !== '/' &&
-      !authCookie) {
+  if (
+    !nextUrl.pathname.startsWith('/auth') &&
+    !nextUrl.pathname.startsWith('/terms') &&
+    !nextUrl.pathname.startsWith('/privacy') &&
+    nextUrl.pathname !== '/' &&
+    !authCookie
+  ) {
     const providers = ['google', 'settings'];
     const findIndex = providers.find((p) => nextUrl.href.indexOf(p) > -1);
     const additional = !findIndex
@@ -118,59 +171,11 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL(`/${url}`, nextUrl.href));
   }
   if (nextUrl.pathname.startsWith('/auth') && !authCookie) {
-    if (org) {
-      const redirect = NextResponse.redirect(new URL(`/`, nextUrl.href));
-      redirect.cookies.set('org', org, {
-        ...(!process.env.NOT_SECURED
-          ? {
-              path: '/',
-              secure: true,
-              httpOnly: true,
-              sameSite: false,
-              domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
-            }
-          : {}),
-        expires: new Date(Date.now() + 15 * 60 * 1000),
-      });
-      return redirect;
-    }
     return topResponse;
   }
-  try {
-    if (org) {
-      const { id } = await (
-        await internalFetch('/user/join-org', {
-          body: JSON.stringify({
-            org,
-          }),
-          method: 'POST',
-        })
-      ).json();
-      const redirect = NextResponse.redirect(
-        new URL(`/?added=true`, nextUrl.href)
-      );
-      if (id) {
-        redirect.cookies.set('showorg', id, {
-          ...(!process.env.NOT_SECURED
-            ? {
-                path: '/',
-                secure: true,
-                httpOnly: true,
-                sameSite: false,
-                domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
-              }
-            : {}),
-          expires: new Date(Date.now() + 15 * 60 * 1000),
-        });
-      }
-      return redirect;
-    }
-    // Allow public access to root path for landing page
-    return topResponse;
-  } catch (err) {
-    console.log('err', err);
-    return NextResponse.redirect(new URL('/auth/logout', nextUrl.href));
-  }
+
+  // Allow public access to root path for landing page
+  return topResponse;
 }
 
 // See "Matching Paths" below to learn more

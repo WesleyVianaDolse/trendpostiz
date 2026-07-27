@@ -655,6 +655,8 @@ export const MultiMediaComponent: FC<{
   label: string;
   description: string;
   mediaNotAvailable?: boolean;
+  hideMediaPreview?: boolean;
+  hideMediaActions?: boolean;
   dummy: boolean;
   allData: {
     content: string;
@@ -699,6 +701,8 @@ export const MultiMediaComponent: FC<{
     toolBar,
     information,
     mediaNotAvailable,
+    hideMediaPreview,
+    hideMediaActions,
   } = props;
   const user = useUser();
   const modals = useModals();
@@ -779,7 +783,12 @@ export const MultiMediaComponent: FC<{
   return (
     <>
       <div className="b1 flex flex-col gap-[8px] rounded-bl-[8px] select-none w-full">
-        <div className="flex gap-[10px] px-[12px]">
+        <div
+          className={clsx(
+            'flex gap-[10px] px-[12px]',
+            hideMediaPreview && 'mobile:hidden'
+          )}
+        >
           {!!currentMedia && (
             <ReactSortable
               list={currentMedia}
@@ -849,7 +858,12 @@ export const MultiMediaComponent: FC<{
         </div>
         <div className="flex gap-[8px] px-[12px] border-t border-newColColor w-full b1 text-textColor">
           {!mediaNotAvailable && (
-            <div className="flex py-[10px] b2 items-center gap-[4px]">
+            <div
+              className={clsx(
+                'flex py-[10px] b2 items-center gap-[4px]',
+                hideMediaActions && 'mobile:hidden'
+              )}
+            >
               <div
                 onClick={showModal}
                 className="cursor-pointer h-[30px] rounded-[6px] justify-center items-center flex bg-newColColor px-[8px]"
@@ -888,7 +902,12 @@ export const MultiMediaComponent: FC<{
             </div>
           )}
           {!mediaNotAvailable && (
-            <div className="text-newColColor h-full flex items-center">
+            <div
+              className={clsx(
+                'text-newColColor h-full flex items-center',
+                hideMediaActions && 'mobile:hidden'
+              )}
+            >
               <VerticalDividerIcon />
             </div>
           )}

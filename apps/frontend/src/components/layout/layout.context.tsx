@@ -42,6 +42,13 @@ function LayoutContextInner(params: { children: ReactNode }) {
         response?.headers?.get('Impersonate');
       const logout =
         response?.headers?.get('logout') || response?.headers?.get('Logout');
+      if (
+        !isSecured &&
+        response.ok &&
+        ['/auth/register', '/auth/login'].includes(url)
+      ) {
+        setCookie('org', '', -10);
+      }
       if (headerAuth) {
         setCookie('auth', headerAuth, 365);
       }

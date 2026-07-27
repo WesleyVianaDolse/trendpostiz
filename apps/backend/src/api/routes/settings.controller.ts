@@ -6,14 +6,16 @@ import { OrganizationService } from '@gitroom/nestjs-libraries/database/prisma/o
 import { AddTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/add.team.member.dto';
 import { ShortlinkPreferenceDto } from '@gitroom/nestjs-libraries/dtos/settings/shortlink-preference.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { AuthorizationActions, Sections } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
+import {
+  AuthorizationActions,
+  Sections,
+} from '@gitroom/backend/services/auth/permissions/permission.exception.class';
+import { CreateTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/create.team.member.dto';
 
 @ApiTags('Settings')
 @Controller('/settings')
 export class SettingsController {
-  constructor(
-    private _organizationService: OrganizationService
-  ) {}
+  constructor(private _organizationService: OrganizationService) {}
 
   @Get('/team')
   @CheckPolicies(
@@ -33,7 +35,23 @@ export class SettingsController {
     @GetOrgFromRequest() org: Organization,
     @Body() body: AddTeamMemberDto
   ) {
-    return this._organizationService.inviteTeamMember(org.id, body);
+    // @ts-ignore
+    const actorRole = org.users?.[0]?.role;
+    return this._organizationService.inviteTeamMember(org.id, body, actorRole);
+  }
+
+  @Post('/team/manual')
+  @CheckPolicies(
+    [AuthorizationActions.Create, Sections.TEAM_MEMBERS],
+    [AuthorizationActions.Create, Sections.ADMIN]
+  )
+  async createTeamMember(
+    @GetOrgFromRequest() org: Organization,
+    @Body() body: CreateTeamMemberDto
+  ) {
+    // @ts-ignore
+    const actorRole = org.users?.[0]?.role;
+    return this._organizationService.createTeamMember(org.id, body, actorRole);
   }
 
   @Delete('/team/:id')

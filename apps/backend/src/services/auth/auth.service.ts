@@ -37,42 +37,67 @@ export class AuthService {
     body: CreateOrgUserDto | LoginUserDto,
     ip: string,
     userAgent: string,
-    addToOrg?: boolean | { orgId: string; role: 'USER' | 'ADMIN'; id: string }
+    addToOrg?:
+      | boolean
+      | {
+          orgId: string;
+          role: 'USER' | 'ADMIN';
+          id: string;
+          email?: string;
+        }
   ) {
     if (provider === Provider.LOCAL) {
       if (process.env.DISALLOW_PLUS && body.email.includes('+')) {
         throw new Error('Email with plus sign is not allowed');
       }
-      if (body instanceof CreateOrgUserDto) {
-        body.email = body.email.toLowerCase();
+
+      body.email = body.email.trim().toLowerCase();
+      if (
+        addToOrg &&
+        typeof addToOrg !== 'boolean' &&
+        'email' in addToOrg &&
+        addToOrg.email &&
+        addToOrg.email.trim().toLowerCase() !== body.email
+      ) {
+        throw new Error('Use the email address that received the invitation');
       }
+
       const user = await this._userService.getUserByEmail(body.email);
       if (body instanceof CreateOrgUserDto) {
         if (user) {
           throw new Error('Email already exists');
         }
 
-        if (!(await this.canRegister(provider))) {
+        if (!addToOrg && !(await this.canRegister(provider))) {
           throw new Error('Registration is disabled');
         }
 
-        const create = await this._organizationService.createOrgAndUser(
-          body,
-          ip,
-          userAgent
-        );
-
-        const addedOrg =
+        const activationRequired = this._emailService.hasProvider();
+        const invitedUser =
           addToOrg && typeof addToOrg !== 'boolean'
-            ? await this._organizationService.addUserToOrg(
-                create.users[0].user.id,
-                addToOrg.id,
-                addToOrg.orgId,
-                addToOrg.role
+            ? await this._organizationService.createInvitedUser(
+                body,
+                addToOrg,
+                !activationRequired,
+                ip,
+                userAgent
               )
-            : false;
+            : null;
+        const create = invitedUser
+          ? null
+          : await this._organizationService.createOrgAndUser(
+              body,
+              ip,
+              userAgent
+            );
+        const createdUser = invitedUser
+          ? invitedUser.user
+          : create!.users[0].user;
+        const addedOrg = invitedUser
+          ? { organizationId: invitedUser.organizationId }
+          : false;
 
-        const obj = { addedOrg, jwt: await this.jwt(create.users[0].user) };
+        const obj = { addedOrg, jwt: await this.jwt(createdUser) };
         await this._emailService.sendEmail(
           body.email,
           'Activate your account',
@@ -90,7 +115,17 @@ export class AuthService {
         throw new Error('User is not activated');
       }
 
-      return { addedOrg: false, jwt: await this.jwt(user) };
+      const addedOrg =
+        addToOrg && typeof addToOrg !== 'boolean'
+          ? await this._organizationService.addUserToOrg(
+              user.id,
+              addToOrg.id,
+              addToOrg.orgId,
+              addToOrg.role
+            )
+          : false;
+
+      return { addedOrg, jwt: await this.jwt(user) };
     }
 
     const user = await this.loginOrRegisterProvider(

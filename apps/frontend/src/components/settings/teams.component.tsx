@@ -3,7 +3,7 @@
 import { Button } from '@gitroom/react/form/button';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import useSWR from 'swr';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useUser } from '@gitroom/frontend/components/layout/user.context';
 import { capitalize } from 'lodash';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
@@ -17,26 +17,41 @@ import { useToaster } from '@gitroom/react/toaster/toaster';
 import { deleteDialog } from '@gitroom/react/helpers/delete.dialog';
 import copy from 'copy-to-clipboard';
 import { useT } from '@gitroom/react/translation/get.transation.service.client';
+import { CreateTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/create.team.member.dto';
 
 const roles = [
   {
-    name: 'User',
     value: 'USER',
   },
   {
-    name: 'Admin',
     value: 'ADMIN',
   },
 ];
-export const AddMember = () => {
+const RoleSelect = () => {
+  const t = useT();
+
+  return (
+    <Select label={t('role', 'Role')} name="role">
+      <option value="">{t('select_role', 'Select Role')}</option>
+      {roles.map((role) => (
+        <option key={role.value} value={role.value}>
+          {role.value === 'USER' ? t('user', 'User') : t('admin', 'Admin')}
+        </option>
+      ))}
+    </Select>
+  );
+};
+
+const InviteMemberForm = () => {
   const modals = useModals();
   const fetch = useFetch();
   const toast = useToaster();
+  const t = useT();
   const resolver = useMemo(() => {
     return classValidatorResolver(AddTeamMemberDto);
   }, []);
   const form = useForm({
-    values: {
+    defaultValues: {
       email: '',
       role: '',
       sendEmail: true,
@@ -50,12 +65,20 @@ export const AddMember = () => {
   });
   const submit = useCallback(
     async (values: { email: string; role: string; sendEmail: boolean }) => {
-      const { url } = await (
-        await fetch('/settings/team', {
-          method: 'POST',
-          body: JSON.stringify(values),
-        })
-      ).json();
+      const response = await fetch('/settings/team', {
+        method: 'POST',
+        body: JSON.stringify(values),
+      });
+      if (!response.ok) {
+        form.setError('email', {
+          message:
+            (await response.text()) ||
+            t('could_not_create_invitation', 'Could not create invitation'),
+        });
+        return;
+      }
+
+      const { url } = await response.json();
       if (values.sendEmail) {
         modals.closeAll();
         toast.show(t('invitation_link_sent', 'Invitation link sent'));
@@ -65,31 +88,23 @@ export const AddMember = () => {
       modals.closeAll();
       toast.show(t('link_copied_to_clipboard', 'Link copied to clipboard'));
     },
-    []
+    [fetch, form, modals, t, toast]
   );
-
-  const t = useT();
 
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(submit)}>
-        <div className="relative flex gap-[10px] flex-col flex-1 p-[16px] pt-0">
+        <div className="relative flex gap-[10px] flex-col flex-1 pt-[8px]">
           {sendEmail && (
             <Input
-              label="Email"
+              label={t('label_email', 'Email')}
               placeholder={t('enter_email', 'Enter email')}
               name="email"
+              type="email"
             />
           )}
-          <Select label="Role" name="role">
-            <option value="">{t('select_role', 'Select Role')}</option>
-            {roles.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.name}
-              </option>
-            ))}
-          </Select>
-          <div className="flex gap-[5px]">
+          <RoleSelect />
+          <div className="flex gap-[8px] items-center">
             <div>
               <Checkbox name="sendEmail" />
             </div>
@@ -97,12 +112,150 @@ export const AddMember = () => {
               {t('send_invitation_via_email', 'Send invitation via email?')}
             </div>
           </div>
-          <Button type="submit" className="mt-[18px]">
-            {sendEmail ? t('send_invitation_link', 'Send Invitation Link') : t('copy_link', 'Copy Link')}
+          <Button
+            type="submit"
+            className="mt-[18px]"
+            loading={form.formState.isSubmitting}
+          >
+            {sendEmail
+              ? t('send_invitation_link', 'Send Invitation Link')
+              : t('copy_link', 'Copy Link')}
           </Button>
         </div>
       </form>
     </FormProvider>
+  );
+};
+
+const ManualMemberForm = ({
+  onCreated,
+}: {
+  onCreated: () => Promise<unknown> | void;
+}) => {
+  const modals = useModals();
+  const fetch = useFetch();
+  const toast = useToaster();
+  const t = useT();
+  const resolver = useMemo(
+    () => classValidatorResolver(CreateTeamMemberDto),
+    []
+  );
+  const form = useForm({
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      role: '',
+    },
+    resolver,
+    mode: 'onChange',
+  });
+  const submit = useCallback(
+    async (values: {
+      name: string;
+      email: string;
+      password: string;
+      role: string;
+    }) => {
+      const response = await fetch('/settings/team/manual', {
+        method: 'POST',
+        body: JSON.stringify(values),
+      });
+      if (!response.ok) {
+        form.setError('email', {
+          message:
+            (await response.text()) ||
+            t('could_not_create_team_member', 'Could not create team member'),
+        });
+        return;
+      }
+
+      await onCreated();
+      modals.closeAll();
+      toast.show(
+        t(
+          'team_member_created_successfully',
+          'Team member created successfully'
+        )
+      );
+    },
+    [fetch, form, modals, onCreated, t, toast]
+  );
+
+  return (
+    <FormProvider {...form}>
+      <form onSubmit={form.handleSubmit(submit)}>
+        <div className="relative flex gap-[10px] flex-col flex-1 pt-[8px]">
+          <Input
+            label={t('label_name', 'Name')}
+            placeholder={t('label_name', 'Name')}
+            name="name"
+            autoComplete="name"
+          />
+          <Input
+            label={t('label_email', 'Email')}
+            placeholder={t('enter_email', 'Enter email')}
+            name="email"
+            type="email"
+            autoComplete="email"
+          />
+          <Input
+            label={t('label_password', 'Password')}
+            placeholder={t('label_password', 'Password')}
+            name="password"
+            type="password"
+            autoComplete="new-password"
+          />
+          <RoleSelect />
+          <Button
+            type="submit"
+            className="mt-[8px]"
+            loading={form.formState.isSubmitting}
+          >
+            {t('create_team_member', 'Create team member')}
+          </Button>
+        </div>
+      </form>
+    </FormProvider>
+  );
+};
+
+export const AddMember = ({
+  onCreated,
+}: {
+  onCreated: () => Promise<unknown> | void;
+}) => {
+  const [method, setMethod] = useState<'invite' | 'manual'>('invite');
+  const t = useT();
+
+  return (
+    <div className="px-[16px] pb-[16px]">
+      <div className="grid grid-cols-2 gap-[8px] rounded-[8px] bg-newBgColorInner p-[4px]">
+        <button
+          type="button"
+          className={`h-[40px] rounded-[6px] ${
+            method === 'invite' ? 'bg-forth text-white' : 'text-customColor18'
+          }`}
+          onClick={() => setMethod('invite')}
+        >
+          {t('invite_member', 'Invite member')}
+        </button>
+        <button
+          type="button"
+          className={`h-[40px] rounded-[6px] ${
+            method === 'manual' ? 'bg-forth text-white' : 'text-customColor18'
+          }`}
+          onClick={() => setMethod('manual')}
+        >
+          {t('manual_registration', 'Manual registration')}
+        </button>
+      </div>
+      {method === 'invite' ? (
+        <InviteMemberForm />
+      ) : (
+        <ManualMemberForm onCreated={onCreated} />
+      )}
+    </div>
   );
 };
 export const TeamsComponent = () => {
@@ -123,9 +276,15 @@ export const TeamsComponent = () => {
       user: {
         email: string;
         id: string;
+        name: string | null;
       };
     }>;
-  }, []);
+  }, [fetch]);
+  const { data, mutate } = useSWR('/api/teams', loadTeam, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateIfStale: false,
+  });
   const addMember = useCallback(() => {
     modals.openModal({
       classNames: {
@@ -133,14 +292,9 @@ export const TeamsComponent = () => {
       },
       title: t('top_title_add_member', 'Add Member'),
       withCloseButton: true,
-      children: <AddMember />,
+      children: <AddMember onCreated={() => mutate()} />,
     });
-  }, [t]);
-  const { data, mutate } = useSWR('/api/teams', loadTeam, {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    revalidateIfStale: false,
-  });
+  }, [modals, mutate, t]);
   const remove = useCallback(
     (toRemove: {
         user: {
@@ -150,7 +304,10 @@ export const TeamsComponent = () => {
       async () => {
         if (
           !(await deleteDialog(
-            t('are_you_sure_remove_team_member', 'Are you sure you want to remove this team member?')
+            t(
+              'are_you_sure_remove_team_member',
+              'Are you sure you want to remove this team member?'
+            )
           ))
         ) {
           return;
@@ -160,7 +317,7 @@ export const TeamsComponent = () => {
         });
         await mutate();
       },
-    [t]
+    [fetch, mutate, t]
   );
 
   return (
@@ -177,7 +334,8 @@ export const TeamsComponent = () => {
           {(data || []).map((p) => (
             <div key={p.user.id} className="flex items-center">
               <div className="flex-1">
-                {capitalize(p.user.email.split('@')[0]).split('.')[0]}
+                {p.user.name ||
+                  capitalize(p.user.email.split('@')[0]).split('.')[0]}
               </div>
               <div className="flex-1">
                 {p.role === 'USER'

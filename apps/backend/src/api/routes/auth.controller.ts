@@ -48,9 +48,14 @@ export class AuthController {
     @UserAgent() userAgent: string
   ) {
     try {
-      const getOrgFromCookie = this._authService.getOrgFromCookie(
-        req?.cookies?.org
-      );
+      const invitationCookie = (req?.cookies?.org || req?.headers?.org) as
+        | string
+        | undefined;
+      const getOrgFromCookie =
+        this._authService.getOrgFromCookie(invitationCookie);
+      if (invitationCookie && !getOrgFromCookie) {
+        throw new Error('Invitation is invalid or has expired');
+      }
 
       const { jwt, addedOrg } = await this._authService.routeAuth(
         body.provider,
@@ -59,6 +64,17 @@ export class AuthController {
         userAgent,
         getOrgFromCookie
       );
+
+      response.cookie('org', '', {
+        path: '/',
+        ...(!process.env.NOT_SECURED
+          ? {
+              domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+            }
+          : {}),
+        expires: new Date(0),
+        maxAge: -1,
+      });
 
       const activationRequired =
         body.provider === 'LOCAL' && this._emailService.hasProvider();
@@ -122,9 +138,14 @@ export class AuthController {
     @UserAgent() userAgent: string
   ) {
     try {
-      const getOrgFromCookie = this._authService.getOrgFromCookie(
-        req?.cookies?.org
-      );
+      const invitationCookie = (req?.cookies?.org || req?.headers?.org) as
+        | string
+        | undefined;
+      const getOrgFromCookie =
+        this._authService.getOrgFromCookie(invitationCookie);
+      if (invitationCookie && !getOrgFromCookie) {
+        throw new Error('Invitation is invalid or has expired');
+      }
 
       const { jwt, addedOrg } = await this._authService.routeAuth(
         body.provider,
@@ -133,6 +154,17 @@ export class AuthController {
         userAgent,
         getOrgFromCookie
       );
+
+      response.cookie('org', '', {
+        path: '/',
+        ...(!process.env.NOT_SECURED
+          ? {
+              domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),
+            }
+          : {}),
+        expires: new Date(0),
+        maxAge: -1,
+      });
 
       response.cookie('auth', jwt, {
         domain: getCookieUrlFromDomain(process.env.FRONTEND_URL!),

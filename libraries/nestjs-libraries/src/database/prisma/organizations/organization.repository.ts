@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import { CreateOrgUserDto } from '@gitroom/nestjs-libraries/dtos/auth/create.org.user.dto';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
+import { CreateTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/create.team.member.dto';
 
 @Injectable()
 export class OrganizationRepository {
@@ -257,6 +258,134 @@ export class OrganizationRepository {
     return create;
   }
 
+  private async canAddUserToOrganization(orgId: string) {
+    const organization = await this._organization.model.organization.findUnique(
+      {
+        where: {
+          id: orgId,
+        },
+        select: {
+          id: true,
+          subscription: {
+            select: {
+              subscriptionTier: true,
+            },
+          },
+        },
+      }
+    );
+
+    if (!organization) {
+      throw new Error('Organization not found');
+    }
+
+    if (
+      process.env.STRIPE_PUBLISHABLE_KEY &&
+      organization.subscription?.subscriptionTier === SubscriptionTier.STANDARD
+    ) {
+      throw new Error('Your subscription does not allow team members');
+    }
+  }
+
+  async createTeamMember(orgId: string, body: CreateTeamMemberDto) {
+    await this.canAddUserToOrganization(orgId);
+
+    const email = body.email.trim().toLowerCase();
+    const existingUser = await this._user.model.user.findFirst({
+      where: {
+        email,
+        providerName: 'LOCAL',
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (existingUser) {
+      throw new Error('Email already exists');
+    }
+
+    return this._user.model.user.create({
+      data: {
+        name: body.name.trim(),
+        email,
+        password: AuthService.hashPassword(body.password),
+        providerName: 'LOCAL',
+        timezone: 0,
+        activated: true,
+        organizations: {
+          create: {
+            organizationId: orgId,
+            role: body.role,
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        organizations: {
+          where: {
+            organizationId: orgId,
+          },
+          select: {
+            role: true,
+          },
+        },
+      },
+    });
+  }
+
+  async createInvitedUser(
+    orgId: string,
+    invitationId: string,
+    role: 'USER' | 'ADMIN',
+    body: CreateOrgUserDto,
+    activated: boolean,
+    ip: string,
+    userAgent: string
+  ) {
+    const usedInvitation = await this._user.model.user.findFirst({
+      where: {
+        inviteId: invitationId,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (usedInvitation) {
+      throw new Error('Invitation has already been used');
+    }
+
+    await this.canAddUserToOrganization(orgId);
+
+    const user = await this._user.model.user.create({
+      data: {
+        name: body.company.trim(),
+        email: body.email.trim().toLowerCase(),
+        password: AuthService.hashPassword(body.password),
+        providerName: 'LOCAL',
+        timezone: 0,
+        activated,
+        inviteId: invitationId,
+        ip,
+        agent: userAgent,
+        organizations: {
+          create: {
+            organizationId: orgId,
+            role,
+          },
+        },
+      },
+    });
+
+    return {
+      user,
+      organizationId: orgId,
+    };
+  }
+
   async createOrgAndUser(
     body: Omit<CreateOrgUserDto, 'providerToken'> & { providerId?: string },
     hasEmail: boolean,
@@ -340,6 +469,7 @@ export class OrganizationRepository {
               select: {
                 email: true,
                 id: true,
+                name: true,
                 sendSuccessEmails: true,
                 sendFailureEmails: true,
                 sendStreakEmails: true,

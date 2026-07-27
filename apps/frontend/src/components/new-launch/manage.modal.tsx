@@ -37,6 +37,8 @@ import { CreationMethodBadge } from '@gitroom/frontend/components/launches/creat
 import {
   SettingsIcon,
   ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   CloseIcon,
   TrashIcon,
   DropdownArrowSmallIcon,
@@ -45,6 +47,9 @@ import { useHasScroll } from '@gitroom/frontend/components/ui/is.scroll.hook';
 import { useShortlinkPreference } from '@gitroom/frontend/components/settings/shortlink-preference.component';
 import dayjs from 'dayjs';
 import { Button } from '@gitroom/react/form/button';
+import { MediaComponentInner } from '@gitroom/frontend/components/launches/helpers/media.settings.component';
+import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
+import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
 
 function countCharacters(text: string, type: string): number {
   if (type !== 'x') {
@@ -62,6 +67,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   const toaster = useToaster();
   const modal = useModals();
   const [showSettings, setShowSettings] = useState(false);
+  const [mobileStep, setMobileStep] = useState(0);
   const { data: shortlinkPreferenceData } = useShortlinkPreference();
 
   const { addEditSets, mutate, customClose, dummy } = props;
@@ -155,6 +161,36 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
     [integrations]
   );
 
+  const mobileSteps = useMemo(
+    () => [
+      t('mobile_post_step_media', 'Media'),
+      t('mobile_post_step_profiles', 'Profiles'),
+      t('mobile_post_step_cover', 'Cover'),
+      t('mobile_post_step_caption', 'Caption'),
+      t('mobile_post_step_settings', 'Settings and post'),
+    ],
+    [t]
+  );
+
+  const nextMobileStep = useCallback(() => {
+    if (mobileStep === 1 && selectedIntegrations.length === 0) {
+      toaster.show(
+        t(
+          'select_at_least_one_profile',
+          'Select at least one profile to continue.'
+        ),
+        'warning'
+      );
+      return;
+    }
+
+    const nextStep = Math.min(mobileStep + 1, mobileSteps.length - 1);
+    setMobileStep(nextStep);
+    if (nextStep === 4 && current !== 'global') {
+      setShowSettings(true);
+    }
+  }, [mobileStep, mobileSteps.length, selectedIntegrations.length, current, t]);
+
   const askClose = useCallback(async () => {
     if (!activateExitButton || dummy) {
       return;
@@ -176,6 +212,16 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
       modal.closeAll();
     }
   }, [activateExitButton, dummy]);
+
+  const previousMobileStep = useCallback(() => {
+    if (mobileStep === 0) {
+      askClose();
+      return;
+    }
+
+    setShowSettings(false);
+    setMobileStep((step) => Math.max(step - 1, 0));
+  }, [mobileStep, askClose]);
 
   const deletePost = useCallback(async () => {
     setLoading(true);
@@ -449,14 +495,23 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
   return (
     <div className="w-full h-full flex-1 p-[40px] flex relative mobile:p-0 mobile:min-h-0 mobile:h-[100dvh] mobile:max-h-[100dvh]">
       <div className="flex flex-1 bg-newBgColorInner rounded-[20px] flex-col mobile:rounded-none mobile:min-h-0 mobile:h-full">
-        <div className="flex-1 flex mobile:flex-col mobile:min-h-0 mobile:overflow-y-auto">
-          <div className="flex flex-col flex-1 border-e border-newBorder mobile:border-e-0 mobile:flex-none mobile:h-[330px] mobile:shrink-0">
+        <div className="flex-1 flex mobile:flex-col mobile:min-h-0 mobile:overflow-hidden">
+          <div className="flex flex-col flex-1 border-e border-newBorder mobile:border-e-0 mobile:min-h-0">
             <div className="bg-newBgColor h-[65px] rounded-s-[20px] !rounded-b-[0] flex items-center gap-[12px] px-[20px] text-[20px] font-[600] mobile:rounded-none mobile:h-[56px] mobile:px-[14px] mobile:text-[18px] mobile:shrink-0">
-              {t('create_post_title', 'Create Post')}
-              <CreationMethodBadge
-                creationMethod={existingData?.posts?.[0]?.creationMethod}
-                size="sm"
-              />
+              <div className="mobile:hidden flex items-center gap-[12px]">
+                {t('create_post_title', 'Create Post')}
+                <CreationMethodBadge
+                  creationMethod={existingData?.posts?.[0]?.creationMethod}
+                  size="sm"
+                />
+              </div>
+              <div className="hidden mobile:flex flex-1 flex-col min-w-0">
+                <div className="text-[11px] font-[500] text-[#A3A3A3]">
+                  {t('step', 'Step')} {mobileStep + 1} {t('of', 'of')}{' '}
+                  {mobileSteps.length}
+                </div>
+                <div className="truncate">{mobileSteps[mobileStep]}</div>
+              </div>
               <button
                 type="button"
                 onClick={askClose}
@@ -473,7 +528,12 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                   id="social-content"
                   className="gap-[32px] flex flex-col pe-[8px] pt-[20px] ps-[20px] absolute top-0 left-0 w-full h-full overflow-x-hidden overflow-y-scroll scrollbar scrollbar-thumb-newColColor scrollbar-track-newBgColorInner mobile:gap-[18px] mobile:p-[14px]"
                 >
-                  <div className="flex w-full mobile:flex-col mobile:gap-[12px]">
+                  <div
+                    className={clsx(
+                      'flex w-full mobile:flex-col mobile:gap-[12px]',
+                      mobileStep !== 1 && 'mobile:hidden'
+                    )}
+                  >
                     <div className="flex flex-1 mobile:min-w-0 mobile:overflow-x-auto">
                       <PicksSocialsComponent toolTip={true} />
                     </div>
@@ -486,10 +546,35 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                       )}
                     </div>
                   </div>
-                  <div className="flex flex-1 gap-[6px] flex-col mobile:min-h-0">
-                    <div>{!existingData.integration && <SelectCurrent />}</div>
-                    <div className="flex-1 flex">
-                      {!hide && <EditorWrapper totalPosts={1} value="" />}
+                  <div
+                    className={clsx(
+                      'flex flex-1 gap-[6px] flex-col mobile:min-h-0',
+                      mobileStep !== 0 &&
+                        mobileStep !== 3 &&
+                        mobileStep !== 4 &&
+                        'mobile:hidden'
+                    )}
+                  >
+                    <div
+                      className={clsx(
+                        mobileStep !== 4 && 'mobile:hidden'
+                      )}
+                    >
+                      {!existingData.integration && <SelectCurrent />}
+                    </div>
+                    <div
+                      className={clsx(
+                        'flex-1 flex',
+                        mobileStep === 4 && 'mobile:hidden'
+                      )}
+                    >
+                      {!hide && (
+                        <EditorWrapper
+                          totalPosts={1}
+                          value=""
+                          mobileStep={mobileStep}
+                        />
+                      )}
                     </div>
                     <div
                       id="social-empty"
@@ -499,6 +584,14 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                       )}
                     />
                   </div>
+                  <div
+                    className={clsx(
+                      'hidden mobile:flex flex-1',
+                      mobileStep !== 2 && 'mobile:!hidden'
+                    )}
+                  >
+                    <MobileVideoCoverStep />
+                  </div>
                 </div>
               </div>
               <div
@@ -506,7 +599,11 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                 className={clsx(
                   'pb-[20px] px-[20px] select-none mobile:px-[14px] mobile:pb-[14px]',
                   showSettings && 'flex-1 flex pt-[20px] mobile:pt-[14px]',
-                  current === 'global' && 'hidden'
+                  current === 'global' && 'hidden',
+                  mobileStep !== 4 && 'mobile:hidden',
+                  mobileStep === 4 &&
+                    current !== 'global' &&
+                    'mobile:flex mobile:flex-1 mobile:pt-[14px] mobile:min-h-0'
                 )}
               >
                 <div className="flex-1 flex flex-col rounded-[12px] gap-[12px] overflow-hidden bg-newSettings">
@@ -530,6 +627,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                   <div
                     className={clsx(
                       !showSettings ? 'hidden' : 'flex-1',
+                      mobileStep === 4 && 'mobile:flex-1',
                       'text-[14px] text-textColor font-[500] relative'
                     )}
                   >
@@ -547,7 +645,7 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
               </div>
             </div>
           </div>
-          <div className="w-[580px] flex flex-col mobile:w-full mobile:h-[150px] mobile:flex-none mobile:border-t mobile:border-newBorder mobile:shrink-0">
+          <div className="w-[580px] flex flex-col mobile:hidden">
             <div className="bg-newBgColor h-[65px] rounded-e-[20px] !rounded-b-[0] flex items-center px-[20px] text-[20px] font-[600] mobile:h-[48px] mobile:rounded-none mobile:px-[14px] mobile:text-[16px] mobile:shrink-0">
               <div className="flex-1">{t('post_preview', 'Post Preview')}</div>
               <div className="cursor-pointer mobile:hidden">
@@ -564,7 +662,20 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
             </div>
           </div>
         </div>
-        <div className="select-none h-[84px] py-[20px] border-t border-newBorder flex items-center mobile:h-auto mobile:p-[12px] mobile:flex-col mobile:items-stretch mobile:gap-[10px] mobile:shrink-0">
+        <div
+          className={clsx(
+            'select-none h-[84px] py-[20px] border-t border-newBorder flex items-center mobile:h-auto mobile:p-[12px] mobile:flex-col mobile:items-stretch mobile:gap-[10px] mobile:shrink-0 mobile:max-h-[48dvh] mobile:overflow-y-auto',
+            mobileStep !== 4 && 'mobile:hidden'
+          )}
+        >
+          <button
+            type="button"
+            onClick={previousMobileStep}
+            className="hidden mobile:flex h-[40px] items-center gap-[6px] font-[600] text-[14px]"
+          >
+            <ChevronLeftIcon />
+            {t('back', 'Back')}
+          </button>
           <div className="flex-1 flex ps-[20px] gap-[8px] mobile:ps-0 mobile:w-full mobile:flex-none mobile:flex-col">
             {!dummy && (
               <TagsComponent
@@ -610,6 +721,18 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                 <div className={clsx(loading && 'invisible')}>
                   {t('save_as_draft', 'Save as Draft')}
                 </div>
+              </button>
+            )}
+            {!dummy && !addEditSets && (
+              <button
+                type="button"
+                onClick={schedule('now')}
+                disabled={
+                  selectedIntegrations.length === 0 || loading || locked
+                }
+                className="hidden mobile:flex h-[44px] rounded-[8px] bg-[#D82D7E] text-white items-center justify-center font-[600] disabled:cursor-not-allowed disabled:opacity-80"
+              >
+                {t('post_now', 'Post Now')}
               </button>
             )}
             {addEditSets && (
@@ -677,6 +800,34 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
             )}
           </div>
         </div>
+        <div className="hidden mobile:block h-[4px] bg-newColColor shrink-0">
+          <div
+            className="h-full bg-[#612BD3] transition-all duration-300"
+            style={{
+              width: `${((mobileStep + 1) / mobileSteps.length) * 100}%`,
+            }}
+          />
+        </div>
+        {mobileStep < mobileSteps.length - 1 && (
+          <div className="hidden mobile:flex gap-[10px] p-[12px] border-t border-newBorder bg-newBgColorInner shrink-0">
+            <button
+              type="button"
+              onClick={previousMobileStep}
+              className="h-[48px] px-[16px] rounded-[8px] border border-newTextColor/10 flex items-center justify-center gap-[6px] font-[600]"
+            >
+              <ChevronLeftIcon />
+              {t('back', 'Back')}
+            </button>
+            <button
+              type="button"
+              onClick={nextMobileStep}
+              className="h-[48px] flex-1 rounded-[8px] bg-[#612BD3] text-white flex items-center justify-center gap-[6px] font-[600]"
+            >
+              {t('continue', 'Continue')}
+              <ChevronRightIcon />
+            </button>
+          </div>
+        )}
       </div>
       <CopilotPopup
         hitEscapeToClose={false}
@@ -724,6 +875,154 @@ const Scrollable: FC<{
   return (
     <div className={clsx(className, hasScroll && scrollClasses)} ref={ref}>
       {children}
+    </div>
+  );
+};
+
+const MobileVideoCoverStep: FC = () => {
+  const t = useT();
+  const modal = useModals();
+  const mediaDirectory = useMediaDirectory();
+  const {
+    current,
+    global,
+    internal,
+    setGlobalValueMedia,
+    setInternalValueMedia,
+  } = useLaunchStore(
+    useShallow((state) => ({
+      current: state.current,
+      global: state.global,
+      internal: state.internal.find(
+        (item) => item.integration.id === state.current
+      ),
+      setGlobalValueMedia: state.setGlobalValueMedia,
+      setInternalValueMedia: state.setInternalValueMedia,
+    }))
+  );
+
+  const values = current === 'global' ? global : internal?.integrationValue || [];
+  const videos = values.flatMap((value, valueIndex) =>
+    (value.media || [])
+      .map((media: any, mediaIndex: number) => ({
+        media,
+        mediaIndex,
+        valueIndex,
+      }))
+      .filter(({ media }) => isVideoExtension(media.path))
+  );
+
+  const editCover = useCallback(
+    (video: (typeof videos)[number]) => {
+      modal.openModal({
+        title: t('edit_video_cover', 'Edit video cover'),
+        askClose: false,
+        closeOnEscape: true,
+        size: 'min(680px, calc(100% - 24px))',
+        children: (close) => (
+          <MediaComponentInner
+            media={video.media}
+            onClose={close}
+            onSelect={(updatedMedia) => {
+              const updated = (values[video.valueIndex]?.media || []).map(
+                (media: any, index: number) =>
+                  index === video.mediaIndex
+                    ? { ...media, ...updatedMedia }
+                    : media
+              );
+
+              if (current === 'global') {
+                setGlobalValueMedia(video.valueIndex, updated);
+              } else {
+                setInternalValueMedia(current, video.valueIndex, updated);
+              }
+            }}
+          />
+        ),
+      });
+    },
+    [
+      current,
+      modal,
+      setGlobalValueMedia,
+      setInternalValueMedia,
+      t,
+      values,
+      videos,
+    ]
+  );
+
+  if (videos.length === 0) {
+    return (
+      <div className="flex-1 rounded-[12px] bg-newSettings p-[24px] flex flex-col items-center justify-center text-center gap-[8px]">
+        <div className="text-[16px] font-[600]">
+          {t('no_video_cover_needed', 'No video cover needed')}
+        </div>
+        <div className="text-[13px] text-[#A3A3A3] max-w-[320px]">
+          {t(
+            'no_video_cover_needed_description',
+            'This step is only needed when the post contains a video.'
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full flex flex-col gap-[12px]">
+      <div className="text-[13px] text-[#A3A3A3]">
+        {t(
+          'choose_video_cover_description',
+          'Choose a frame from the video or upload a cover image.'
+        )}
+      </div>
+      {videos.map((video, index) => {
+        const thumbnail = video.media.thumbnail
+          ? mediaDirectory.set(video.media.thumbnail)
+          : undefined;
+
+        return (
+          <div
+            key={`${video.media.id}-${video.valueIndex}-${video.mediaIndex}`}
+            className="rounded-[12px] border border-newBorder bg-newSettings overflow-hidden"
+          >
+            <div className="aspect-video bg-black">
+              {thumbnail ? (
+                <img
+                  src={thumbnail}
+                  alt=""
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <video
+                  src={mediaDirectory.set(video.media.path)}
+                  className="w-full h-full object-contain"
+                  preload="metadata"
+                  playsInline
+                  controls
+                />
+              )}
+            </div>
+            <div className="p-[12px] flex items-center gap-[12px]">
+              <div className="flex-1 min-w-0">
+                <div className="text-[14px] font-[600]">
+                  {t('video', 'Video')} {index + 1}
+                </div>
+                <div className="text-[12px] text-[#A3A3A3] truncate">
+                  {video.media.name || video.media.path.split('/').pop()}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => editCover(video)}
+                className="h-[40px] px-[14px] rounded-[8px] bg-[#612BD3] text-white font-[600] text-[13px]"
+              >
+                {t('edit_cover', 'Edit cover')}
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
