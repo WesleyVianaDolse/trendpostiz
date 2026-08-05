@@ -6,7 +6,12 @@ import { SaveMediaInformationDto } from '@gitroom/nestjs-libraries/dtos/media/sa
 export class MediaRepository {
   constructor(private _media: PrismaRepository<'media'>) {}
 
-  saveFile(org: string, fileName: string, filePath: string, originalName?: string) {
+  saveFile(
+    org: string,
+    fileName: string,
+    filePath: string,
+    originalName?: string
+  ) {
     return this._media.model.media.create({
       data: {
         organization: {
@@ -18,6 +23,20 @@ export class MediaRepository {
         path: filePath,
         originalName: originalName || null,
       },
+      select: {
+        id: true,
+        name: true,
+        originalName: true,
+        path: true,
+        thumbnail: true,
+        alt: true,
+      },
+    });
+  }
+
+  findFileByPath(org: string, filePath: string) {
+    return this._media.model.media.findFirst({
+      where: { organizationId: org, path: filePath, deletedAt: null },
       select: {
         id: true,
         name: true,

@@ -101,6 +101,54 @@ export class MediaController {
     );
   }
 
+  @Post('/resumable-upload')
+  initializeResumableUpload(
+    @GetOrgFromRequest() org: Organization,
+    @Body()
+    body: {
+      uploadId?: string;
+      originalName: string;
+      size: number;
+      type: string;
+    }
+  ) {
+    return this._mediaService.initializeResumableUpload(org.id, body);
+  }
+
+  @Post('/resumable-upload/:uploadId/:partNumber')
+  @UseInterceptors(
+    FileInterceptor('chunk', { limits: { fileSize: 8 * 1024 * 1024 } })
+  )
+  uploadResumableChunk(
+    @GetOrgFromRequest() org: Organization,
+    @Param('uploadId') uploadId: string,
+    @Param('partNumber') partNumber: string,
+    @UploadedFile('chunk') chunk: Express.Multer.File
+  ) {
+    return this._mediaService.saveResumableUploadChunk(
+      org.id,
+      uploadId,
+      partNumber,
+      chunk
+    );
+  }
+
+  @Post('/resumable-upload/:uploadId/complete')
+  completeResumableUpload(
+    @GetOrgFromRequest() org: Organization,
+    @Param('uploadId') uploadId: string
+  ) {
+    return this._mediaService.completeResumableUpload(org.id, uploadId);
+  }
+
+  @Delete('/resumable-upload/:uploadId')
+  abortResumableUpload(
+    @GetOrgFromRequest() org: Organization,
+    @Param('uploadId') uploadId: string
+  ) {
+    return this._mediaService.abortResumableUpload(org.id, uploadId);
+  }
+
   @Post('/save-media')
   async saveMedia(
     @GetOrgFromRequest() org: Organization,
@@ -193,10 +241,12 @@ export class MediaController {
   }
 
   @Post('/video/function')
-  videoFunction(
-    @Body() body: VideoFunctionDto
-  ) {
-    return this._mediaService.videoFunction(body.identifier, body.functionName, body.params);
+  videoFunction(@Body() body: VideoFunctionDto) {
+    return this._mediaService.videoFunction(
+      body.identifier,
+      body.functionName,
+      body.params
+    );
   }
 
   @Get('/generate-video/:type/allowed')

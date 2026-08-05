@@ -12,6 +12,7 @@ import {
   Sections,
   SubscriptionException,
 } from '@gitroom/backend/services/auth/permissions/permission.exception.class';
+import { ResumableUploadService } from '@gitroom/nestjs-libraries/upload/resumable.upload.service';
 
 @Injectable()
 export class MediaService {
@@ -21,7 +22,8 @@ export class MediaService {
     private _mediaRepository: MediaRepository,
     private _openAi: OpenaiService,
     private _subscriptionService: SubscriptionService,
-    private _videoManager: VideoManager
+    private _videoManager: VideoManager,
+    private _resumableUploadService: ResumableUploadService
   ) {}
 
   async deleteMedia(org: string, id: string) {
@@ -52,8 +54,65 @@ export class MediaService {
     return generating;
   }
 
-  saveFile(org: string, fileName: string, filePath: string, originalName?: string) {
-    return this._mediaRepository.saveFile(org, fileName, filePath, originalName);
+  saveFile(
+    org: string,
+    fileName: string,
+    filePath: string,
+    originalName?: string
+  ) {
+    return this._mediaRepository.saveFile(
+      org,
+      fileName,
+      filePath,
+      originalName
+    );
+  }
+
+  initializeResumableUpload(
+    org: string,
+    input: {
+      uploadId?: string;
+      originalName: string;
+      size: number;
+      type: string;
+    }
+  ) {
+    return this._resumableUploadService.initialize(org, input);
+  }
+
+  saveResumableUploadChunk(
+    org: string,
+    uploadId: string,
+    partNumber: string,
+    chunk: Express.Multer.File
+  ) {
+    return this._resumableUploadService.saveChunk(
+      org,
+      uploadId,
+      partNumber,
+      chunk
+    );
+  }
+
+  async completeResumableUpload(org: string, uploadId: string) {
+    const metadata = await this._resumableUploadService.complete(org, uploadId);
+    const existing = await this._mediaRepository.findFileByPath(
+      org,
+      metadata.path
+    );
+    return (
+      existing ||
+      this._mediaRepository.saveFile(
+        org,
+        metadata.name,
+        metadata.path,
+        metadata.originalName
+      )
+    );
+  }
+
+  abortResumableUpload(org: string, uploadId: string) {
+    return this._resumableUploadService.abort(org, uploadId);
   }
 
   getMedia(org: string, page: number, search?: string) {

@@ -1,8 +1,18 @@
 // @ts-check
 import { withSentryConfig } from '@sentry/nextjs';
+import { readFileSync } from 'fs';
+
+const fileVersion = readFileSync(
+  new URL('../../version.txt', import.meta.url),
+  'utf8'
+).trim();
+const appVersion = process.env.NEXT_PUBLIC_VERSION?.trim() || fileVersion;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    NEXT_PUBLIC_APP_VERSION: appVersion,
+  },
   experimental: {
     proxyTimeout: 600_000,
   },
