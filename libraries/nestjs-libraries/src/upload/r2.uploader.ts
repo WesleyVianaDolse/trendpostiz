@@ -38,7 +38,10 @@ const ALLOWED_MIME_TO_EXT: Record<string, string> = Object.entries(
   return acc;
 }, {} as Record<string, string>);
 
-function normalizeExtension(filename: string, contentType?: string): string | null {
+function normalizeExtension(
+  filename: string,
+  contentType?: string
+): string | null {
   const ext = path.extname(filename || '').toLowerCase();
   if (ALLOWED_EXT_TO_MIME[ext]) {
     return ext;
@@ -66,6 +69,10 @@ const R2 = new S3Client({
 // Function to generate a random string
 function generateRandomString() {
   return makeId(20);
+}
+
+function publicObjectUrl(key: string) {
+  return `${(CLOUDFLARE_BUCKET_URL || '').replace(/\/+$/, '')}/${key}`;
 }
 
 export default async function handleR2Upload(
@@ -96,7 +103,10 @@ export async function simpleUpload(
   _contentType: string
 ) {
   const detected = await fromBuffer(data);
-  if (!detected || !Object.values(ALLOWED_EXT_TO_MIME).includes(detected.mime)) {
+  if (
+    !detected ||
+    !Object.values(ALLOWED_EXT_TO_MIME).includes(detected.mime)
+  ) {
     throw new Error('Unsupported file type.');
   }
   const fileExtension = `.${detected.ext}`;
@@ -113,12 +123,15 @@ export async function simpleUpload(
   const command = new PutObjectCommand({ ...params });
   await R2.send(command);
 
-  return CLOUDFLARE_BUCKET_URL + '/' + randomFilename;
+  return publicObjectUrl(randomFilename);
 }
 
 export async function createMultipartUpload(req: Request, res: Response) {
   const { file, fileHash, contentType } = req.body;
-  const safeExt = normalizeExtension(file?.name || '', contentType || file?.type);
+  const safeExt = normalizeExtension(
+    file?.name || '',
+    contentType || file?.type
+  );
   if (!safeExt) {
     return res.status(400).json({ message: 'Unsupported file type.' });
   }
@@ -131,7 +144,7 @@ export async function createMultipartUpload(req: Request, res: Response) {
       Key: `${randomFilename}`,
       ContentType: safeContentType,
       Metadata: {
-        'x-amz-meta-file-hash': fileHash,
+        'file-hash': fileHash,
       },
     };
 
@@ -242,10 +255,7 @@ export async function completeMultipartUpload(req: Request, res: Response) {
         .json({ message: 'File contents do not match declared type.' });
     }
 
-    response.Location =
-      process.env.CLOUDFLARE_BUCKET_URL +
-      '/' +
-      response?.Location?.split('/').at(-1);
+    response.Location = publicObjectUrl(key);
     return response;
   } catch (err) {
     console.log('Error', err);

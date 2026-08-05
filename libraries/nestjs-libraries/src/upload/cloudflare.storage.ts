@@ -121,7 +121,6 @@ class CloudflareStorage implements IUploadProvider {
       // Create the PutObjectCommand to upload the file to Cloudflare R2
       const command = new PutObjectCommand({
         Bucket: this._bucketName,
-        ACL: 'public-read',
         Key: `${id}.${extension}`,
         Body: file.buffer,
         ContentType: safeContentType,
@@ -136,8 +135,11 @@ class CloudflareStorage implements IUploadProvider {
         buffer: file.buffer,
         originalname: `${id}.${extension}`,
         fieldname: 'file',
-        path: `${this._uploadUrl}/${id}.${extension}`,
-        destination: `${this._uploadUrl}/${id}.${extension}`,
+        path: `${this._uploadUrl.replace(/\/+$/, '')}/${id}.${extension}`,
+        destination: `${this._uploadUrl.replace(
+          /\/+$/,
+          ''
+        )}/${id}.${extension}`,
         encoding: '7bit',
         stream: file.buffer as any,
       };

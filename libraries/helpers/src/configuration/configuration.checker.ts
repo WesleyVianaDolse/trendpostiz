@@ -31,6 +31,23 @@ export class ConfigurationChecker {
     this.checkIsValidUrl('NEXT_PUBLIC_BACKEND_URL');
     this.checkIsValidUrl('BACKEND_INTERNAL_URL');
     this.checkNonEmpty('STORAGE_PROVIDER', 'Needed to setup storage.');
+    this.checkStorageProvider();
+  }
+
+  checkStorageProvider() {
+    const provider = this.get('STORAGE_PROVIDER');
+    if (provider !== 'local' && provider !== 'cloudflare') {
+      this.issues.push('STORAGE_PROVIDER must be local or cloudflare.');
+      return;
+    }
+    if (provider !== 'cloudflare') return;
+
+    this.checkNonEmpty('CLOUDFLARE_ACCOUNT_ID');
+    this.checkNonEmpty('CLOUDFLARE_ACCESS_KEY');
+    this.checkNonEmpty('CLOUDFLARE_SECRET_ACCESS_KEY');
+    this.checkNonEmpty('CLOUDFLARE_BUCKETNAME');
+    this.checkNonEmpty('CLOUDFLARE_REGION');
+    this.checkIsValidUrl('CLOUDFLARE_BUCKET_URL');
   }
 
   checkNonEmpty(key: string, description?: string): boolean {
