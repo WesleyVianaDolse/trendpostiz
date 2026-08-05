@@ -11,7 +11,12 @@ import { pipeline } from 'stream/promises';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { fromBuffer } = require('file-type');
 
-const CHUNK_SIZE = 8 * 1024 * 1024;
+// Keep chunks small enough for mobile networks and comfortably below proxy limits.
+const CHUNK_SIZE = 5 * 1024 * 1024;
+const LEGACY_CHUNK_SIZE = 8 * 1024 * 1024;
+// This is deliberately larger than CHUNK_SIZE. Multer treats reaching fileSize
+// exactly as LIMIT_FILE_SIZE, and multipart/form-data also adds request overhead.
+export const MAX_RESUMABLE_CHUNK_REQUEST_SIZE = 12 * 1024 * 1024;
 const MAX_FILE_SIZE = 1024 * 1024 * 1024;
 const UPLOAD_ID_PATTERN = /^[a-f0-9-]{36}$/;
 const ALLOWED_MIME_TYPES = new Set([
@@ -33,6 +38,7 @@ interface UploadMetadata {
   size: number;
   type: string;
   totalParts: number;
+  chunkSize?: number;
   createdAt: string;
   completedPath?: string;
   completedName?: string;
@@ -74,7 +80,7 @@ export class ResumableUploadService {
       ) {
         return {
           uploadId: existing.uploadId,
-          chunkSize: CHUNK_SIZE,
+          chunkSize: this.metadataChunkSize(existing),
           uploadedParts: await this.listUploadedParts(existing),
           completed: !!existing.completedPath,
         };
@@ -89,6 +95,7 @@ export class ResumableUploadService {
       size,
       type: input.type || 'application/octet-stream',
       totalParts: Math.ceil(size / CHUNK_SIZE),
+      chunkSize: CHUNK_SIZE,
       createdAt: new Date().toISOString(),
     };
     await mkdir(this.uploadPath(uploadId), { recursive: true });
@@ -117,14 +124,17 @@ export class ResumableUploadService {
     ) {
       throw new BadRequestException('Invalid upload part.');
     }
-    if (!chunk?.buffer?.length || chunk.size > CHUNK_SIZE) {
+    if (
+      !chunk?.buffer?.length ||
+      chunk.size > this.metadataChunkSize(metadata)
+    ) {
       throw new BadRequestException('Invalid upload chunk.');
     }
 
     const expectedSize =
       partNumber === metadata.totalParts - 1
-        ? metadata.size - partNumber * CHUNK_SIZE
-        : CHUNK_SIZE;
+        ? metadata.size - partNumber * this.metadataChunkSize(metadata)
+        : this.metadataChunkSize(metadata);
     if (chunk.size !== expectedSize) {
       throw new BadRequestException('Upload chunk has an unexpected size.');
     }
@@ -265,8 +275,8 @@ export class ResumableUploadService {
     for (let part = 0; part < metadata.totalParts; part++) {
       const expectedSize =
         part === metadata.totalParts - 1
-          ? metadata.size - part * CHUNK_SIZE
-          : CHUNK_SIZE;
+          ? metadata.size - part * this.metadataChunkSize(metadata)
+          : this.metadataChunkSize(metadata);
       const partStats = await stat(
         this.partPath(metadata.uploadId, part)
       ).catch(() => null);
@@ -275,6 +285,10 @@ export class ResumableUploadService {
       }
     }
     return parts;
+  }
+
+  private metadataChunkSize(metadata: UploadMetadata) {
+    return metadata.chunkSize || LEGACY_CHUNK_SIZE;
   }
 
   private async removeParts(metadata: UploadMetadata) {

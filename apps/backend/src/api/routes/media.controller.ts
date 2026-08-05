@@ -25,6 +25,7 @@ import { UploadFactory } from '@gitroom/nestjs-libraries/upload/upload.factory';
 import { SaveMediaInformationDto } from '@gitroom/nestjs-libraries/dtos/media/save.media.information.dto';
 import { VideoDto } from '@gitroom/nestjs-libraries/dtos/videos/video.dto';
 import { VideoFunctionDto } from '@gitroom/nestjs-libraries/dtos/videos/video.function.dto';
+import { MAX_RESUMABLE_CHUNK_REQUEST_SIZE } from '@gitroom/nestjs-libraries/upload/resumable.upload.service';
 
 @ApiTags('Media')
 @Controller('/media')
@@ -117,7 +118,9 @@ export class MediaController {
 
   @Post('/resumable-upload/:uploadId/:partNumber')
   @UseInterceptors(
-    FileInterceptor('chunk', { limits: { fileSize: 8 * 1024 * 1024 } })
+    FileInterceptor('chunk', {
+      limits: { fileSize: MAX_RESUMABLE_CHUNK_REQUEST_SIZE },
+    })
   )
   uploadResumableChunk(
     @GetOrgFromRequest() org: Organization,
