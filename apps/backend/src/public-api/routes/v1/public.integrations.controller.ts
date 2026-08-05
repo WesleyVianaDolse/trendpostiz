@@ -79,7 +79,7 @@ export class PublicIntegrationsController {
   @UsePipes(new CustomFileValidationPipe())
   async uploadSimple(
     @GetOrgFromRequest() org: Organization,
-    @UploadedFile('file') file: Express.Multer.File
+    @UploadedFile() file: Express.Multer.File
   ) {
     Sentry.metrics.count('public_api-request', 1);
     if (!file) {

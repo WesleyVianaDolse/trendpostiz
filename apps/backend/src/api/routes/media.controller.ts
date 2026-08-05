@@ -126,7 +126,7 @@ export class MediaController {
     @GetOrgFromRequest() org: Organization,
     @Param('uploadId') uploadId: string,
     @Param('partNumber') partNumber: string,
-    @UploadedFile('chunk') chunk: Express.Multer.File
+    @UploadedFile() chunk: Express.Multer.File
   ) {
     return this._mediaService.saveResumableUploadChunk(
       org.id,
@@ -183,7 +183,7 @@ export class MediaController {
   @UsePipes(new CustomFileValidationPipe())
   async uploadSimple(
     @GetOrgFromRequest() org: Organization,
-    @UploadedFile('file') file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
     @Body('preventSave') preventSave: string = 'false'
   ) {
     const originalName = file.originalname;
