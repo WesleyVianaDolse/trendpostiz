@@ -1,5 +1,8 @@
 services:
   postiz:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     image: ghcr.io/wesleyvianadolse/postiz-app:latest
     container_name: postiz
     restart: always
