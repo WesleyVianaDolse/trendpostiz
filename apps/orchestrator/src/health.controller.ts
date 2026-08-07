@@ -1,9 +1,12 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { Connection } from '@temporalio/client';
+import { TemporalService } from 'nestjs-temporal-core';
 
 @Controller('health')
 export class HealthController {
+  constructor(private readonly temporalService: TemporalService) {}
+
   @Get('/status')
   async getHealthStatus(@Res() res: Response) {
     let connection: Connection | undefined;
@@ -24,9 +27,41 @@ export class HealthController {
           setTimeout(() => reject(new Error('timeout')), 10000)
         ),
       ]);
-      return res.status(200).json({ status: 'ok' });
-    } catch {
-      return res.status(500).json({ status: 'error' });
+      const workers = this.temporalService.getAllWorkers();
+      const workerStatuses = workers
+        ? Array.from(workers.workers.entries()).map(([taskQueue, status]) => ({
+            taskQueue,
+            running: status.isRunning,
+            healthy: status.isHealthy,
+            lastError: status.lastError,
+          }))
+        : [];
+      const mainWorker = workerStatuses.find(
+        (worker) => worker.taskQueue === 'main'
+      );
+      const allWorkersHealthy =
+        workerStatuses.length > 0 &&
+        workerStatuses.every((worker) => worker.running && worker.healthy);
+
+      if (!mainWorker?.running || !mainWorker.healthy || !allWorkersHealthy) {
+        return res.status(503).json({
+          status: 'error',
+          temporal: 'connected',
+          workers: workerStatuses,
+        });
+      }
+
+      return res.status(200).json({
+        status: 'ok',
+        temporal: 'connected',
+        workers: workerStatuses,
+      });
+    } catch (error) {
+      return res.status(503).json({
+        status: 'error',
+        temporal: 'disconnected',
+        message: error instanceof Error ? error.message : String(error),
+      });
     } finally {
       await connection?.close().catch(() => {});
     }

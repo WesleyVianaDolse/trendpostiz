@@ -42,6 +42,8 @@ services:
       REDIS_URL: "redis://postiz-redis:6379"
       BACKEND_INTERNAL_URL: "http://localhost:3000"
       TEMPORAL_ADDRESS: "postiz-temporal:7233"
+      # Enable only after reconciling old QUEUE records posted manually.
+      RUN_CRON: "${RUN_CRON:-false}"
       IS_GENERAL: "true"
       DISABLE_REGISTRATION: "false"
 
@@ -97,7 +99,19 @@ services:
       postiz-redis:
         condition: service_healthy
       postiz-temporal:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3002/health/status').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   postiz-postgres:
     image: postgres:17-alpine
@@ -165,6 +179,21 @@ services:
     depends_on:
       postiz-temporal-postgres:
         condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "temporal",
+          "operator",
+          "cluster",
+          "health",
+          "--address",
+          "postiz-temporal:7233",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
 
   postiz-temporal-ui:
     image: temporalio/ui:2.34.0

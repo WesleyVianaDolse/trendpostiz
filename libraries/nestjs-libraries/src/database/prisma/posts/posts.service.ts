@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   ValidationPipe,
 } from '@nestjs/common';
 import { PostsRepository } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.repository';
@@ -57,6 +58,7 @@ type PostWithConditionals = Post & {
 
 @Injectable()
 export class PostsService {
+  private readonly logger = new Logger(PostsService.name);
   private storage = UploadFactory.createStorage();
   constructor(
     private _postRepository: PostsRepository,
@@ -696,7 +698,7 @@ export class PostsService {
     try {
       const workflows = this._temporalService.client
         .getRawClient()
-        ?.workflow.list({
+        .workflow.list({
           query: `postId="${postId}" AND ExecutionStatus="Running"`,
         });
 
@@ -711,40 +713,84 @@ export class PostsService {
           ) {
             await workflow.terminate();
           }
-        } catch (err) {}
+        } catch (error) {
+          this.logger.warn(
+            `Could not terminate previous workflow ${
+              executionInfo.workflowId
+            }: ${error instanceof Error ? error.message : String(error)}`
+          );
+        }
       }
-    } catch (err) {}
+    } catch (error) {
+      this.logger.warn(
+        `Could not inspect previous workflows for post ${postId}: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    }
 
     if (state === 'DRAFT') {
       return;
     }
 
+    const workflowId = `post_${postId}`;
+    const client = this._temporalService.client.getRawClient();
+
     try {
-      await this._temporalService.client
-        .getRawClient()
-        ?.workflow.start('postWorkflowV105', {
-          workflowId: `post_${postId}`,
-          taskQueue: 'main',
-          workflowIdConflictPolicy: 'TERMINATE_EXISTING',
-          args: [
-            {
-              taskQueue: taskQueue,
-              postId: postId,
-              organizationId: orgId,
-            },
-          ],
-          typedSearchAttributes: new TypedSearchAttributes([
-            {
-              key: postIdSearchParam,
-              value: postId,
-            },
-            {
-              key: organizationId,
-              value: orgId,
-            },
-          ]),
-        });
-    } catch (err) {}
+      await client.workflow.start('postWorkflowV105', {
+        workflowId,
+        taskQueue: 'main',
+        workflowIdConflictPolicy: 'TERMINATE_EXISTING',
+        args: [
+          {
+            taskQueue: taskQueue,
+            postId: postId,
+            organizationId: orgId,
+          },
+        ],
+        typedSearchAttributes: new TypedSearchAttributes([
+          {
+            key: postIdSearchParam,
+            value: postId,
+          },
+          {
+            key: organizationId,
+            value: orgId,
+          },
+        ]),
+      });
+      this.logger.log(
+        `Scheduling confirmed for post ${postId} on task queue ${taskQueue}.`
+      );
+    } catch (error) {
+      // A network timeout may happen after Temporal accepted the request. Check
+      // before reporting a false scheduling failure to the user.
+      try {
+        const existing = await client.workflow.getHandle(workflowId).describe();
+        if (existing.status.name === 'RUNNING') {
+          this.logger.warn(
+            `Temporal start returned an error, but ${workflowId} is running.`
+          );
+          return;
+        }
+      } catch {
+        // The workflow really could not be confirmed below.
+      }
+
+      const message = `Scheduling was not confirmed for post ${postId}: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
+      this.logger.error(message, error instanceof Error ? error.stack : '');
+      await this._postRepository
+        .changeState(postId, 'ERROR', message, [{ id: postId }])
+        .catch((stateError) =>
+          this.logger.error(
+            `Could not persist scheduling failure for post ${postId}.`,
+            stateError instanceof Error ? stateError.stack : String(stateError)
+          )
+        );
+      throw error;
+    }
   }
 
   async createPost(
@@ -789,12 +835,12 @@ export class PostsService {
       }
 
       if (body.type !== 'update') {
-        this.startWorkflow(
+        await this.startWorkflow(
           post.settings.__type.split('-')[0].toLowerCase(),
           posts[0].id,
           orgId,
           posts[0].state
-        ).catch((err) => {});
+        );
       }
 
       Sentry.metrics.count('post_created', 1);
@@ -828,14 +874,12 @@ export class PostsService {
     const state: State = status === 'draft' ? 'DRAFT' : 'QUEUE';
     await this._postRepository.changeState(id, state);
 
-    try {
-      await this.startWorkflow(
-        getPostById.integration.providerIdentifier.split('-')[0].toLowerCase(),
-        getPostById.id,
-        orgId,
-        state
-      );
-    } catch (err) {}
+    await this.startWorkflow(
+      getPostById.integration.providerIdentifier.split('-')[0].toLowerCase(),
+      getPostById.id,
+      orgId,
+      state
+    );
 
     return { id, state };
   }
@@ -859,16 +903,12 @@ export class PostsService {
     );
 
     if (action === 'schedule') {
-      try {
-        await this.startWorkflow(
-          getPostById.integration.providerIdentifier
-            .split('-')[0]
-            .toLowerCase(),
-          getPostById.id,
-          orgId,
-          getPostById.state === 'DRAFT' ? 'DRAFT' : 'QUEUE'
-        );
-      } catch (err) {}
+      await this.startWorkflow(
+        getPostById.integration.providerIdentifier.split('-')[0].toLowerCase(),
+        getPostById.id,
+        orgId,
+        getPostById.state === 'DRAFT' ? 'DRAFT' : 'QUEUE'
+      );
     }
 
     return newDate;
