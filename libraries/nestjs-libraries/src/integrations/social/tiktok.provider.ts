@@ -487,6 +487,10 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
   private buildTikokPostInfoBody(firstPost: PostDetails<TikTokDto>) {
     const isPhoto = !isVideoExtension(firstPost?.media?.[0]?.path);
     const method = firstPost?.settings?.content_posting_method;
+    const hasCommercialDisclosure =
+      firstPost.settings.disclose &&
+      (firstPost.settings.brand_content_toggle ||
+        firstPost.settings.brand_organic_toggle);
 
     if (method === 'DIRECT_POST') {
       return {
@@ -509,10 +513,14 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
           ...(isPhoto
             ? {}
             : { is_aigc: firstPost.settings.video_made_with_ai || false }),
-          brand_content_toggle:
-            firstPost.settings.brand_content_toggle || false,
-          brand_organic_toggle:
-            firstPost.settings.brand_organic_toggle || false,
+          ...(hasCommercialDisclosure
+            ? {
+                brand_content_toggle:
+                  firstPost.settings.brand_content_toggle || false,
+                brand_organic_toggle:
+                  firstPost.settings.brand_organic_toggle || false,
+              }
+            : {}),
           ...(isPhoto
             ? {
                 auto_add_music: firstPost.settings.autoAddMusic === 'yes',
@@ -581,6 +589,19 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
           '{}',
           Buffer.from('{}'),
           'Explicit consent is required before sending content directly to TikTok'
+        );
+      }
+
+      if (
+        firstPost.settings.disclose &&
+        !firstPost.settings.brand_organic_toggle &&
+        !firstPost.settings.brand_content_toggle
+      ) {
+        throw new BadBody(
+          'tiktok-commercial-disclosure',
+          '{}',
+          Buffer.from('{}'),
+          'Please select whether this content promotes your own brand or branded content'
         );
       }
 

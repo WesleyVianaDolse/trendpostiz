@@ -8,7 +8,7 @@ import React, {
   useImperativeHandle,
   useMemo,
 } from 'react';
-import { useForm, FormProvider } from 'react-hook-form';
+import { useForm, FormProvider, type Mode } from 'react-hook-form';
 import { IsOptional } from 'class-validator';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
@@ -59,6 +59,7 @@ export const withProvider = function <T extends object>(params: {
     additionalSettings: any
   ) => Promise<string | true>;
   maximumCharacters?: number | ((settings: any) => number);
+  validationMode?: Mode;
 }) {
   const {
     postComment,
@@ -67,6 +68,7 @@ export const withProvider = function <T extends object>(params: {
     dto,
     checkValidity,
     maximumCharacters,
+    validationMode = 'all',
   } = params;
 
   const Wrapped = forwardRef((props: { id: string }, ref) => {
@@ -184,7 +186,7 @@ export const withProvider = function <T extends object>(params: {
       ...(Object.keys(selectedIntegration.settings).length > 0
         ? { values: { ...selectedIntegration.settings } }
         : {}),
-      mode: 'all',
+      mode: validationMode,
       criteriaMode: 'all',
       reValidateMode: 'onChange',
     });

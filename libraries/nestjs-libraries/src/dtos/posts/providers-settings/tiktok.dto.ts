@@ -16,13 +16,18 @@ export class TikTokDto {
   title: string;
 
   @ValidateIf((p) => p.content_posting_method === 'DIRECT_POST')
-  @IsIn([
-    'PUBLIC_TO_EVERYONE',
-    'MUTUAL_FOLLOW_FRIENDS',
-    'FOLLOWER_OF_CREATOR',
-    'SELF_ONLY',
-  ])
-  @IsString()
+  @IsIn(
+    [
+      'PUBLIC_TO_EVERYONE',
+      'MUTUAL_FOLLOW_FRIENDS',
+      'FOLLOWER_OF_CREATOR',
+      'SELF_ONLY',
+    ],
+    {
+      message:
+        'Please select who can see this video before publishing to TikTok.',
+    }
+  )
   privacy_level?:
     | 'PUBLIC_TO_EVERYONE'
     | 'MUTUAL_FOLLOW_FRIENDS'
@@ -50,6 +55,18 @@ export class TikTokDto {
 
   @IsBoolean()
   brand_organic_toggle: boolean;
+
+  @IsBoolean()
+  disclose: boolean;
+
+  @ValidateIf(
+    (p) => p.disclose && !p.brand_organic_toggle && !p.brand_content_toggle
+  )
+  @Equals(false, {
+    message:
+      'Please select whether this content promotes your own brand or branded content.',
+  })
+  commercial_disclosure_selection_required?: boolean;
 
   @IsIn(['DIRECT_POST', 'UPLOAD'])
   @IsString()
