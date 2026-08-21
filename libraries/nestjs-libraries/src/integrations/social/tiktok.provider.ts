@@ -16,6 +16,17 @@ import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
 import { Integration } from '@prisma/client';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
 
+export type TikTokCreatorInfo = {
+  creator_avatar_url: string;
+  creator_username: string;
+  creator_nickname: string;
+  privacy_level_options: Exclude<TikTokDto['privacy_level'], undefined>[];
+  comment_disabled: boolean;
+  duet_disabled: boolean;
+  stitch_disabled: boolean;
+  max_video_post_duration_sec: number;
+};
+
 @Rules(
   'TikTok can have one video or one picture or multiple pictures, it cannot be without an attachment'
 )
@@ -185,7 +196,8 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
     if (body.indexOf('url_ownership_unverified') > -1) {
       return {
         type: 'bad-body' as const,
-        value: 'You have to upload the picture/video to TrendPostiz when sending a URL',
+        value:
+          'You have to upload the picture/video to TrendPostiz when sending a URL',
       };
     }
 
@@ -362,11 +374,9 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
     };
   }
 
-  async maxVideoLength(accessToken: string) {
-    const {
-      data: { max_video_post_duration_sec },
-    } = await (
-      await fetch(
+  async creatorInfo(accessToken: string): Promise<TikTokCreatorInfo> {
+    const response = await (
+      await this.fetch(
         'https://open.tiktokapis.com/v2/post/publish/creator_info/query/',
         {
           method: 'POST',
@@ -374,9 +384,26 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
             'Content-Type': 'application/json; charset=UTF-8',
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
+        'tiktok-creator-info'
       )
     ).json();
+
+    if (response?.error?.code && response.error.code !== 'ok') {
+      const handleError = this.handleErrors(JSON.stringify(response));
+      throw new BadBody(
+        'tiktok-creator-info',
+        JSON.stringify(response),
+        Buffer.from(JSON.stringify(response)),
+        handleError?.value || response.error.message || ''
+      );
+    }
+
+    return response.data;
+  }
+
+  async maxVideoLength(accessToken: string) {
+    const { max_video_post_duration_sec } = await this.creatorInfo(accessToken);
 
     return {
       maxDurationSeconds: max_video_post_duration_sec,
@@ -471,8 +498,7 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
             ? { title: firstPost.message }
             : {}),
           ...(isPhoto ? { description: firstPost.message } : {}),
-          privacy_level:
-            firstPost.settings.privacy_level || 'PUBLIC_TO_EVERYONE',
+          privacy_level: firstPost.settings.privacy_level,
           ...(isPhoto
             ? {}
             : { disable_duet: !firstPost.settings.duet || false }),
@@ -547,6 +573,63 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
   ): Promise<PostResponse[]> {
     const [firstPost] = postDetails;
     const isPhoto = !isVideoExtension(firstPost?.media?.[0]?.path);
+
+    if (firstPost.settings.content_posting_method === 'DIRECT_POST') {
+      if (firstPost.settings.direct_post_consent !== true) {
+        throw new BadBody(
+          'tiktok-direct-post-consent',
+          '{}',
+          Buffer.from('{}'),
+          'Explicit consent is required before sending content directly to TikTok'
+        );
+      }
+
+      const creatorInfo = await this.creatorInfo(accessToken);
+      const privacyLevel = firstPost.settings.privacy_level;
+
+      if (
+        !privacyLevel ||
+        !creatorInfo.privacy_level_options.includes(privacyLevel)
+      ) {
+        throw new BadBody(
+          'tiktok-privacy-level',
+          JSON.stringify({ privacyLevel }),
+          Buffer.from(JSON.stringify({ privacyLevel })),
+          'Choose one of the privacy options currently allowed by this TikTok account'
+        );
+      }
+
+      if (firstPost.settings.comment && creatorInfo.comment_disabled) {
+        throw new BadBody(
+          'tiktok-comments-disabled',
+          '{}',
+          Buffer.from('{}'),
+          'Comments are disabled in this TikTok account privacy settings'
+        );
+      }
+
+      if (!isPhoto && firstPost.settings.duet && creatorInfo.duet_disabled) {
+        throw new BadBody(
+          'tiktok-duet-disabled',
+          '{}',
+          Buffer.from('{}'),
+          'Duet is disabled in this TikTok account privacy settings'
+        );
+      }
+
+      if (
+        !isPhoto &&
+        firstPost.settings.stitch &&
+        creatorInfo.stitch_disabled
+      ) {
+        throw new BadBody(
+          'tiktok-stitch-disabled',
+          '{}',
+          Buffer.from('{}'),
+          'Stitch is disabled in this TikTok account privacy settings'
+        );
+      }
+    }
 
     console.log({
       ...this.buildTikokPostInfoBody(firstPost),
