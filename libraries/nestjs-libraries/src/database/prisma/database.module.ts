@@ -42,10 +42,11 @@ import { AnnouncementsRepository } from '@gitroom/nestjs-libraries/database/pris
 import { AnnouncementsService } from '@gitroom/nestjs-libraries/database/prisma/announcements/announcements.service';
 import { ErrorsRepository } from '@gitroom/nestjs-libraries/database/prisma/errors/errors.repository';
 import { ErrorsService } from '@gitroom/nestjs-libraries/database/prisma/errors/errors.service';
+import { UploadModule } from '@gitroom/nestjs-libraries/upload/upload.module';
 
 @Global()
 @Module({
-  imports: [],
+  imports: [UploadModule],
   controllers: [],
   providers: [
     PrismaService,
