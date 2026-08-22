@@ -335,14 +335,17 @@ export class YoutubeProvider extends SocialAbstract implements SocialProvider {
       true
     );
 
-    if (settings?.thumbnail?.path) {
+    const thumbnailPath =
+      settings?.thumbnail?.path || firstPost?.media?.[0]?.thumbnail;
+
+    if (thumbnailPath) {
       await this.runInConcurrent(async () =>
         youtubeClient.thumbnails.set({
           videoId: all?.data?.id!,
           media: {
             body: (
               await axios({
-                url: settings?.thumbnail?.path,
+                url: thumbnailPath,
                 method: 'GET',
                 responseType: 'stream',
               })

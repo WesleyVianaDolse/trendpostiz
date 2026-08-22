@@ -104,7 +104,8 @@ export class InstagramProvider
     if (body.toLowerCase().indexOf('session has been invalidated') > -1) {
       return {
         type: 'refresh-token' as const,
-        value: 'You session has been invalidated, this can usually happen from frequent posting, please re-authenticate, and wait 1-2 days before posting again',
+        value:
+          'You session has been invalidated, this can usually happen from frequent posting, please re-authenticate, and wait 1-2 days before posting again',
       };
     }
 
@@ -549,6 +550,12 @@ export class InstagramProvider
           firstPost.media?.length === 1
             ? `&caption=${encodeURIComponent(firstPost.message)}`
             : ``;
+        const videoCover =
+          firstPost.media?.length === 1 && !isStory && m.thumbnail
+            ? typeof m.thumbnailTimestamp === 'number'
+              ? `&thumb_offset=${m.thumbnailTimestamp}`
+              : `&cover_url=${encodeURIComponent(m.thumbnail)}`
+            : `&thumb_offset=${m.thumbnailTimestamp || 0}`;
         const isCarousel =
           (firstPost?.media?.length || 0) > 1 && !isStory
             ? `&is_carousel_item=true`
@@ -557,14 +564,10 @@ export class InstagramProvider
           ? firstPost?.media?.length === 1
             ? isStory
               ? `video_url=${m.path}&media_type=STORIES`
-              : `video_url=${m.path}&media_type=REELS&thumb_offset=${
-                  m?.thumbnailTimestamp || 0
-                }`
+              : `video_url=${m.path}&media_type=REELS${videoCover}`
             : isStory
             ? `video_url=${m.path}&media_type=STORIES`
-            : `video_url=${m.path}&media_type=VIDEO&thumb_offset=${
-                m?.thumbnailTimestamp || 0
-              }`
+            : `video_url=${m.path}&media_type=VIDEO${videoCover}`
           : isStory
           ? `image_url=${m.path}&media_type=STORIES`
           : `image_url=${m.path}`;

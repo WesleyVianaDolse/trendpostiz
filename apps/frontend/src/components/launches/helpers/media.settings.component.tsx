@@ -16,6 +16,50 @@ import { useLaunchStore } from '@gitroom/frontend/components/new-launch/store';
 import { useVariables } from '@gitroom/react/helpers/variable.context';
 import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
 const postUrlEmitter = new EventEmitter();
+const MAX_THUMBNAIL_DIMENSION = 1920;
+
+const canvasToJpeg = (canvas: HTMLCanvasElement, quality = 0.85) =>
+  new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) =>
+        blob
+          ? resolve(blob)
+          : reject(new Error('Unable to prepare the thumbnail image.')),
+      'image/jpeg',
+      quality
+    );
+  });
+
+const normalizeThumbnailImage = async (file: File) => {
+  const image = await createImageBitmap(file);
+  try {
+    const scale = Math.min(
+      1,
+      MAX_THUMBNAIL_DIMENSION / Math.max(image.width, image.height)
+    );
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(image.width * scale);
+    canvas.height = Math.round(image.height * scale);
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Unable to prepare the thumbnail image.');
+    }
+
+    context.fillStyle = '#000000';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    let thumbnail = await canvasToJpeg(canvas);
+    for (const quality of [0.75, 0.65, 0.55]) {
+      if (thumbnail.size <= 2 * 1024 * 1024) {
+        break;
+      }
+      thumbnail = await canvasToJpeg(canvas, quality);
+    }
+    return thumbnail;
+  } finally {
+    image.close();
+  }
+};
 
 export const MediaSettingsLayout = () => {
   const [showPostSelector, setShowPostSelector] = useState(false);
@@ -114,6 +158,7 @@ export const CreateThumbnail: FC<{
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
@@ -138,6 +183,7 @@ export const CreateThumbnail: FC<{
   const handleSeek = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const time = parseFloat(e.target.value);
     if (videoRef.current) {
+      setIsSeeking(true);
       videoRef.current.currentTime = time;
       setCurrentTime(time);
     }
@@ -151,20 +197,30 @@ export const CreateThumbnail: FC<{
       const canvas = canvasRef.current;
       const ctx = canvas?.getContext('2d');
 
-      if (!video || !canvas || !ctx || !video.videoWidth || !video.videoHeight) {
+      if (
+        !video ||
+        !canvas ||
+        !ctx ||
+        !video.videoWidth ||
+        !video.videoHeight
+      ) {
         setIsCapturing(false);
         return;
       }
 
-      // Set canvas dimensions to match video
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // Keep generated covers compatible with platform thumbnail size limits.
+      const scale = Math.min(
+        1,
+        MAX_THUMBNAIL_DIMENSION / Math.max(video.videoWidth, video.videoHeight)
+      );
+      canvas.width = Math.round(video.videoWidth * scale);
+      canvas.height = Math.round(video.videoHeight * scale);
 
       // Draw current frame to canvas
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
       // Get timestamp in milliseconds
-      const timestampMs = Math.round(currentTime * 1000);
+      const timestampMs = Math.round(video.currentTime * 1000);
 
       // Convert canvas to blob
       canvas.toBlob(
@@ -190,12 +246,17 @@ export const CreateThumbnail: FC<{
           const tempCtx = tempCanvas.getContext('2d');
 
           if (tempCtx) {
-            tempCanvas.width = video.videoWidth;
-            tempCanvas.height = video.videoHeight;
-            tempCtx.drawImage(video, 0, 0);
+            const scale = Math.min(
+              1,
+              MAX_THUMBNAIL_DIMENSION /
+                Math.max(video.videoWidth, video.videoHeight)
+            );
+            tempCanvas.width = Math.round(video.videoWidth * scale);
+            tempCanvas.height = Math.round(video.videoHeight * scale);
+            tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
 
             // Get timestamp in milliseconds
-            const timestampMs = Math.round(currentTime * 1000);
+            const timestampMs = Math.round(video.currentTime * 1000);
 
             tempCanvas.toBlob(
               (blob: Blob | null) => {
@@ -217,7 +278,7 @@ export const CreateThumbnail: FC<{
         setIsCapturing(false);
       }
     }
-  }, [onSelect, currentTime]);
+  }, [onSelect]);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -234,6 +295,7 @@ export const CreateThumbnail: FC<{
     setLoadError(false);
     setCurrentTime(0);
     setDuration(0);
+    setIsSeeking(false);
 
     videoRef.current?.load();
 
@@ -254,6 +316,11 @@ export const CreateThumbnail: FC<{
           onLoadedData={markVideoLoaded}
           onCanPlay={markVideoLoaded}
           onTimeUpdate={handleTimeUpdate}
+          onSeeking={() => setIsSeeking(true)}
+          onSeeked={() => {
+            setIsSeeking(false);
+            handleTimeUpdate();
+          }}
           onError={() => {
             setIsLoaded(false);
             setLoadError(true);
@@ -301,10 +368,14 @@ export const CreateThumbnail: FC<{
           <div className="flex justify-center">
             <button
               onClick={captureFrame}
-              disabled={isCapturing}
+              disabled={isCapturing || isSeeking}
               className="bg-forth text-white px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isCapturing ? 'Capturing...' : 'Select This Frame'}
+              {isCapturing
+                ? 'Capturing...'
+                : isSeeking
+                ? 'Loading frame...'
+                : 'Select This Frame'}
             </button>
           </div>
         </>
@@ -398,7 +469,7 @@ export const MediaComponentInner: FC<{
   );
 
   const uploadThumbnailImage = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
+    async (event: ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       event.target.value = '';
 
@@ -411,31 +482,48 @@ export const MediaComponentInner: FC<{
         return;
       }
 
-      const url = URL.createObjectURL(file);
-      setThumbnailPreview(url, null);
+      try {
+        const normalizedImage = await normalizeThumbnailImage(file);
+        const url = URL.createObjectURL(normalizedImage);
+        setThumbnailPreview(url, null);
+      } catch (error) {
+        console.error('Error preparing thumbnail image:', error);
+        alert('Unable to prepare this thumbnail image.');
+      }
     },
     [setThumbnailPreview]
   );
 
   const save = useCallback(async () => {
     setLoading(true);
-    let path = thumbnail || '';
-    if (newThumbnail) {
-      const blob = await (await fetch(newThumbnail)).blob();
-      const formData = new FormData();
-      formData.append('file', blob, 'media.jpg');
-      formData.append('preventSave', 'true');
-      const data = await (
-        await newFetch('/media/upload-simple', {
+    try {
+      let path = thumbnail || '';
+      if (newThumbnail) {
+        const blobResponse = await fetch(newThumbnail);
+        if (!blobResponse.ok) {
+          throw new Error('Unable to read the selected thumbnail.');
+        }
+
+        const blob = await blobResponse.blob();
+        const formData = new FormData();
+        formData.append('file', blob, 'thumbnail.jpg');
+        formData.append('preventSave', 'true');
+        const uploadResponse = await newFetch('/media/upload-simple', {
           method: 'POST',
           body: formData,
-        })
-      ).json();
-      path = data.path;
-    }
+        });
+        if (!uploadResponse.ok) {
+          throw new Error('Unable to upload the selected thumbnail.');
+        }
 
-    const media = await (
-      await newFetch('/media/information', {
+        const data = await uploadResponse.json();
+        if (!data?.path) {
+          throw new Error('The thumbnail upload returned no file path.');
+        }
+        path = data.path;
+      }
+
+      const saveResponse = await newFetch('/media/information', {
         method: 'POST',
         body: JSON.stringify({
           id: props.media.id,
@@ -443,12 +531,34 @@ export const MediaComponentInner: FC<{
           thumbnail: path,
           thumbnailTimestamp: thumbnailTimestamp,
         }),
-      })
-    ).json();
+      });
+      if (!saveResponse.ok) {
+        throw new Error('Unable to save the thumbnail.');
+      }
 
-    onSelect(media);
-    onClose();
-  }, [altText, newThumbnail, thumbnail, thumbnailTimestamp]);
+      const updatedMedia = await saveResponse.json();
+      onSelect(updatedMedia);
+      onClose();
+    } catch (error) {
+      console.error('Error saving media settings:', error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'Unable to save the media settings.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    altText,
+    newFetch,
+    newThumbnail,
+    onClose,
+    onSelect,
+    props.media.id,
+    thumbnail,
+    thumbnailTimestamp,
+  ]);
 
   const currentThumbnail = newThumbnail || thumbnail;
   const currentThumbnailSrc = currentThumbnail?.startsWith('blob:')
@@ -589,10 +699,11 @@ export const MediaComponentInner: FC<{
             Cancel
           </button>
           <button
+            disabled={loading}
             onClick={save}
-            className="flex-1 bg-forth text-white px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all"
+            className="flex-1 bg-forth text-white px-6 py-2 rounded-lg hover:bg-opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Save Changes
+            {loading ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
       )}

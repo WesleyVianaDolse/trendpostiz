@@ -1,5 +1,17 @@
-import { IsDefined, IsString, IsUrl, ValidateIf, Validate } from 'class-validator';
-import { ValidUrlExtension, ValidUrlPath } from '@gitroom/helpers/utils/valid.url.path';
+import {
+  IsDefined,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Min,
+  ValidateIf,
+  Validate,
+} from 'class-validator';
+import {
+  ValidUrlExtension,
+  ValidUrlPath,
+} from '@gitroom/helpers/utils/valid.url.path';
 
 export class MediaDto {
   @IsString()
@@ -19,4 +31,9 @@ export class MediaDto {
   @ValidateIf((o) => o.thumbnail)
   @IsUrl()
   thumbnail?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  thumbnailTimestamp?: number;
 }

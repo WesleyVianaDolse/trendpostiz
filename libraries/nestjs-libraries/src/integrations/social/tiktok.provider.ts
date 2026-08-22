@@ -487,6 +487,13 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
   private buildTikokPostInfoBody(firstPost: PostDetails<TikTokDto>) {
     const isPhoto = !isVideoExtension(firstPost?.media?.[0]?.path);
     const method = firstPost?.settings?.content_posting_method;
+    const videoCoverTimestamp = firstPost?.media?.[0]?.thumbnailTimestamp;
+    const videoCover =
+      method === 'DIRECT_POST' &&
+      !isPhoto &&
+      typeof videoCoverTimestamp === 'number'
+        ? { video_cover_timestamp_ms: videoCoverTimestamp }
+        : {};
     const hasCommercialDisclosure =
       firstPost.settings.disclose &&
       (firstPost.settings.brand_content_toggle ||
@@ -513,6 +520,7 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
           ...(isPhoto
             ? {}
             : { is_aigc: firstPost.settings.video_made_with_ai || false }),
+          ...videoCover,
           ...(hasCommercialDisclosure
             ? {
                 brand_content_toggle:
@@ -537,6 +545,7 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
           : {}),
         ...(!isPhoto && firstPost.message ? { title: firstPost.message } : {}),
         ...(isPhoto ? { description: firstPost.message } : {}),
+        ...videoCover,
       },
     };
   }
@@ -563,12 +572,6 @@ export class TiktokProvider extends SocialAbstract implements SocialProvider {
       source_info: {
         source: 'PULL_FROM_URL',
         video_url: firstPost?.media?.[0]?.path!,
-        ...(firstPost?.media?.[0]?.thumbnailTimestamp!
-          ? {
-              video_cover_timestamp_ms:
-                firstPost?.media?.[0]?.thumbnailTimestamp!,
-            }
-          : {}),
       },
     };
   }

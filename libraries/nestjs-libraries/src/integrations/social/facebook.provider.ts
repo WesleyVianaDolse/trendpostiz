@@ -417,6 +417,48 @@ export class FacebookProvider extends SocialAbstract implements SocialProvider {
     let finalId = '';
     let finalUrl = '';
     if (isVideoExtension(firstPost?.media?.[0]?.path)) {
+      const video = firstPost.media![0];
+      let videoUploadOptions: RequestInit;
+
+      if (video.thumbnail) {
+        const thumbnailResponse = await fetch(video.thumbnail);
+        if (!thumbnailResponse.ok) {
+          throw new Error(
+            `Unable to download the Facebook video cover: ${thumbnailResponse.status}`
+          );
+        }
+
+        const thumbnailType =
+          thumbnailResponse.headers.get('content-type') || 'image/jpeg';
+        const formData = new FormData();
+        formData.append('file_url', video.path);
+        formData.append('description', firstPost.message);
+        formData.append('published', 'true');
+        formData.append(
+          'thumb',
+          new Blob([await thumbnailResponse.arrayBuffer()], {
+            type: thumbnailType,
+          }),
+          'thumbnail.jpg'
+        );
+        videoUploadOptions = {
+          method: 'POST',
+          body: formData,
+        };
+      } else {
+        videoUploadOptions = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            file_url: video.path,
+            description: firstPost.message,
+            published: true,
+          }),
+        };
+      }
+
       const {
         id: videoId,
         permalink_url,
@@ -424,17 +466,7 @@ export class FacebookProvider extends SocialAbstract implements SocialProvider {
       } = await (
         await this.fetch(
           `https://graph.facebook.com/v20.0/${id}/videos?access_token=${accessToken}&fields=id,permalink_url`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              file_url: firstPost?.media?.[0]?.path!,
-              description: firstPost.message,
-              published: true,
-            }),
-          },
+          videoUploadOptions,
           'upload mp4'
         )
       ).json();
@@ -657,4 +689,3 @@ export class FacebookProvider extends SocialAbstract implements SocialProvider {
     }
   }
 }
-
