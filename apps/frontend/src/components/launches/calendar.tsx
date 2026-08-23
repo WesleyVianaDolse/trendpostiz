@@ -1017,6 +1017,9 @@ const CalendarItem: FC<{
     user?.impersonate &&
     post.creationMethod &&
     post.creationMethod !== 'UNKNOWN';
+  const isOverdue =
+    state === 'QUEUE' &&
+    dayjs().isAfter(dayjs.utc(post.publishDate).add(5, 'minutes'));
   const preview = useCallback(() => {
     window.open(`/p/` + post.id + '?share=true', '_blank');
   }, [post]);
@@ -1041,7 +1044,8 @@ const CalendarItem: FC<{
       className={clsx(
         'w-full flex h-full flex-1 flex-col group',
         'relative',
-        state === 'ERROR' && 'rounded-[10px] ring-2 ring-red-500'
+        state === 'ERROR' && 'rounded-[10px] ring-2 ring-red-500',
+        isOverdue && 'rounded-[10px] ring-2 ring-amber-500'
       )}
       style={{
         opacity,
@@ -1052,6 +1056,18 @@ const CalendarItem: FC<{
           className="absolute -top-[6px] -left-[6px] z-20 w-[18px] h-[18px] rounded-full bg-red-500 flex items-center justify-center text-white text-[11px] font-bold cursor-pointer"
           data-tooltip-id="tooltip"
           data-tooltip-content={post.error || 'An error occurred while publishing this post'}
+        >
+          !
+        </div>
+      )}
+      {isOverdue && (
+        <div
+          className="absolute -top-[6px] -left-[6px] z-20 w-[18px] h-[18px] rounded-full bg-amber-500 flex items-center justify-center text-black text-[11px] font-bold cursor-pointer"
+          data-tooltip-id="tooltip"
+          data-tooltip-content={t(
+            'scheduled_post_is_overdue',
+            'The scheduled time passed, but this post is still queued.'
+          )}
         >
           !
         </div>
