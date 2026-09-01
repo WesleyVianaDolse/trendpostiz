@@ -154,11 +154,22 @@ class LocalResumableUpload extends BasePlugin<any, any, any> {
       );
       this.controllers.delete(file.id);
       window.localStorage.removeItem(storageKey);
-      this.uppy.emit('upload-success', this.uppy.getFile(file.id), {
+      const uploadResponse = {
         status: 200,
         body: { saved },
         uploadURL: saved.path,
+      };
+      // Custom uploaders must persist the response just like Uppy native
+      // uploaders do. Consumers also read it later from result.successful.
+      this.uppy.setFileState(file.id, {
+        response: uploadResponse,
+        uploadURL: saved.path,
       });
+      this.uppy.emit(
+        'upload-success',
+        this.uppy.getFile(file.id),
+        uploadResponse
+      );
     } catch (error) {
       if ((error as Error)?.name !== 'AbortError') {
         this.uppy.emit(

@@ -17,12 +17,6 @@ import {
 type PublisherUppyMeta = Record<string, unknown>;
 type PublisherUppyBody = Record<string, unknown>;
 
-interface UploadResponseFile {
-  response?: {
-    body?: unknown;
-  };
-}
-
 interface TransloaditResult {
   url?: string;
   name?: string;
@@ -47,14 +41,20 @@ class PublisherCompression extends Compressor<
   }
 }
 
-function savedMedia(file: UploadResponseFile): PublisherMedia | undefined {
-  const body = file?.response?.body;
+function savedMedia(source: unknown): PublisherMedia | undefined {
+  if (!source || typeof source !== 'object') return undefined;
+  const container = source as Record<string, unknown>;
+  const response =
+    container.response && typeof container.response === 'object'
+      ? (container.response as Record<string, unknown>)
+      : container;
+  const body = response.body ?? response;
   if (!body || typeof body !== 'object') return undefined;
-  const response = body as Record<string, unknown>;
+  const parsedBody = body as Record<string, unknown>;
   const saved =
-    response.saved && typeof response.saved === 'object'
-      ? (response.saved as Record<string, unknown>)
-      : response;
+    parsedBody.saved && typeof parsedBody.saved === 'object'
+      ? (parsedBody.saved as Record<string, unknown>)
+      : parsedBody;
   if (typeof saved.id !== 'string' || typeof saved.path !== 'string') {
     return undefined;
   }
@@ -83,9 +83,8 @@ export function usePublisherUploader() {
   const fetch = useFetch();
   const { storageProvider, backendUrl, disableImageCompression, transloadit } =
     useVariables();
-  const [uppy, setUppy] = useState<
-    Uppy<PublisherUppyMeta, PublisherUppyBody>
-  >();
+  const [uppy, setUppy] =
+    useState<Uppy<PublisherUppyMeta, PublisherUppyBody>>();
   const [items, setItems] = useState<PublisherUploadItem[]>([]);
   const [selectionError, setSelectionError] = useState<string>();
 
@@ -174,17 +173,21 @@ export function usePublisherUploader() {
       );
     });
 
-    instance.on('upload-success', (file) => {
+    instance.on('upload-success', (file, response) => {
       if (!file) return;
-      const media = savedMedia(file);
+      const media = savedMedia(response) || savedMedia(file);
       if (!media && transloadit.length) return;
       setItems((current) =>
-        updatePublisherUploadItem(current, file.id, media
-          ? { status: 'completed', progress: 100, media }
-          : {
-              status: 'error',
-              error: 'O upload terminou, mas a resposta de mídia é inválida.',
-            })
+        updatePublisherUploadItem(
+          current,
+          file.id,
+          media
+            ? { status: 'completed', progress: 100, media }
+            : {
+                status: 'error',
+                error: 'O upload terminou, mas a resposta de mídia é inválida.',
+              }
+        )
       );
     });
 
@@ -201,13 +204,16 @@ export function usePublisherUploader() {
           const converted = Object.values(transloaditResults || {})
             .flatMap((value) => value)
             .map((value) => ({
-              name: String(value.url || '').split('/').pop(),
+              name: String(value.url || '')
+                .split('/')
+                .pop(),
               originalName: value.name || '',
               order: Number(value.user_meta?.addedOrder || 0),
             }))
             .filter((value) => value.name);
-          const unique = [...new Map(converted.map((value) => [value.name, value])).values()]
-            .sort((a, b) => a.order - b.order);
+          const unique = [
+            ...new Map(converted.map((value) => [value.name, value])).values(),
+          ].sort((a, b) => a.order - b.order);
           const saved = await Promise.all(
             unique.map(async (value) => {
               const response = await fetch('/media/save-media', {
@@ -217,14 +223,20 @@ export function usePublisherUploader() {
                   originalName: value.originalName,
                 }),
               });
-              if (!response.ok) throw new Error('Falha ao registrar a mídia processada.');
+              if (!response.ok)
+                throw new Error('Falha ao registrar a mídia processada.');
               return (await response.json()) as PublisherMedia;
             })
           );
           setItems((current) =>
             current.map((item, index) =>
               saved[index]
-                ? { ...item, status: 'completed', progress: 100, media: saved[index] }
+                ? {
+                    ...item,
+                    status: 'completed',
+                    progress: 100,
+                    media: saved[index],
+                  }
                 : item
             )
           );
@@ -244,10 +256,14 @@ export function usePublisherUploader() {
         if (media) continue;
         if (!transloadit.length) {
           setItems((current) =>
-            updatePublisherUploadItem(current, file.id, {
-              status: 'error',
-              error: 'O backend não retornou um MediaDto válido.',
-            })
+            current.some(
+              (item) => item.id === file.id && item.status === 'completed'
+            )
+              ? current
+              : updatePublisherUploadItem(current, file.id, {
+                  status: 'error',
+                  error: 'O backend não retornou um MediaDto válido.',
+                })
           );
         }
       }
