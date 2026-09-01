@@ -29,7 +29,7 @@ export const useApplicationVersion = () => {
   };
 };
 
-const activateLatestVersion = async (version: string) => {
+export const clearApplicationCache = async () => {
   if ('serviceWorker' in navigator) {
     const registrations = await navigator.serviceWorker.getRegistrations();
     await Promise.all(
@@ -39,6 +39,18 @@ const activateLatestVersion = async (version: string) => {
   if ('caches' in window) {
     await Promise.all((await caches.keys()).map((key) => caches.delete(key)));
   }
+};
+
+export const reloadWithoutCache = async (cacheKey = Date.now().toString()) => {
+  await clearApplicationCache();
+
+  const url = new URL(window.location.href);
+  url.searchParams.set('__refresh', cacheKey);
+  window.location.replace(url.toString());
+};
+
+const activateLatestVersion = async (version: string) => {
+  await clearApplicationCache();
 
   const url = new URL(window.location.href);
   url.searchParams.set('__version', version);

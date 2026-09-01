@@ -1,10 +1,7 @@
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
-import {
-  BuildPostPayloadInput,
-  PublisherPostPayload,
-} from './publisher.types';
+import { BuildPostPayloadInput, PublisherPostPayload } from './publisher.types';
 
 dayjs.extend(utc);
 
@@ -28,8 +25,8 @@ export function buildPostPayload(
   if (!input.integrations.length) {
     throw new Error('É necessário selecionar ao menos uma integração.');
   }
-  if (!input.content.trim()) {
-    throw new Error('O conteúdo não pode estar vazio.');
+  if (!input.content.trim() && !input.media?.length) {
+    throw new Error('Adicione um conteúdo ou uma mídia.');
   }
 
   const group = input.group || makeId(10);

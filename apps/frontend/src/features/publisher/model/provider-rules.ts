@@ -22,7 +22,8 @@ interface ProviderRule {
   fields?: ProviderField[];
 }
 
-const noMedia = 'Este provider exige mídia, que será adicionada na Fase 3.';
+const noMedia =
+  'Este provider exige mídia e ainda não está disponível no Publisher.';
 const remoteSelection =
   'Este provider exige uma seleção remota específica ainda não disponível no Publisher.';
 
@@ -126,9 +127,8 @@ export const providerRules: Record<string, ProviderRule> = {
     ],
   },
   tiktok: {
-    supported: false,
+    supported: true,
     maximumCharacters: 2_000,
-    unavailableReason: noMedia,
   },
   pinterest: {
     supported: false,
@@ -222,6 +222,21 @@ export function getDefaultProviderSettings(
         selfDeclaredMadeForKids: 'no',
         tags: [],
       };
+    case 'tiktok':
+      return {
+        content_posting_method: 'UPLOAD',
+        privacy_level: '',
+        comment: false,
+        duet: false,
+        stitch: false,
+        autoAddMusic: 'no',
+        disclose: false,
+        brand_organic_toggle: false,
+        brand_content_toggle: false,
+        video_made_with_ai: false,
+        direct_post_consent: false,
+        creator_info_loaded: false,
+      };
     case 'x':
       return { who_can_reply_post: 'everyone' };
     case 'gmb':
@@ -239,11 +254,15 @@ export function getMaximumCharacters(integration: PublisherIntegration) {
   }
 
   try {
-    const settings = JSON.parse(integration.additionalSettings || '[]') as Array<{
+    const settings = JSON.parse(
+      integration.additionalSettings || '[]'
+    ) as Array<{
       title?: string;
       value?: boolean;
     }>;
-    return settings.some((setting) => setting.title === 'Verified' && setting.value)
+    return settings.some(
+      (setting) => setting.title === 'Verified' && setting.value
+    )
       ? 4_000
       : 280;
   } catch {
@@ -279,6 +298,34 @@ function validateProviderSettings(
         String(settings.title || '').trim().length >= 2 &&
         ['public', 'private', 'unlisted'].includes(String(settings.type || ''))
       );
+    case 'tiktok': {
+      const method = String(settings.content_posting_method || '');
+      const validBase =
+        ['DIRECT_POST', 'UPLOAD'].includes(method) &&
+        ['yes', 'no'].includes(String(settings.autoAddMusic || '')) &&
+        typeof settings.comment === 'boolean' &&
+        typeof settings.duet === 'boolean' &&
+        typeof settings.stitch === 'boolean' &&
+        typeof settings.disclose === 'boolean' &&
+        typeof settings.brand_organic_toggle === 'boolean' &&
+        typeof settings.brand_content_toggle === 'boolean' &&
+        typeof settings.video_made_with_ai === 'boolean';
+
+      if (!validBase) return false;
+      if (
+        settings.disclose &&
+        !settings.brand_organic_toggle &&
+        !settings.brand_content_toggle
+      ) {
+        return false;
+      }
+      if (method === 'UPLOAD') return true;
+      return (
+        settings.creator_info_loaded === true &&
+        settings.direct_post_consent === true &&
+        Boolean(settings.privacy_level)
+      );
+    }
     case 'gmb':
       return (
         settings.topicType === 'STANDARD' &&
@@ -301,7 +348,8 @@ export function validatePublisherForm(
   } else if (
     input.selectedIntegrations.some(
       (integration) =>
-        integration.refreshNeeded || !getProviderRule(integration.identifier).supported
+        integration.refreshNeeded ||
+        !getProviderRule(integration.identifier).supported
     )
   ) {
     errors.accounts = 'Uma das contas selecionadas não está disponível.';
@@ -324,11 +372,12 @@ export function validatePublisherForm(
     }
   }
 
-  const invalidSettings = input.selectedIntegrations.find((integration) =>
-    !validateProviderSettings(
-      integration,
-      input.settingsByIntegration[integration.id] || {}
-    )
+  const invalidSettings = input.selectedIntegrations.find(
+    (integration) =>
+      !validateProviderSettings(
+        integration,
+        input.settingsByIntegration[integration.id] || {}
+      )
   );
   if (invalidSettings) {
     errors.settings = `Complete as configurações obrigatórias de ${invalidSettings.name}.`;

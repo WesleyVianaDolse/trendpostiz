@@ -91,7 +91,8 @@ export function NewPublishForm() {
   const loadShortlinkPreference = useCallback(
     async (path: string) => {
       const response = await fetch(path);
-      if (!response.ok) throw new Error('Não foi possível carregar a preferência de links.');
+      if (!response.ok)
+        throw new Error('Não foi possível carregar a preferência de links.');
       return (await response.json()) as ShortlinkPreferenceResponse;
     },
     [fetch]
@@ -113,7 +114,8 @@ export function NewPublishForm() {
     [data]
   );
   const selectedIntegrations = useMemo(
-    () => accounts.filter((integration) => selectedIds.includes(integration.id)),
+    () =>
+      accounts.filter((integration) => selectedIds.includes(integration.id)),
     [accounts, selectedIds]
   );
   const strictestLimit = useMemo(() => {
@@ -126,7 +128,11 @@ export function NewPublishForm() {
   }, [selectedIntegrations]);
 
   const toggleIntegration = useCallback((integration: PublisherIntegration) => {
-    if (integration.refreshNeeded || !getProviderRule(integration.identifier).supported) return;
+    if (
+      integration.refreshNeeded ||
+      !getProviderRule(integration.identifier).supported
+    )
+      return;
 
     setSelectedIds((current) =>
       current.includes(integration.id)
@@ -138,14 +144,16 @@ export function NewPublishForm() {
         ? current
         : {
             ...current,
-            [integration.id]: getDefaultProviderSettings(integration.identifier),
+            [integration.id]: getDefaultProviderSettings(
+              integration.identifier
+            ),
           }
     );
     setErrors((current) => ({ ...current, accounts: undefined }));
   }, []);
 
   const changeProviderSetting = useCallback(
-    (integrationId: string, key: string, value: string) => {
+    (integrationId: string, key: string, value: unknown) => {
       setSettingsByIntegration((current) => ({
         ...current,
         [integrationId]: {
@@ -160,7 +168,11 @@ export function NewPublishForm() {
 
   const changeMedia = useCallback((nextMedia: PublisherMedia[]) => {
     setMedia(nextMedia);
-    setErrors((current) => ({ ...current, media: undefined, content: undefined }));
+    setErrors((current) => ({
+      ...current,
+      media: undefined,
+      content: undefined,
+    }));
   }, []);
 
   const changeUploadStatus = useCallback(
@@ -312,12 +324,20 @@ export function NewPublishForm() {
     >
       <div className="mx-auto min-h-full w-full max-w-[430px] bg-newBgColor pb-[calc(5rem+env(safe-area-inset-bottom))] shadow-[0_0_40px_rgba(0,0,0,0.06)]">
         <header className="flex items-center gap-3 px-5 pb-5 pt-6">
-          <Link href="/publish" aria-label="Voltar para o início" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-newTableBorder bg-newBgColorInner text-xl text-newTextColor">
+          <Link
+            href="/publish"
+            aria-label="Voltar para o início"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-newTableBorder bg-newBgColorInner text-xl text-newTextColor"
+          >
             ←
           </Link>
           <div>
-            <p className="text-xs font-semibold text-textItemBlur">TrendPostiz Publisher</p>
-            <p className="text-xl font-bold tracking-[-0.02em] text-newTextColor">Nova publicação</p>
+            <p className="text-xs font-semibold text-textItemBlur">
+              TrendPostiz Publisher
+            </p>
+            <p className="text-xl font-bold tracking-[-0.02em] text-newTextColor">
+              Nova publicação
+            </p>
           </div>
         </header>
 
@@ -352,11 +372,25 @@ export function NewPublishForm() {
             />
 
             <section aria-labelledby="publisher-content-title">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-btnPrimary">Etapa 2</p>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-btnPrimary">
+                Etapa 2
+              </p>
               <div className="mt-1 flex items-end justify-between gap-3">
-                <h2 id="publisher-content-title" className="text-lg font-bold text-newTextColor">Escreva o conteúdo</h2>
-                <span className={`text-xs font-semibold ${strictestLimit && content.length > strictestLimit ? 'text-red-500' : 'text-textItemBlur'}`}>
-                  {content.length}{strictestLimit ? ` / ${strictestLimit}` : ''}
+                <h2
+                  id="publisher-content-title"
+                  className="text-lg font-bold text-newTextColor"
+                >
+                  Escreva o conteúdo
+                </h2>
+                <span
+                  className={`text-xs font-semibold ${
+                    strictestLimit && content.length > strictestLimit
+                      ? 'text-red-500'
+                      : 'text-textItemBlur'
+                  }`}
+                >
+                  {content.length}
+                  {strictestLimit ? ` / ${strictestLimit}` : ''}
                 </span>
               </div>
               <textarea
@@ -369,7 +403,11 @@ export function NewPublishForm() {
                 placeholder="O que você quer compartilhar?"
                 className="mt-3 w-full resize-y rounded-2xl border border-newTableBorder bg-newBgColorInner p-4 text-base leading-6 text-newTextColor outline-none placeholder:text-textItemBlur focus:border-btnPrimary"
               />
-              {errors.content ? <p className="mt-2 text-xs font-medium text-red-500">{errors.content}</p> : null}
+              {errors.content ? (
+                <p className="mt-2 text-xs font-medium text-red-500">
+                  {errors.content}
+                </p>
+              ) : null}
             </section>
 
             <MediaUploader
@@ -386,8 +424,15 @@ export function NewPublishForm() {
             />
 
             <section aria-labelledby="publisher-mode-title">
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-btnPrimary">Etapa 4</p>
-              <h2 id="publisher-mode-title" className="mt-1 text-lg font-bold text-newTextColor">Quando publicar?</h2>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-btnPrimary">
+                Etapa 4
+              </p>
+              <h2
+                id="publisher-mode-title"
+                className="mt-1 text-lg font-bold text-newTextColor"
+              >
+                Quando publicar?
+              </h2>
               <div className="mt-3 grid grid-cols-2 gap-3">
                 {(['now', 'schedule'] as PublisherMode[]).map((item) => (
                   <button
@@ -395,10 +440,17 @@ export function NewPublishForm() {
                     type="button"
                     onClick={() => {
                       setMode(item);
-                      setErrors((current) => ({ ...current, schedule: undefined }));
+                      setErrors((current) => ({
+                        ...current,
+                        schedule: undefined,
+                      }));
                     }}
                     aria-pressed={mode === item}
-                    className={`min-h-14 rounded-2xl border px-3 text-sm font-bold ${mode === item ? 'border-btnPrimary bg-btnPrimary/10 text-btnPrimary' : 'border-newTableBorder bg-newBgColorInner text-newTextColor'}`}
+                    className={`min-h-14 rounded-2xl border px-3 text-sm font-bold ${
+                      mode === item
+                        ? 'border-btnPrimary bg-btnPrimary/10 text-btnPrimary'
+                        : 'border-newTableBorder bg-newBgColorInner text-newTextColor'
+                    }`}
                   >
                     {item === 'now' ? 'Publicar agora' : 'Agendar'}
                   </button>
@@ -414,7 +466,10 @@ export function NewPublishForm() {
                       value={scheduleDate}
                       onChange={(event) => {
                         setScheduleDate(event.target.value);
-                        setErrors((current) => ({ ...current, schedule: undefined }));
+                        setErrors((current) => ({
+                          ...current,
+                          schedule: undefined,
+                        }));
                       }}
                       className="mt-2 min-h-12 w-full rounded-xl border border-newTableBorder bg-newTableHeader px-2 text-sm text-newTextColor outline-none focus:border-btnPrimary"
                     />
@@ -426,21 +481,34 @@ export function NewPublishForm() {
                       value={scheduleTime}
                       onChange={(event) => {
                         setScheduleTime(event.target.value);
-                        setErrors((current) => ({ ...current, schedule: undefined }));
+                        setErrors((current) => ({
+                          ...current,
+                          schedule: undefined,
+                        }));
                       }}
                       className="mt-2 min-h-12 w-full rounded-xl border border-newTableBorder bg-newTableHeader px-2 text-sm text-newTextColor outline-none focus:border-btnPrimary"
                     />
                   </label>
                 </div>
               ) : null}
-              {errors.schedule ? <p className="mt-2 text-xs font-medium text-red-500">{errors.schedule}</p> : null}
+              {errors.schedule ? (
+                <p className="mt-2 text-xs font-medium text-red-500">
+                  {errors.schedule}
+                </p>
+              ) : null}
             </section>
 
             <div className="sticky bottom-20 z-20 rounded-2xl bg-newBgColor/95 pt-2 backdrop-blur">
-              <button type="button" onClick={review} className="min-h-14 w-full rounded-2xl bg-btnPrimary px-5 text-base font-bold text-white shadow-[0_10px_24px_rgba(97,43,211,0.25)] active:scale-[0.98]">
+              <button
+                type="button"
+                onClick={review}
+                className="min-h-14 w-full rounded-2xl bg-btnPrimary px-5 text-base font-bold text-white shadow-[0_10px_24px_rgba(97,43,211,0.25)] active:scale-[0.98]"
+              >
                 Revisar publicação
               </button>
-              <p className="mt-2 text-center text-[10px] text-textItemBlur">Você confirmará o envio na próxima etapa.</p>
+              <p className="mt-2 text-center text-[10px] text-textItemBlur">
+                Você confirmará o envio na próxima etapa.
+              </p>
             </div>
           </main>
         )}

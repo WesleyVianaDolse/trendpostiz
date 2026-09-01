@@ -53,7 +53,9 @@ test('aceita HTTP 201 apenas com a lista de postId/integration esperada', async 
   );
 
   assert.equal(result.httpStatus, 201);
-  assert.deepEqual(result.posts, [{ postId: 'post-1', integration: integration.id }]);
+  assert.deepEqual(result.posts, [
+    { postId: 'post-1', integration: integration.id },
+  ]);
 });
 
 test('reproduz shortlink YES e envia o payload final uma única vez', async () => {
@@ -79,7 +81,11 @@ test('reproduz shortlink YES e envia o payload final uma única vez', async () =
   assert.equal(calls.filter((call) => call.path === '/posts').length, 1);
   assert.equal(JSON.parse(calls[1].body || '{}').shortLink, true);
   assert.equal(result.payload.shortLink, true);
-  assert.equal(payload.shortLink, false, 'o draft original deve permanecer intacto');
+  assert.equal(
+    payload.shortLink,
+    false,
+    'o draft original deve permanecer intacto'
+  );
 });
 
 test('bloqueia um segundo envio enquanto o primeiro está em andamento', async () => {
@@ -115,9 +121,12 @@ test('trata erro HTTP e preserva o payload para correção manual', async () => 
   await assert.rejects(
     postPublisherPayload(
       async () =>
-        new Response(JSON.stringify({ message: 'Integration with id invalid not found' }), {
-          status: 400,
-        }),
+        new Response(
+          JSON.stringify({ message: 'Integration with id invalid not found' }),
+          {
+            status: 400,
+          }
+        ),
       payload
     ),
     (error: unknown) =>
@@ -131,7 +140,10 @@ test('marca erro de rede do POST como ambíguo e não altera o draft', async () 
   const original = structuredClone(payload);
 
   await assert.rejects(
-    postPublisherPayload(async () => Promise.reject(new Error('offline')), payload),
+    postPublisherPayload(
+      async () => Promise.reject(new Error('offline')),
+      payload
+    ),
     (error: unknown) =>
       error instanceof PublisherSubmissionError &&
       error.code === 'network' &&
@@ -166,10 +178,28 @@ test('estado submitting bloqueia o botão e validações impedem envio inváido'
       selectedIntegrations: [{ ...integration, refreshNeeded: true }],
     }).accounts
   );
-  assert.ok(
-    validatePublisherForm({
-      ...common,
-      selectedIntegrations: [{ ...integration, identifier: 'tiktok' }],
-    }).accounts
-  );
+  const tiktok = { ...integration, identifier: 'tiktok' };
+  const tiktokSettings = {
+    content_posting_method: 'UPLOAD',
+    privacy_level: '',
+    comment: false,
+    duet: false,
+    stitch: false,
+    autoAddMusic: 'no',
+    disclose: false,
+    brand_organic_toggle: false,
+    brand_content_toggle: false,
+    video_made_with_ai: false,
+    direct_post_consent: false,
+    creator_info_loaded: false,
+  };
+  const tiktokValidation = validatePublisherForm({
+    ...common,
+    selectedIntegrations: [tiktok],
+    settingsByIntegration: { [tiktok.id]: tiktokSettings },
+    media: [{ id: 'media-1', path: 'https://cdn.example.com/video.mp4' }],
+  });
+  assert.equal(tiktokValidation.accounts, undefined);
+  assert.equal(tiktokValidation.settings, undefined);
+  assert.equal(tiktokValidation.media, undefined);
 });

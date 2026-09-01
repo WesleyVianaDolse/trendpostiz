@@ -21,7 +21,10 @@ export interface PublisherFileLike {
 export function validatePublisherFile(file: PublisherFileLike) {
   const extensions = allowedTypes.get(file.type);
   const name = file.name.toLowerCase();
-  if (!extensions || !extensions.some((extension) => name.endsWith(extension))) {
+  if (
+    !extensions ||
+    !extensions.some((extension) => name.endsWith(extension))
+  ) {
     return 'Formato não permitido. Use JPEG, PNG, GIF, WebP, MP4 ou MOV.';
   }
 
@@ -56,6 +59,16 @@ export function validateProviderMedia(
         return 'A mídia do YouTube deve ser um vídeo MP4.';
       }
       return undefined;
+    case 'tiktok': {
+      if (!media.length) {
+        return 'TikTok exige um vídeo ou pelo menos uma imagem.';
+      }
+      const videos = media.filter(isVideoMedia);
+      if (videos.length && (videos.length !== 1 || media.length !== 1)) {
+        return 'No TikTok, envie um único vídeo ou somente imagens.';
+      }
+      return undefined;
+    }
     default:
       return undefined;
   }
