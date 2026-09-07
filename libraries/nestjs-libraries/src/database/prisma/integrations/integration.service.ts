@@ -165,6 +165,47 @@ export class IntegrationService {
     return this._integrationRepository.getIntegrationById(org, id);
   }
 
+  async resolveActiveInstagramStandalone(internalId: string) {
+    const integrations =
+      await this._integrationRepository.findActiveInstagramStandaloneByInternalId(
+        internalId
+      );
+
+    if (integrations.length === 0) {
+      return { status: 'not_found' as const };
+    }
+    if (integrations.length > 1) {
+      return { status: 'ambiguous' as const };
+    }
+    return { status: 'found' as const, integration: integrations[0] };
+  }
+
+  updateInstagramWebhookSubscription(
+    id: string,
+    subscribed: boolean,
+    error?: string
+  ) {
+    return this._integrationRepository.updateInstagramWebhookSubscription(
+      id,
+      subscribed,
+      error
+    );
+  }
+
+  updateInstagramWebhookSubscriptions(
+    id: string,
+    commentsSubscribed: boolean,
+    messagesSubscribed: boolean,
+    error?: string
+  ) {
+    return this._integrationRepository.updateInstagramWebhookSubscriptions(
+      id,
+      commentsSubscribed,
+      messagesSubscribed,
+      error
+    );
+  }
+
   async refreshToken(provider: SocialProvider, refresh: string) {
     try {
       const { refreshToken, accessToken, expiresIn } =

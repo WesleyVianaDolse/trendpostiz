@@ -1,0 +1,255 @@
+import { InstagramMetaApiError } from '@gitroom/nestjs-libraries/integrations/social/instagram-standalone-messaging.service';
+import { InstagramCommentAutomationService } from './instagram-comment-automation.service';
+
+describe('InstagramCommentAutomationService', () => {
+  const repository = {
+    findEventForProcessing: jest.fn(),
+    findEnabledAutomation: jest.fn(),
+    findExecutionByPublicReplyId: jest.fn(),
+    claimExecution: jest.fn(),
+    updateEventStatus: jest.fn().mockResolvedValue({}),
+    findExecutionWithDeliveryContext: jest.fn(),
+    updateDeliverySuccess: jest.fn().mockResolvedValue({}),
+    updateDeliveryFailure: jest.fn().mockResolvedValue({}),
+    finalizeExecution: jest.fn().mockResolvedValue('REPLIED'),
+  };
+  const messaging = {
+    replyToComment: jest.fn(),
+    sendPrivateReplyFromComment: jest.fn(),
+    sanitizeError: jest.fn((message: string) => message),
+  };
+  const service = new InstagramCommentAutomationService(
+    repository as any,
+    messaging as any
+  );
+  const event = {
+    id: 'event-1',
+    status: 'RECEIVED',
+    integrationId: 'integration-1',
+    mediaId: 'media-1',
+    authorId: 'author-1',
+    externalCommentId: 'comment-1',
+    commentText: 'EU QUERO',
+    integration: {
+      id: 'integration-1',
+      internalId: 'account-1',
+      providerIdentifier: 'instagram-standalone',
+      token: 'secret-token',
+      disabled: false,
+      deletedAt: null,
+    },
+    automationExecution: null,
+  };
+  const automation = {
+    id: 'automation-1',
+    matchType: 'EXACT',
+    publicReplyEnabled: true,
+    publicReplyText: 'See your direct',
+    privateReplyEnabled: true,
+    privateReplyText: 'Here is the link',
+    triggers: [{ normalizedPhrase: 'eu quero' }],
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    repository.findEventForProcessing.mockResolvedValue({ ...event });
+    repository.findExecutionByPublicReplyId.mockResolvedValue(null);
+    repository.findEnabledAutomation.mockResolvedValue({ ...automation });
+    repository.claimExecution.mockResolvedValue({ id: 'execution-1' });
+  });
+
+  it.each([
+    ['without an automation', null],
+    ['with only a disabled automation', null],
+  ])('skips a comment %s', async (_name, foundAutomation) => {
+    repository.findEnabledAutomation.mockResolvedValue(foundAutomation);
+    await expect(service.prepare('event-1')).resolves.toMatchObject({
+      process: false,
+      reason: 'no_automation',
+    });
+    expect(repository.updateEventStatus).toHaveBeenCalledWith(
+      'event-1',
+      'SKIPPED'
+    );
+    expect(repository.claimExecution).not.toHaveBeenCalled();
+  });
+
+  it('claims a matching automation before any delivery', async () => {
+    await expect(service.prepare('event-1')).resolves.toEqual({
+      process: true,
+      executionId: 'execution-1',
+      webhookEventId: 'event-1',
+      publicReplyPending: true,
+      privateReplyPending: true,
+    });
+    expect(repository.claimExecution).toHaveBeenCalledWith(
+      expect.objectContaining({
+        automationId: 'automation-1',
+        authorId: 'author-1',
+        externalCommentId: 'comment-1',
+      })
+    );
+  });
+
+  it('skips the second event from the same author when the atomic claim loses', async () => {
+    repository.claimExecution.mockResolvedValue(null);
+    await expect(service.prepare('event-1')).resolves.toMatchObject({
+      process: false,
+      reason: 'already_claimed',
+    });
+  });
+
+  it('allows only one of two concurrent events from the same author to claim', async () => {
+    let claimed = false;
+    repository.claimExecution.mockImplementation(async () => {
+      if (claimed) return null;
+      claimed = true;
+      return { id: 'execution-1' };
+    });
+
+    const results = await Promise.all([
+      service.prepare('event-1'),
+      service.prepare('event-2'),
+    ]);
+    expect(results.filter((result) => result.process)).toHaveLength(1);
+  });
+
+  it('does not process a detectable comment from the professional account', async () => {
+    repository.findEventForProcessing.mockResolvedValue({
+      ...event,
+      authorId: 'account-1',
+    });
+    await expect(service.prepare('event-1')).resolves.toMatchObject({
+      process: false,
+      reason: 'own_account_comment',
+    });
+  });
+
+  it('does not process a comment ID previously stored as a public reply', async () => {
+    repository.findExecutionByPublicReplyId.mockResolvedValue({
+      id: 'previous-execution',
+    });
+    await expect(service.prepare('event-1')).resolves.toMatchObject({
+      process: false,
+      reason: 'own_public_reply',
+    });
+  });
+
+  it('does not process a completed execution again on webhook redelivery', async () => {
+    repository.findEventForProcessing.mockResolvedValue({
+      ...event,
+      automationExecution: {
+        id: 'execution-1',
+        processedAt: new Date(),
+        publicReplyStatus: 'SUCCESS',
+        privateReplyStatus: 'SUCCESS',
+      },
+    });
+    await expect(service.prepare('event-1')).resolves.toMatchObject({
+      process: false,
+      reason: 'already_processed',
+    });
+    expect(repository.claimExecution).not.toHaveBeenCalled();
+    expect(repository.updateEventStatus).not.toHaveBeenCalled();
+  });
+
+  it('resumes an existing pending execution without creating a second one', async () => {
+    repository.findEventForProcessing.mockResolvedValue({
+      ...event,
+      status: 'PROCESSING',
+      automationExecution: {
+        id: 'execution-1',
+        processedAt: null,
+        publicReplyStatus: 'SUCCESS',
+        privateReplyStatus: 'PENDING',
+      },
+    });
+
+    await expect(service.prepare('event-1')).resolves.toEqual({
+      process: true,
+      executionId: 'execution-1',
+      webhookEventId: 'event-1',
+      publicReplyPending: false,
+      privateReplyPending: true,
+    });
+    expect(repository.claimExecution).not.toHaveBeenCalled();
+  });
+
+  it('records public reply success', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue({
+      externalCommentId: 'comment-1',
+      publicReplyStatus: 'PENDING',
+      automation: {
+        publicReplyText: 'Public reply',
+        integration: { token: 'secret-token' },
+      },
+    });
+    messaging.replyToComment.mockResolvedValue('reply-1');
+    await expect(service.deliverPublicReply('execution-1')).resolves.toBe(true);
+    expect(repository.updateDeliverySuccess).toHaveBeenCalledWith(
+      'execution-1',
+      'public',
+      'reply-1'
+    );
+  });
+
+  it('records private reply success', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue({
+      externalCommentId: 'comment-1',
+      privateReplyStatus: 'PENDING',
+      automation: {
+        privateReplyText: 'Private reply',
+        integration: { token: 'secret-token' },
+      },
+    });
+    messaging.sendPrivateReplyFromComment.mockResolvedValue('message-1');
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(
+      true
+    );
+    expect(repository.updateDeliverySuccess).toHaveBeenCalledWith(
+      'execution-1',
+      'private',
+      'message-1'
+    );
+  });
+
+  it('stores a permanent delivery failure without throwing for retry', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue({
+      externalCommentId: 'comment-1',
+      publicReplyStatus: 'PENDING',
+      automation: {
+        publicReplyText: 'Public reply',
+        integration: { token: 'secret-token' },
+      },
+    });
+    messaging.replyToComment.mockRejectedValue(
+      new InstagramMetaApiError('permanent', false)
+    );
+    await expect(service.deliverPublicReply('execution-1')).resolves.toBe(
+      false
+    );
+    expect(repository.updateDeliveryFailure).toHaveBeenCalledWith(
+      'execution-1',
+      'public',
+      'permanent'
+    );
+  });
+
+  it('rethrows a transient delivery failure for Temporal retry', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue({
+      externalCommentId: 'comment-1',
+      publicReplyStatus: 'PENDING',
+      automation: {
+        publicReplyText: 'Public reply',
+        integration: { token: 'secret-token' },
+      },
+    });
+    messaging.replyToComment.mockRejectedValue(
+      new InstagramMetaApiError('transient', true)
+    );
+    await expect(
+      service.deliverPublicReply('execution-1')
+    ).rejects.toMatchObject({ transient: true });
+    expect(repository.updateDeliveryFailure).not.toHaveBeenCalled();
+  });
+});

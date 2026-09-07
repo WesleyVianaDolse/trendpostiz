@@ -383,6 +383,56 @@ export class IntegrationRepository {
     });
   }
 
+  findActiveInstagramStandaloneByInternalId(internalId: string) {
+    return this._integration.model.integration.findMany({
+      where: {
+        providerIdentifier: 'instagram-standalone',
+        internalId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        internalId: true,
+        providerIdentifier: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    });
+  }
+
+  updateInstagramWebhookSubscription(
+    id: string,
+    subscribed: boolean,
+    error?: string
+  ) {
+    return this._integration.model.integration.update({
+      where: { id },
+      data: {
+        webhookCommentsSubscribed: subscribed,
+        webhookSubscriptionLastAttemptAt: new Date(),
+        webhookSubscriptionError: error || null,
+      },
+    });
+  }
+
+  updateInstagramWebhookSubscriptions(
+    id: string,
+    commentsSubscribed: boolean,
+    messagesSubscribed: boolean,
+    error?: string
+  ) {
+    return this._integration.model.integration.update({
+      where: { id },
+      data: {
+        webhookCommentsSubscribed: commentsSubscribed,
+        webhookMessagesSubscribed: messagesSubscribed,
+        webhookSubscriptionLastAttemptAt: new Date(),
+        webhookSubscriptionError: error || null,
+      },
+    });
+  }
+
   async getIntegrationForOrder(
     id: string,
     order: string,

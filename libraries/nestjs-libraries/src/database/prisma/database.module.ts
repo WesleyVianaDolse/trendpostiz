@@ -1,5 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { PrismaRepository, PrismaService, PrismaTransaction } from './prisma.service';
+import {
+  PrismaRepository,
+  PrismaService,
+  PrismaTransaction,
+} from './prisma.service';
 import { OrganizationRepository } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.repository';
 import { OrganizationService } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.service';
 import { UsersService } from '@gitroom/nestjs-libraries/database/prisma/users/users.service';
@@ -43,6 +47,12 @@ import { AnnouncementsService } from '@gitroom/nestjs-libraries/database/prisma/
 import { ErrorsRepository } from '@gitroom/nestjs-libraries/database/prisma/errors/errors.repository';
 import { ErrorsService } from '@gitroom/nestjs-libraries/database/prisma/errors/errors.service';
 import { UploadModule } from '@gitroom/nestjs-libraries/upload/upload.module';
+import { InstagramWebhookEventsRepository } from '@gitroom/nestjs-libraries/database/prisma/instagram-webhooks/instagram-webhook-events.repository';
+import { InstagramWebhookEventsService } from '@gitroom/nestjs-libraries/database/prisma/instagram-webhooks/instagram-webhook-events.service';
+import { InstagramWebhookSubscriptionService } from '@gitroom/nestjs-libraries/integrations/social/instagram-webhook-subscription.service';
+import { InstagramCommentAutomationRepository } from '@gitroom/nestjs-libraries/database/prisma/instagram-comment-automations/instagram-comment-automation.repository';
+import { InstagramStandaloneMessagingService } from '@gitroom/nestjs-libraries/integrations/social/instagram-standalone-messaging.service';
+import { InstagramCommentAutomationService } from '@gitroom/nestjs-libraries/instagram-comment-automation/instagram-comment-automation.service';
 
 @Global()
 @Module({
@@ -94,6 +104,12 @@ import { UploadModule } from '@gitroom/nestjs-libraries/upload/upload.module';
     AnnouncementsService,
     ErrorsRepository,
     ErrorsService,
+    InstagramWebhookEventsRepository,
+    InstagramWebhookEventsService,
+    InstagramWebhookSubscriptionService,
+    InstagramCommentAutomationRepository,
+    InstagramStandaloneMessagingService,
+    InstagramCommentAutomationService,
   ],
   get exports() {
     return this.providers;

@@ -35,7 +35,10 @@ import { NoAuthIntegrationsController } from '@gitroom/backend/api/routes/no.aut
 import { EnterpriseController } from '@gitroom/backend/api/routes/enterprise.controller';
 import { OAuthAppController } from '@gitroom/backend/api/routes/oauth-app.controller';
 import { ApprovedAppsController } from '@gitroom/backend/api/routes/approved-apps.controller';
-import { OAuthController, OAuthAuthorizedController } from '@gitroom/backend/api/routes/oauth.controller';
+import {
+  OAuthController,
+  OAuthAuthorizedController,
+} from '@gitroom/backend/api/routes/oauth.controller';
 import { AnnouncementsController } from '@gitroom/backend/api/routes/announcements.controller';
 import { AdminController } from '@gitroom/backend/api/routes/admin.controller';
 import { AuthProviderManager } from '@gitroom/backend/services/auth/providers/providers.manager';
@@ -44,6 +47,11 @@ import { GoogleProvider } from '@gitroom/backend/services/auth/providers/google.
 import { FarcasterProvider } from '@gitroom/backend/services/auth/providers/farcaster.provider';
 import { WalletProvider } from '@gitroom/backend/services/auth/providers/wallet.provider';
 import { OauthProvider } from '@gitroom/backend/services/auth/providers/oauth.provider';
+import { InstagramWebhookController } from '@gitroom/backend/api/routes/instagram.webhook.controller';
+import { InstagramCommentAutomationDispatcherService } from '@gitroom/nestjs-libraries/instagram-comment-automation/instagram-comment-automation-dispatcher.service';
+import { InstagramCommentAutomationsController } from '@gitroom/backend/api/routes/instagram-comment-automations.controller';
+import { InstagramCommentAutomationCrudService } from '@gitroom/backend/services/instagram-comment-automations/instagram-comment-automation-crud.service';
+import { InstagramMediaService } from '@gitroom/backend/services/instagram-comment-automations/instagram-media.service';
 
 const authenticatedController = [
   UsersController,
@@ -65,6 +73,7 @@ const authenticatedController = [
   OAuthAuthorizedController,
   AnnouncementsController,
   AdminController,
+  InstagramCommentAutomationsController,
 ];
 @Module({
   imports: [UploadModule],
@@ -77,6 +86,7 @@ const authenticatedController = [
     EnterpriseController,
     NoAuthIntegrationsController,
     OAuthController,
+    InstagramWebhookController,
     ...authenticatedController,
   ],
   providers: [
@@ -98,6 +108,9 @@ const authenticatedController = [
     FarcasterProvider,
     WalletProvider,
     OauthProvider,
+    InstagramCommentAutomationDispatcherService,
+    InstagramCommentAutomationCrudService,
+    InstagramMediaService,
   ],
   get exports() {
     return [...this.imports, ...this.providers];

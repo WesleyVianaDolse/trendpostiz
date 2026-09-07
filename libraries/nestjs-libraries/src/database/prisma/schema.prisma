@@ -312,35 +312,41 @@ model Customer {
 }
 
 model Integration {
-  id                    String                 @id @default(cuid())
-  internalId            String
-  organizationId        String
-  name                  String
-  picture               String?
-  providerIdentifier    String
-  type                  String
-  token                 String
-  disabled              Boolean                @default(false)
-  tokenExpiration       DateTime?
-  refreshToken          String?
-  profile               String?
-  deletedAt             DateTime?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime?              @updatedAt
-  inBetweenSteps        Boolean                @default(false)
-  refreshNeeded         Boolean                @default(false)
-  postingTimes          String                 @default("[{\"time\":120}, {\"time\":400}, {\"time\":700}]")
-  customInstanceDetails String?
-  customerId            String?
-  rootInternalId        String?
-  additionalSettings    String?                @default("[]")
-  exisingPlugData       ExisingPlugData[]
-  customer              Customer?              @relation(fields: [customerId], references: [id])
-  organization          Organization           @relation(fields: [organizationId], references: [id])
-  webhooks              IntegrationsWebhooks[]
-  orderItems            OrderItems[]
-  plugs                 Plugs[]
-  posts                 Post[]
+  id                               String                       @id @default(cuid())
+  internalId                       String
+  organizationId                   String
+  name                             String
+  picture                          String?
+  providerIdentifier               String
+  type                             String
+  token                            String
+  disabled                         Boolean                      @default(false)
+  tokenExpiration                  DateTime?
+  refreshToken                     String?
+  profile                          String?
+  deletedAt                        DateTime?
+  createdAt                        DateTime                     @default(now())
+  updatedAt                        DateTime?                    @updatedAt
+  inBetweenSteps                   Boolean                      @default(false)
+  refreshNeeded                    Boolean                      @default(false)
+  postingTimes                     String                       @default("[{\"time\":120}, {\"time\":400}, {\"time\":700}]")
+  customInstanceDetails            String?
+  customerId                       String?
+  rootInternalId                   String?
+  additionalSettings               String?                      @default("[]")
+  webhookCommentsSubscribed        Boolean                      @default(false)
+  webhookMessagesSubscribed        Boolean                      @default(false)
+  webhookSubscriptionLastAttemptAt DateTime?
+  webhookSubscriptionError         String?
+  exisingPlugData                  ExisingPlugData[]
+  customer                         Customer?                    @relation(fields: [customerId], references: [id])
+  organization                     Organization                 @relation(fields: [organizationId], references: [id])
+  webhooks                         IntegrationsWebhooks[]
+  orderItems                       OrderItems[]
+  plugs                            Plugs[]
+  posts                            Post[]
+  instagramWebhookEvents           InstagramWebhookEvent[]
+  instagramCommentAutomations      InstagramCommentAutomation[]
 
   @@unique([organizationId, internalId])
   @@index([rootInternalId])
@@ -353,6 +359,110 @@ model Integration {
   @@index([inBetweenSteps])
   @@index([refreshNeeded])
   @@index([disabled])
+}
+
+enum InstagramWebhookEventStatus {
+  RECEIVED
+  PROCESSING
+  PROCESSED
+  REPLIED
+  SKIPPED
+  FAILED
+  UNMATCHED
+  AMBIGUOUS
+  INVALID
+}
+
+model InstagramWebhookEvent {
+  id                  String                               @id @default(cuid())
+  externalCommentId   String?                              @unique
+  integrationId       String?
+  instagramAccountId  String
+  mediaId             String?
+  authorId            String?
+  authorUsername      String?
+  commentText         String?
+  payload             Json
+  status              InstagramWebhookEventStatus
+  receivedAt          DateTime                             @default(now())
+  integration         Integration?                         @relation(fields: [integrationId], references: [id])
+  automationExecution InstagramCommentAutomationExecution?
+
+  @@index([integrationId])
+  @@index([instagramAccountId])
+  @@index([status])
+  @@index([receivedAt])
+}
+
+enum InstagramCommentMatchType {
+  CONTAINS
+  EXACT
+}
+
+enum InstagramCommentDeliveryStatus {
+  PENDING
+  SUCCESS
+  SKIPPED
+  FAILED
+}
+
+model InstagramCommentAutomation {
+  id                  String                                @id @default(cuid())
+  integrationId       String
+  mediaId             String
+  enabled             Boolean                               @default(false)
+  matchType           InstagramCommentMatchType
+  publicReplyEnabled  Boolean                               @default(true)
+  publicReplyText     String?
+  privateReplyEnabled Boolean                               @default(true)
+  privateReplyText    String?
+  createdAt           DateTime                              @default(now())
+  updatedAt           DateTime                              @updatedAt
+  integration         Integration                           @relation(fields: [integrationId], references: [id])
+  triggers            InstagramCommentAutomationTrigger[]
+  executions          InstagramCommentAutomationExecution[]
+
+  @@unique([integrationId, mediaId])
+  @@index([integrationId])
+  @@index([mediaId])
+  @@index([enabled])
+}
+
+model InstagramCommentAutomationTrigger {
+  id               String                     @id @default(cuid())
+  automationId     String
+  phrase           String
+  normalizedPhrase String
+  createdAt        DateTime                   @default(now())
+  automation       InstagramCommentAutomation @relation(fields: [automationId], references: [id])
+
+  @@unique([automationId, normalizedPhrase])
+  @@index([automationId])
+}
+
+model InstagramCommentAutomationExecution {
+  id                 String                         @id @default(cuid())
+  automationId       String
+  webhookEventId     String?                        @unique
+  authorId           String
+  externalCommentId  String
+  publicReplyId      String?                        @unique
+  privateReplyId     String?
+  publicReplyStatus  InstagramCommentDeliveryStatus @default(PENDING)
+  privateReplyStatus InstagramCommentDeliveryStatus @default(PENDING)
+  publicReplyError   String?
+  privateReplyError  String?
+  createdAt          DateTime                       @default(now())
+  processedAt        DateTime?
+  automation         InstagramCommentAutomation     @relation(fields: [automationId], references: [id])
+  webhookEvent       InstagramWebhookEvent?         @relation(fields: [webhookEventId], references: [id])
+
+  @@unique([automationId, authorId])
+  @@unique([automationId, externalCommentId])
+  @@index([automationId])
+  @@index([authorId])
+  @@index([externalCommentId])
+  @@index([createdAt])
 }
 
 model Signatures {

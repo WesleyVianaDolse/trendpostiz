@@ -32,6 +32,19 @@ export class ConfigurationChecker {
     this.checkIsValidUrl('BACKEND_INTERNAL_URL');
     this.checkNonEmpty('STORAGE_PROVIDER', 'Needed to setup storage.');
     this.checkStorageProvider();
+    this.checkInstagramWebhook();
+  }
+
+  checkInstagramWebhook() {
+    const keys = [
+      'INSTAGRAM_APP_ID',
+      'INSTAGRAM_APP_SECRET',
+      'INSTAGRAM_WEBHOOK_VERIFY_TOKEN',
+    ];
+    if (!keys.some((key) => this.get(key))) {
+      return;
+    }
+    keys.forEach((key) => this.checkNonEmpty(key));
   }
 
   checkStorageProvider() {
