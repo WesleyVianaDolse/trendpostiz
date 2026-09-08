@@ -138,7 +138,7 @@ export const useMenuItem = () => {
       path: '/plugs',
     },
     {
-      name: 'Automações IG',
+      name: 'Automations',
       icon: (
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none">
           <rect

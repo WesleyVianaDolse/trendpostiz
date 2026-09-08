@@ -88,4 +88,26 @@ describe('InstagramWebhookEventsRepository', () => {
       })
     );
   });
+
+  it('uses one canonical event when the same comment arrives through both providers', async () => {
+    upsert.mockResolvedValue({ id: 'event-1', status: 'RECEIVED' });
+    updateMany.mockResolvedValue({ count: 1 });
+    const base = {
+      externalCommentId: 'same-comment',
+      instagramAccountId: 'ig-1',
+      payload: { field: 'comments' },
+      status: 'RECEIVED' as const,
+    };
+
+    await repository.record({ ...base, integrationId: 'standalone' });
+    await repository.record({ ...base, integrationId: 'facebook' });
+
+    expect(upsert).toHaveBeenCalledTimes(2);
+    expect(
+      upsert.mock.calls.every(
+        ([call]) => call.where.externalCommentId === 'same-comment'
+      )
+    ).toBe(true);
+    expect(create).not.toHaveBeenCalled();
+  });
 });

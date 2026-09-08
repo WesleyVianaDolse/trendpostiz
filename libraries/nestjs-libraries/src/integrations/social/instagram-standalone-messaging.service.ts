@@ -41,7 +41,8 @@ export class InstagramStandaloneMessagingService {
         recipient: { comment_id: commentId },
         message: { text: message },
       },
-      token
+      token,
+      false
     );
     const id = response.message_id || response.id;
     if (typeof id !== 'string' || !id) {
@@ -62,7 +63,12 @@ export class InstagramStandaloneMessagingService {
       .slice(0, 1000);
   }
 
-  private async request(path: string, body: object, token: string) {
+  private async request(
+    path: string,
+    body: object,
+    token: string,
+    retryUnknownOutcome = true
+  ) {
     try {
       const response = await fetch(
         `https://graph.instagram.com/${INSTAGRAM_GRAPH_API_VERSION}${path}`,
@@ -100,10 +106,14 @@ export class InstagramStandaloneMessagingService {
       if (error instanceof InstagramMetaApiError) throw error;
       throw new InstagramMetaApiError(
         this.sanitizeError(
-          error instanceof Error ? error.message : 'Instagram request failed',
+          error instanceof Error
+            ? retryUnknownOutcome
+              ? error.message
+              : `Private reply delivery outcome is unknown; automatic retry suppressed: ${error.message}`
+            : 'Instagram request failed',
           token
         ),
-        true
+        retryUnknownOutcome
       );
     }
   }

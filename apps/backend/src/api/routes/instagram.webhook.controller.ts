@@ -42,6 +42,24 @@ export function isValidInstagramSignature(
   );
 }
 
+export type InstagramWebhookCredentialFamily = 'instagram' | 'facebook';
+
+export function getValidInstagramSignatureFamilies(
+  rawBody: Buffer | undefined,
+  signature: string | undefined,
+  secrets: Partial<Record<InstagramWebhookCredentialFamily, string>>
+) {
+  return (
+    Object.entries(secrets) as Array<
+      [InstagramWebhookCredentialFamily, string | undefined]
+    >
+  )
+    .filter(([, secret]) =>
+      isValidInstagramSignature(rawBody, signature, secret)
+    )
+    .map(([family]) => family);
+}
+
 @ApiTags('Instagram Webhook')
 @Controller('/public/webhooks/instagram')
 export class InstagramWebhookController {
@@ -75,24 +93,28 @@ export class InstagramWebhookController {
     @Req() request: RawBodyRequest<Request>,
     @Headers('x-hub-signature-256') signature?: string
   ) {
-    if (!process.env.INSTAGRAM_APP_SECRET) {
+    const configuredSecrets = {
+      instagram: process.env.INSTAGRAM_APP_SECRET,
+      facebook: process.env.FACEBOOK_APP_SECRET,
+    };
+    if (!configuredSecrets.instagram && !configuredSecrets.facebook) {
       throw new ServiceUnavailableException(
         'Instagram webhook signature validation is not configured'
       );
     }
 
-    if (
-      !isValidInstagramSignature(
-        request.rawBody,
-        signature,
-        process.env.INSTAGRAM_APP_SECRET
-      )
-    ) {
+    const credentialFamilies = getValidInstagramSignatureFamilies(
+      request.rawBody,
+      signature,
+      configuredSecrets
+    );
+    if (!credentialFamilies.length) {
       throw new ForbiddenException('Invalid Instagram webhook signature');
     }
 
     const result = await this._eventsService.receive(
-      request.body as InstagramWebhookPayload | unknown
+      request.body as InstagramWebhookPayload | unknown,
+      credentialFamilies
     );
     void this._dispatcher.dispatchMany(result.eventIds);
     return { received: true };

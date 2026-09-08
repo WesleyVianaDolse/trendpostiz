@@ -99,4 +99,18 @@ describe('InstagramStandaloneMessagingService', () => {
       expect((error as Error).message).not.toContain('secret-token');
     }
   });
+
+  it('does not blindly retry a private reply with an unknown network outcome', async () => {
+    jest.spyOn(global, 'fetch').mockRejectedValue(new Error('socket closed'));
+    await expect(
+      service.sendPrivateReplyFromComment(
+        'comment-1',
+        'Private reply',
+        'secret-token'
+      )
+    ).rejects.toMatchObject({
+      transient: false,
+      message: expect.stringContaining('automatic retry suppressed'),
+    });
+  });
 });

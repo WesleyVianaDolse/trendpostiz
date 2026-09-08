@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InstagramCommentAutomationRepository } from '@gitroom/nestjs-libraries/database/prisma/instagram-comment-automations/instagram-comment-automation.repository';
 import { matchesInstagramComment } from '@gitroom/nestjs-libraries/instagram-comment-automation/instagram-comment-matching';
+import { InstagramMetaApiError } from '@gitroom/nestjs-libraries/integrations/social/instagram-standalone-messaging.service';
+import { InstagramCommentMessagingService } from '@gitroom/nestjs-libraries/integrations/social/instagram-comment-messaging.service';
 import {
-  InstagramMetaApiError,
-  InstagramStandaloneMessagingService,
-} from '@gitroom/nestjs-libraries/integrations/social/instagram-standalone-messaging.service';
+  getInstagramIntegrationCapabilities,
+  isInstagramProviderIdentifier,
+} from '@gitroom/nestjs-libraries/integrations/social/instagram-capabilities';
 
 export interface InstagramCommentAutomationPreparation {
   process: boolean;
@@ -15,11 +17,13 @@ export interface InstagramCommentAutomationPreparation {
   reason?: string;
 }
 
+const PRIVATE_REPLY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+
 @Injectable()
 export class InstagramCommentAutomationService {
   constructor(
     private _repository: InstagramCommentAutomationRepository,
-    private _messaging: InstagramStandaloneMessagingService
+    private _messaging: InstagramCommentMessagingService
   ) {}
 
   async prepare(
@@ -28,9 +32,24 @@ export class InstagramCommentAutomationService {
     const event = await this._repository.findEventForProcessing(webhookEventId);
     if (!event) return { process: false, reason: 'event_not_found' };
 
+    const integrationCapabilities = event.integration
+      ? getInstagramIntegrationCapabilities(event.integration)
+      : undefined;
+    const processableIntegration =
+      !!event.integration &&
+      !event.integration.deletedAt &&
+      !event.integration.disabled &&
+      !event.integration.refreshNeeded &&
+      isInstagramProviderIdentifier(event.integration.providerIdentifier) &&
+      integrationCapabilities?.commentsWebhook === true;
+
     if (event.automationExecution) {
       if (event.automationExecution.processedAt) {
         return { process: false, reason: 'already_processed' };
+      }
+      if (!processableIntegration) {
+        await this._repository.updateEventStatus(event.id, 'SKIPPED');
+        return { process: false, reason: 'integration_unavailable' };
       }
       return {
         process: true,
@@ -48,10 +67,8 @@ export class InstagramCommentAutomationService {
     }
 
     if (
+      !processableIntegration ||
       !event.integration ||
-      event.integration.deletedAt ||
-      event.integration.disabled ||
-      event.integration.providerIdentifier !== 'instagram-standalone' ||
       !event.mediaId ||
       !event.commentText ||
       !event.authorId ||
@@ -61,7 +78,11 @@ export class InstagramCommentAutomationService {
       return { process: false, reason: 'missing_processing_data' };
     }
 
-    if (event.authorId === event.integration.internalId) {
+    if (
+      event.authorId === event.integration.internalId ||
+      (event.integration.providerIdentifier === 'instagram' &&
+        event.authorId === event.integration.facebookPageId)
+    ) {
       await this._repository.updateEventStatus(event.id, 'SKIPPED');
       return { process: false, reason: 'own_account_comment' };
     }
@@ -124,11 +145,19 @@ export class InstagramCommentAutomationService {
   async deliverPublicReply(executionId: string) {
     const context = await this.getDeliveryContext(executionId, 'public');
     if (!context) return false;
+    if (!getInstagramIntegrationCapabilities(context.integration).publicReply) {
+      await this._repository.updateDeliveryFailure(
+        executionId,
+        'public',
+        'Instagram public reply capability is unavailable'
+      );
+      return false;
+    }
     try {
       const replyId = await this._messaging.replyToComment(
+        context.integration,
         context.externalCommentId,
-        context.text,
-        context.token
+        context.text
       );
       await this._repository.updateDeliverySuccess(
         executionId,
@@ -144,11 +173,32 @@ export class InstagramCommentAutomationService {
   async deliverPrivateReply(executionId: string) {
     const context = await this.getDeliveryContext(executionId, 'private');
     if (!context) return false;
+    if (
+      !getInstagramIntegrationCapabilities(context.integration).privateReply
+    ) {
+      await this._repository.updateDeliveryFailure(
+        executionId,
+        'private',
+        'Instagram private reply capability is unavailable'
+      );
+      return false;
+    }
+    if (
+      context.commentReceivedAt &&
+      Date.now() - context.commentReceivedAt.getTime() > PRIVATE_REPLY_WINDOW_MS
+    ) {
+      await this._repository.updateDeliveryFailure(
+        executionId,
+        'private',
+        'Instagram private reply window expired'
+      );
+      return false;
+    }
     try {
       const replyId = await this._messaging.sendPrivateReplyFromComment(
+        context.integration,
         context.externalCommentId,
-        context.text,
-        context.token
+        context.text
       );
       await this._repository.updateDeliverySuccess(
         executionId,
@@ -197,7 +247,8 @@ export class InstagramCommentAutomationService {
     return {
       externalCommentId: execution.externalCommentId,
       text,
-      token: execution.automation.integration.token,
+      integration: execution.automation.integration,
+      commentReceivedAt: execution.webhookEvent?.receivedAt,
     };
   }
 

@@ -13,6 +13,10 @@ import {
   UpdateInstagramCommentAutomationDto,
 } from './instagram-comment-automation.dto';
 import { InstagramMediaService } from './instagram-media.service';
+import {
+  getInstagramIntegrationCapabilities,
+  isInstagramProviderIdentifier,
+} from '@gitroom/nestjs-libraries/integrations/social/instagram-capabilities';
 
 @Injectable()
 export class InstagramCommentAutomationCrudService {
@@ -21,11 +25,11 @@ export class InstagramCommentAutomationCrudService {
     private readonly media: InstagramMediaService
   ) {}
 
-  listAccounts(organizationId: string) {
-    return this.prisma.integration.findMany({
+  async listAccounts(organizationId: string) {
+    const integrations = await this.prisma.integration.findMany({
       where: {
         organizationId,
-        providerIdentifier: 'instagram-standalone',
+        providerIdentifier: { in: ['instagram-standalone', 'instagram'] },
         deletedAt: null,
         disabled: false,
       },
@@ -35,11 +39,41 @@ export class InstagramCommentAutomationCrudService {
         name: true,
         profile: true,
         picture: true,
+        providerIdentifier: true,
+        token: true,
+        tokenExpiration: true,
+        facebookPageId: true,
         disabled: true,
+        deletedAt: true,
         refreshNeeded: true,
         webhookCommentsSubscribed: true,
         webhookMessagesSubscribed: true,
       },
+    });
+    return integrations.map((integration) => {
+      const capabilities = getInstagramIntegrationCapabilities(integration);
+      return {
+        id: integration.id,
+        name: integration.name,
+        profile: integration.profile,
+        picture: integration.picture,
+        disabled: integration.disabled,
+        refreshNeeded: integration.refreshNeeded,
+        capabilities,
+        status: {
+          comments: capabilities.commentsWebhook
+            ? ('ACTIVE' as const)
+            : capabilities.reconnectRequired
+            ? ('RECONNECT_REQUIRED' as const)
+            : ('UNAVAILABLE' as const),
+          publicReply: capabilities.publicReply
+            ? ('AVAILABLE' as const)
+            : ('UNAVAILABLE' as const),
+          privateReply: capabilities.privateReply
+            ? ('AVAILABLE' as const)
+            : ('UNAVAILABLE' as const),
+        },
+      };
     });
   }
 
@@ -167,14 +201,12 @@ export class InstagramCommentAutomationCrudService {
 
   async setStatus(organizationId: string, id: string, enabled: boolean) {
     const automation = await this.findOwned(organizationId, id);
-    if (
-      enabled &&
-      automation.privateReplyEnabled &&
-      !automation.integration.webhookMessagesSubscribed
-    ) {
-      throw new BadRequestException(
-        'Reconecte esta conta para habilitar automações com Direct.'
+    if (enabled) {
+      const integration = await this.getInstagramIntegration(
+        organizationId,
+        automation.integrationId
       );
+      this.assertCapabilities(automation, integration);
     }
     return this.prisma.instagramCommentAutomation.update({
       where: { id },
@@ -240,8 +272,6 @@ export class InstagramCommentAutomationCrudService {
             name: true,
             profile: true,
             picture: true,
-            providerIdentifier: true,
-            webhookMessagesSubscribed: true,
           },
         },
       },
@@ -255,7 +285,7 @@ export class InstagramCommentAutomationCrudService {
       where: { id, organizationId, deletedAt: null, disabled: false },
     });
     if (!integration) throw new NotFoundException('Conta não encontrada.');
-    if (integration.providerIdentifier !== 'instagram-standalone') {
+    if (!isInstagramProviderIdentifier(integration.providerIdentifier)) {
       throw new BadRequestException('A conta selecionada não é do Instagram.');
     }
     return integration;
@@ -263,7 +293,7 @@ export class InstagramCommentAutomationCrudService {
 
   private validateConfiguration(
     dto: UpdateInstagramCommentAutomationDto,
-    integration: Pick<Integration, 'webhookMessagesSubscribed'>
+    integration: Integration
   ) {
     if (!dto.publicReplyEnabled && !dto.privateReplyEnabled) {
       throw new BadRequestException('Habilite pelo menos uma resposta.');
@@ -274,15 +304,7 @@ export class InstagramCommentAutomationCrudService {
     if (dto.privateReplyEnabled && !dto.privateReplyText?.trim()) {
       throw new BadRequestException('Informe a mensagem no Direct.');
     }
-    if (
-      dto.enabled &&
-      dto.privateReplyEnabled &&
-      !integration.webhookMessagesSubscribed
-    ) {
-      throw new BadRequestException(
-        'Reconecte esta conta para habilitar automações com Direct.'
-      );
-    }
+    this.assertCapabilities(dto, integration);
     const triggers = dto.triggers.map((phrase) => ({
       phrase: phrase.trim(),
       normalizedPhrase: normalizeInstagramCommentPhrase(phrase),
@@ -311,6 +333,33 @@ export class InstagramCommentAutomationCrudService {
         enabled: dto.enabled,
       },
     };
+  }
+
+  private assertCapabilities(
+    configuration: Pick<
+      UpdateInstagramCommentAutomationDto,
+      'publicReplyEnabled' | 'privateReplyEnabled'
+    >,
+    integration: Integration
+  ) {
+    const capabilities = getInstagramIntegrationCapabilities(integration);
+    if (!capabilities.commentsWebhook) {
+      throw new BadRequestException(
+        capabilities.reconnectRequired
+          ? 'Reconecte esta conta do Instagram para habilitar automações.'
+          : 'Os comentários desta conta estão indisponíveis para automações.'
+      );
+    }
+    if (configuration.publicReplyEnabled && !capabilities.publicReply) {
+      throw new BadRequestException(
+        'A resposta pública não está disponível para esta conta.'
+      );
+    }
+    if (configuration.privateReplyEnabled && !capabilities.privateReply) {
+      throw new BadRequestException(
+        'O Direct não está disponível para esta conta.'
+      );
+    }
   }
 
   private async metrics(automationId: string) {

@@ -1,11 +1,15 @@
 import { PrismaRepository } from '@gitroom/nestjs-libraries/database/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import dayjs from 'dayjs';
-import { Integration } from '@prisma/client';
+import { Integration, Prisma } from '@prisma/client';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { IntegrationTimeDto } from '@gitroom/nestjs-libraries/dtos/integrations/integration.time.dto';
 import { UploadFactory } from '@gitroom/nestjs-libraries/upload/upload.factory';
 import { PlugDto } from '@gitroom/nestjs-libraries/dtos/plugs/plug.dto';
+import { isInstagramProviderIdentifier } from '@gitroom/nestjs-libraries/integrations/social/instagram-capabilities';
+
+const INSTAGRAM_CONNECTION_CONFLICT =
+  'Esta conta do Instagram j\u00e1 est\u00e1 conectada por outro m\u00e9todo. Desconecte-a antes de tentar novamente.';
 
 @Injectable()
 export class IntegrationRepository {
@@ -143,14 +147,6 @@ export class IntegrationRepository {
   }
 
   async updateIntegration(id: string, params: Partial<Integration>) {
-    if (
-      params.picture &&
-      (params.picture.indexOf(process.env.CLOUDFLARE_BUCKET_URL!) === -1 ||
-        params.picture.indexOf(process.env.FRONTEND_URL!) === -1)
-    ) {
-      params.picture = await this.storage.uploadSimple(params.picture);
-    }
-
     const existing = await this._integration.model.integration.findUnique({
       where: {
         organizationId_internalId: {
@@ -159,6 +155,16 @@ export class IntegrationRepository {
         },
       },
     });
+
+    this.assertNoInstagramProviderConflict(existing, params.providerIdentifier);
+
+    if (
+      params.picture &&
+      (params.picture.indexOf(process.env.CLOUDFLARE_BUCKET_URL!) === -1 ||
+        params.picture.indexOf(process.env.FRONTEND_URL!) === -1)
+    ) {
+      params.picture = await this.storage.uploadSimple(params.picture);
+    }
 
     if (existing) {
       await this._posts.model.post.updateMany({
@@ -240,60 +246,87 @@ export class IntegrationRepository {
           ]),
         }
       : {};
-    const upsert = await this._integration.model.integration.upsert({
-      where: {
-        organizationId_internalId: {
-          internalId,
-          organizationId: org,
-        },
-      },
-      create: {
-        type: type as any,
-        name,
-        providerIdentifier: provider,
-        token,
-        profile: username,
-        ...(picture ? { picture } : {}),
-        inBetweenSteps: isBetweenSteps,
-        refreshToken,
-        ...(expiresIn
-          ? { tokenExpiration: new Date(Date.now() + expiresIn * 1000) }
-          : {}),
-        internalId,
-        ...postTimes,
-        organizationId: org,
-        refreshNeeded: false,
-        rootInternalId: internalId,
-        ...(customInstanceDetails ? { customInstanceDetails } : {}),
-        additionalSettings: additionalSettings
-          ? JSON.stringify(additionalSettings)
-          : '[]',
-      },
-      update: {
-        ...(additionalSettings
-          ? { additionalSettings: JSON.stringify(additionalSettings) }
-          : {}),
-        ...(customInstanceDetails ? { customInstanceDetails } : {}),
-        type: type as any,
-        ...(!refresh
-          ? {
-              inBetweenSteps: isBetweenSteps,
-            }
-          : {}),
-        ...(picture ? { picture } : {}),
-        profile: username,
-        providerIdentifier: provider,
-        token,
-        refreshToken,
-        ...(expiresIn
-          ? { tokenExpiration: new Date(Date.now() + expiresIn * 1000) }
-          : {}),
+    const uniqueWhere = {
+      organizationId_internalId: {
         internalId,
         organizationId: org,
-        deletedAt: null,
-        refreshNeeded: false,
       },
-    });
+    };
+    const createData = {
+      type: type as any,
+      name,
+      providerIdentifier: provider,
+      token,
+      profile: username,
+      ...(picture ? { picture } : {}),
+      inBetweenSteps: isBetweenSteps,
+      refreshToken,
+      ...(expiresIn
+        ? { tokenExpiration: new Date(Date.now() + expiresIn * 1000) }
+        : {}),
+      internalId,
+      ...postTimes,
+      organizationId: org,
+      refreshNeeded: false,
+      rootInternalId: internalId,
+      ...(customInstanceDetails ? { customInstanceDetails } : {}),
+      additionalSettings: additionalSettings
+        ? JSON.stringify(additionalSettings)
+        : '[]',
+    };
+    const updateData = {
+      ...(additionalSettings
+        ? { additionalSettings: JSON.stringify(additionalSettings) }
+        : {}),
+      ...(customInstanceDetails ? { customInstanceDetails } : {}),
+      type: type as any,
+      ...(!refresh
+        ? {
+            inBetweenSteps: isBetweenSteps,
+          }
+        : {}),
+      ...(picture ? { picture } : {}),
+      profile: username,
+      providerIdentifier: provider,
+      token,
+      refreshToken,
+      ...(expiresIn
+        ? { tokenExpiration: new Date(Date.now() + expiresIn * 1000) }
+        : {}),
+      internalId,
+      organizationId: org,
+      deletedAt: null,
+      refreshNeeded: false,
+    };
+
+    const save = async () => {
+      const existing = await this._integration.model.integration.findUnique({
+        where: uniqueWhere,
+      });
+      this.assertNoInstagramProviderConflict(existing, provider);
+      if (existing) {
+        return this._integration.model.integration.update({
+          where: { id: existing.id },
+          data: updateData,
+        });
+      }
+      return this._integration.model.integration.create({ data: createData });
+    };
+
+    let upsert: Integration;
+    try {
+      upsert = await save();
+    } catch (error) {
+      if (
+        !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+        error.code !== 'P2002'
+      ) {
+        throw error;
+      }
+      // A concurrent connection may have claimed the canonical account ID.
+      // Re-read it so a different Instagram provider can never overwrite it.
+      upsert = await save();
+    }
 
     if (oneTimeToken) {
       const rootId =
@@ -325,6 +358,21 @@ export class IntegrationRepository {
     }
 
     return upsert;
+  }
+
+  private assertNoInstagramProviderConflict(
+    existing: Pick<Integration, 'providerIdentifier'> | null,
+    requestedProvider?: string
+  ) {
+    if (
+      existing &&
+      requestedProvider &&
+      existing.providerIdentifier !== requestedProvider &&
+      isInstagramProviderIdentifier(existing.providerIdentifier) &&
+      isInstagramProviderIdentifier(requestedProvider)
+    ) {
+      throw new ConflictException(INSTAGRAM_CONNECTION_CONFLICT);
+    }
   }
 
   needsToBeRefreshed() {
@@ -398,6 +446,53 @@ export class IntegrationRepository {
       orderBy: {
         createdAt: 'asc',
       },
+    });
+  }
+
+  findActiveInstagramWebhookCandidates(
+    objectId: string,
+    credentialFamilies: Array<'instagram' | 'facebook'>
+  ) {
+    const providers: Prisma.IntegrationWhereInput[] = [];
+    if (credentialFamilies.includes('instagram')) {
+      providers.push({
+        providerIdentifier: 'instagram-standalone',
+        internalId: objectId,
+      });
+    }
+    if (credentialFamilies.includes('facebook')) {
+      providers.push({
+        providerIdentifier: 'instagram',
+        facebookPageId: objectId,
+      });
+    }
+    if (!providers.length) return Promise.resolve([]);
+
+    return this._integration.model.integration.findMany({
+      where: {
+        OR: providers,
+        deletedAt: null,
+        disabled: false,
+        refreshNeeded: false,
+        token: { not: '' },
+        webhookCommentsSubscribed: true,
+        AND: [
+          {
+            OR: [
+              { tokenExpiration: null },
+              { tokenExpiration: { gt: new Date() } },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        internalId: true,
+        facebookPageId: true,
+        organizationId: true,
+        providerIdentifier: true,
+      },
+      orderBy: { createdAt: 'asc' },
     });
   }
 

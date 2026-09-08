@@ -4,6 +4,7 @@ import { InstagramMediaService } from './instagram-media.service';
 const integration = {
   internalId: 'ig-123',
   token: 'secret-access-token',
+  providerIdentifier: 'instagram-standalone',
 } as any;
 
 describe('InstagramMediaService', () => {
@@ -37,6 +38,12 @@ describe('InstagramMediaService', () => {
       'https://graph.instagram.com/v25.0/ig-123/media'
     );
     expect(requested.searchParams.get('after')).toBe('cursor-1');
+    expect(requested.searchParams.get('access_token')).toBeNull();
+    expect(fetchMock.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer secret-access-token' },
+      })
+    );
     expect(result.nextCursor).toBe('cursor-2');
     expect(result.items[0]).toEqual({
       id: 'media-1',
@@ -61,6 +68,32 @@ describe('InstagramMediaService', () => {
     await expect(
       new InstagramMediaService().get(integration, '1')
     ).resolves.toMatchObject({ thumbnailUrl: 'thumb' });
+  });
+
+  it('lists Facebook/BM media on the Facebook host with cursor pagination', async () => {
+    const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [],
+        paging: { next: 'opaque', cursors: { after: 'next-facebook' } },
+      }),
+    } as Response);
+
+    const result = await new InstagramMediaService().list(
+      { ...integration, providerIdentifier: 'instagram' } as any,
+      'cursor-facebook'
+    );
+    const requested = new URL(String(fetchMock.mock.calls[0][0]));
+    expect(requested.origin + requested.pathname).toBe(
+      'https://graph.facebook.com/v25.0/ig-123/media'
+    );
+    expect(requested.searchParams.get('after')).toBe('cursor-facebook');
+    expect(result.nextCursor).toBe('next-facebook');
+    expect(fetchMock.mock.calls[0][1]).toEqual(
+      expect.objectContaining({
+        headers: { Authorization: 'Bearer secret-access-token' },
+      })
+    );
   });
 
   it('maps an invalid media response to a safe bad request', async () => {

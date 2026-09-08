@@ -52,6 +52,10 @@ import { InstagramWebhookEventsService } from '@gitroom/nestjs-libraries/databas
 import { InstagramWebhookSubscriptionService } from '@gitroom/nestjs-libraries/integrations/social/instagram-webhook-subscription.service';
 import { InstagramCommentAutomationRepository } from '@gitroom/nestjs-libraries/database/prisma/instagram-comment-automations/instagram-comment-automation.repository';
 import { InstagramStandaloneMessagingService } from '@gitroom/nestjs-libraries/integrations/social/instagram-standalone-messaging.service';
+import {
+  InstagramCommentMessagingService,
+  InstagramFacebookCommentMessagingStrategy,
+} from '@gitroom/nestjs-libraries/integrations/social/instagram-comment-messaging.service';
 import { InstagramCommentAutomationService } from '@gitroom/nestjs-libraries/instagram-comment-automation/instagram-comment-automation.service';
 
 @Global()
@@ -109,6 +113,8 @@ import { InstagramCommentAutomationService } from '@gitroom/nestjs-libraries/ins
     InstagramWebhookSubscriptionService,
     InstagramCommentAutomationRepository,
     InstagramStandaloneMessagingService,
+    InstagramFacebookCommentMessagingStrategy,
+    InstagramCommentMessagingService,
     InstagramCommentAutomationService,
   ],
   get exports() {

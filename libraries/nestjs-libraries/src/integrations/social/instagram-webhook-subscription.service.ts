@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { Integration } from '@prisma/client';
-import { IntegrationService } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.service';
+import { IntegrationRepository } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.repository';
+import { INSTAGRAM_FACEBOOK_GRAPH_API_VERSION } from './instagram.provider';
 
 @Injectable()
 export class InstagramWebhookSubscriptionService {
@@ -8,16 +9,19 @@ export class InstagramWebhookSubscriptionService {
     InstagramWebhookSubscriptionService.name
   );
 
-  constructor(private _integrationService: IntegrationService) {}
+  constructor(private _integrationRepository: IntegrationRepository) {}
 
   async subscribeComments(integration: Integration) {
     return this.subscribeCommentsAndMessages(integration);
   }
 
   async subscribeCommentsAndMessages(integration: Integration) {
-    if (integration.providerIdentifier !== 'instagram-standalone') {
+    if (
+      integration.providerIdentifier !== 'instagram-standalone' &&
+      integration.providerIdentifier !== 'instagram'
+    ) {
       throw new BadRequestException(
-        'Webhook subscriptions are only supported for Instagram Standalone'
+        'Webhook subscriptions are only supported for Instagram integrations'
       );
     }
     if (!integration.internalId || !integration.token) {
@@ -25,20 +29,39 @@ export class InstagramWebhookSubscriptionService {
         'Instagram integration is missing its account ID or access token'
       );
     }
+    if (
+      integration.providerIdentifier === 'instagram' &&
+      !integration.facebookPageId
+    ) {
+      throw new BadRequestException(
+        'Facebook Page ID is required for Instagram webhook subscription'
+      );
+    }
 
     let success = false;
     let error: string | undefined;
 
     try {
+      const standalone =
+        integration.providerIdentifier === 'instagram-standalone';
+      const host = standalone
+        ? 'https://graph.instagram.com/v25.0'
+        : `https://graph.facebook.com/${INSTAGRAM_FACEBOOK_GRAPH_API_VERSION}`;
+      const objectId = standalone
+        ? integration.internalId
+        : integration.facebookPageId!;
       const url = new URL(
-        `https://graph.instagram.com/v25.0/${encodeURIComponent(
-          integration.internalId
-        )}/subscribed_apps`
+        `${host}/${encodeURIComponent(objectId)}/subscribed_apps`
       );
-      url.searchParams.set('subscribed_fields', 'comments,messages');
-      url.searchParams.set('access_token', integration.token);
+      url.searchParams.set(
+        'subscribed_fields',
+        standalone ? 'comments,messages' : 'comments'
+      );
 
-      const response = await fetch(url, { method: 'POST' });
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${integration.token}` },
+      });
       const responseBody = await this.parseResponse(response);
       success = response.ok && responseBody?.success === true;
 
@@ -57,10 +80,16 @@ export class InstagramWebhookSubscriptionService {
     }
 
     try {
-      await this._integrationService.updateInstagramWebhookSubscriptions(
+      const standalone =
+        integration.providerIdentifier === 'instagram-standalone';
+      await this._integrationRepository.updateInstagramWebhookSubscriptions(
         integration.id,
-        success || integration.webhookCommentsSubscribed === true,
-        success,
+        standalone
+          ? success || integration.webhookCommentsSubscribed === true
+          : success,
+        standalone
+          ? success || integration.webhookMessagesSubscribed === true
+          : false,
         error
       );
     } catch {
@@ -71,7 +100,7 @@ export class InstagramWebhookSubscriptionService {
 
     if (!success) {
       this.logger.warn(
-        `Instagram comments/messages webhook subscription failed for integration ${integration.id}: ${error}`
+        `Instagram webhook subscription failed for integration ${integration.id}: ${error}`
       );
     }
 

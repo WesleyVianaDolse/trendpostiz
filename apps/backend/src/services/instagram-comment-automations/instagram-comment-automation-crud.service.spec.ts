@@ -6,6 +6,13 @@ const integration = {
   id: 'integration-1',
   organizationId: 'org-1',
   providerIdentifier: 'instagram-standalone',
+  token: 'token',
+  tokenExpiration: null,
+  facebookPageId: null,
+  disabled: false,
+  deletedAt: null,
+  refreshNeeded: false,
+  webhookCommentsSubscribed: true,
   webhookMessagesSubscribed: true,
 };
 const dto = {
@@ -73,15 +80,24 @@ describe('InstagramCommentAutomationCrudService', () => {
   });
 
   it('rejects an invalid integration', async () => {
+    const findFirst = jest.fn().mockResolvedValue(null);
     const { service } = makeService({
-      integration: { findFirst: jest.fn().mockResolvedValue(null) },
+      integration: { findFirst },
     });
     await expect(service.create('org-1', dto)).rejects.toThrow(
       NotFoundException
     );
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        id: 'integration-1',
+        organizationId: 'org-1',
+        deletedAt: null,
+        disabled: false,
+      },
+    });
   });
 
-  it('rejects a provider other than instagram-standalone', async () => {
+  it('rejects a provider outside the Instagram allowlist', async () => {
     const { service } = makeService({
       integration: {
         findFirst: jest.fn().mockResolvedValue({
@@ -104,11 +120,11 @@ describe('InstagramCommentAutomationCrudService', () => {
         }),
       },
     });
-    await expect(service.create('org-1', dto)).rejects.toThrow('Reconecte');
+    await expect(service.create('org-1', dto)).rejects.toThrow('Direct');
   });
 
-  it('allows inactive private reply configuration without messages subscription', async () => {
-    const { service, prisma } = makeService({
+  it('does not bypass capabilities by saving an inactive configuration', async () => {
+    const { service } = makeService({
       integration: {
         findFirst: jest.fn().mockResolvedValue({
           ...integration,
@@ -116,17 +132,9 @@ describe('InstagramCommentAutomationCrudService', () => {
         }),
       },
     });
-    prisma.$transaction.mockImplementation((callback: any) =>
-      callback({
-        instagramCommentAutomation: {
-          create: jest.fn().mockResolvedValue({ id: 'a' }),
-        },
-      })
-    );
-    jest.spyOn(service, 'get').mockResolvedValue({ id: 'a' } as any);
     await expect(
       service.create('org-1', { ...dto, enabled: false })
-    ).resolves.toEqual({ id: 'a' });
+    ).rejects.toThrow('Direct');
   });
 
   it('preserves history when delete is requested', async () => {
@@ -165,8 +173,9 @@ describe('InstagramCommentAutomationCrudService', () => {
   it('changes status after ownership validation', async () => {
     const { service, prisma } = makeService();
     jest.spyOn(service as any, 'findOwned').mockResolvedValue({
+      integrationId: 'integration-1',
       privateReplyEnabled: false,
-      integration: { webhookMessagesSubscribed: false },
+      publicReplyEnabled: true,
     });
     prisma.instagramCommentAutomation.update.mockResolvedValue({
       enabled: true,
@@ -178,15 +187,95 @@ describe('InstagramCommentAutomationCrudService', () => {
 
   it('lists only sanitized account fields', async () => {
     const { service, prisma } = makeService();
-    prisma.integration.findMany.mockResolvedValue([]);
-    await service.listAccounts('org-1');
+    prisma.integration.findMany.mockResolvedValue([
+      { ...integration, token: 'must-not-leak' },
+    ]);
+    const result = await service.listAccounts('org-1');
     const options = prisma.integration.findMany.mock.calls[0][0];
-    expect(options.select.token).toBeUndefined();
     expect(options.where).toMatchObject({
       organizationId: 'org-1',
-      providerIdentifier: 'instagram-standalone',
+      providerIdentifier: { in: ['instagram-standalone', 'instagram'] },
       disabled: false,
     });
+    expect(result[0]).toMatchObject({
+      id: 'integration-1',
+      capabilities: { commentsWebhook: true },
+      status: { comments: 'ACTIVE' },
+    });
+    expect(JSON.stringify(result)).not.toContain('must-not-leak');
+    expect(JSON.stringify(result)).not.toContain('providerIdentifier');
+  });
+
+  it('allows a subscribed Facebook/BM account without messages subscription', async () => {
+    const { service, prisma } = makeService({
+      integration: {
+        findFirst: jest.fn().mockResolvedValue({
+          ...integration,
+          providerIdentifier: 'instagram',
+          facebookPageId: 'page-1',
+          webhookMessagesSubscribed: false,
+        }),
+      },
+    });
+    prisma.$transaction.mockImplementation((callback: any) =>
+      callback({
+        instagramCommentAutomation: {
+          create: jest.fn().mockResolvedValue({ id: 'a' }),
+        },
+      })
+    );
+    jest.spyOn(service, 'get').mockResolvedValue({ id: 'a' } as any);
+    await expect(service.create('org-1', dto)).resolves.toEqual({ id: 'a' });
+  });
+
+  it('returns reconnect status for an old Facebook/BM account without Page ID', async () => {
+    const { service, prisma } = makeService();
+    prisma.integration.findMany.mockResolvedValue([
+      {
+        ...integration,
+        providerIdentifier: 'instagram',
+        facebookPageId: null,
+        webhookMessagesSubscribed: false,
+      },
+    ]);
+    await expect(service.listAccounts('org-1')).resolves.toEqual([
+      expect.objectContaining({
+        capabilities: expect.objectContaining({ reconnectRequired: true }),
+        status: expect.objectContaining({
+          comments: 'RECONNECT_REQUIRED',
+          publicReply: 'UNAVAILABLE',
+          privateReply: 'UNAVAILABLE',
+        }),
+      }),
+    ]);
+  });
+
+  it('requires an old Facebook/BM account without Page ID to reconnect', async () => {
+    const { service } = makeService({
+      integration: {
+        findFirst: jest.fn().mockResolvedValue({
+          ...integration,
+          providerIdentifier: 'instagram',
+          facebookPageId: null,
+          webhookMessagesSubscribed: false,
+        }),
+      },
+    });
+    await expect(service.create('org-1', dto)).rejects.toThrow(
+      'Reconecte esta conta do Instagram'
+    );
+  });
+
+  it.each([
+    ['expired', { tokenExpiration: new Date(0) }],
+    ['refresh-needed', { refreshNeeded: true }],
+  ])('rejects a %s Instagram token state', async (_, state) => {
+    const { service } = makeService({
+      integration: {
+        findFirst: jest.fn().mockResolvedValue({ ...integration, ...state }),
+      },
+    });
+    await expect(service.create('org-1', dto)).rejects.toThrow('Reconecte');
   });
 
   it('paginates executions only after ownership validation', async () => {

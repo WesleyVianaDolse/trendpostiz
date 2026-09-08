@@ -35,6 +35,11 @@ describe('InstagramCommentAutomationService', () => {
       internalId: 'account-1',
       providerIdentifier: 'instagram-standalone',
       token: 'secret-token',
+      tokenExpiration: null,
+      facebookPageId: null,
+      webhookCommentsSubscribed: true,
+      webhookMessagesSubscribed: true,
+      refreshNeeded: false,
       disabled: false,
       deletedAt: null,
     },
@@ -91,7 +96,47 @@ describe('InstagramCommentAutomationService', () => {
     );
   });
 
+  it.each(['EXACT', 'CONTAINS'] as const)(
+    'uses the common %s matcher for a Facebook/BM event',
+    async (matchType) => {
+      repository.findEventForProcessing.mockResolvedValue({
+        ...event,
+        integration: {
+          ...event.integration,
+          providerIdentifier: 'instagram',
+          facebookPageId: 'page-1',
+          webhookMessagesSubscribed: false,
+        },
+      });
+      repository.findEnabledAutomation.mockResolvedValue({
+        ...automation,
+        matchType,
+      });
+
+      await expect(service.prepare('event-1')).resolves.toMatchObject({
+        process: true,
+      });
+    }
+  );
+
   it('skips the second event from the same author when the atomic claim loses', async () => {
+    repository.claimExecution.mockResolvedValue(null);
+    await expect(service.prepare('event-1')).resolves.toMatchObject({
+      process: false,
+      reason: 'already_claimed',
+    });
+  });
+
+  it('preserves once-per-user acquisition for Facebook/BM', async () => {
+    repository.findEventForProcessing.mockResolvedValue({
+      ...event,
+      integration: {
+        ...event.integration,
+        providerIdentifier: 'instagram',
+        facebookPageId: 'page-1',
+        webhookMessagesSubscribed: false,
+      },
+    });
     repository.claimExecution.mockResolvedValue(null);
     await expect(service.prepare('event-1')).resolves.toMatchObject({
       process: false,
@@ -118,6 +163,23 @@ describe('InstagramCommentAutomationService', () => {
     repository.findEventForProcessing.mockResolvedValue({
       ...event,
       authorId: 'account-1',
+    });
+    await expect(service.prepare('event-1')).resolves.toMatchObject({
+      process: false,
+      reason: 'own_account_comment',
+    });
+  });
+
+  it('does not process a Facebook/BM comment authored by its Page', async () => {
+    repository.findEventForProcessing.mockResolvedValue({
+      ...event,
+      authorId: 'page-1',
+      integration: {
+        ...event.integration,
+        providerIdentifier: 'instagram',
+        facebookPageId: 'page-1',
+        webhookMessagesSubscribed: false,
+      },
     });
     await expect(service.prepare('event-1')).resolves.toMatchObject({
       process: false,
@@ -175,13 +237,36 @@ describe('InstagramCommentAutomationService', () => {
     expect(repository.claimExecution).not.toHaveBeenCalled();
   });
 
+  it('does not resume a pending execution after its integration is disabled', async () => {
+    repository.findEventForProcessing.mockResolvedValue({
+      ...event,
+      integration: { ...event.integration, disabled: true },
+      status: 'PROCESSING',
+      automationExecution: {
+        id: 'execution-1',
+        processedAt: null,
+        publicReplyStatus: 'PENDING',
+        privateReplyStatus: 'PENDING',
+      },
+    });
+
+    await expect(service.prepare('event-1')).resolves.toEqual({
+      process: false,
+      reason: 'integration_unavailable',
+    });
+    expect(repository.updateEventStatus).toHaveBeenCalledWith(
+      'event-1',
+      'SKIPPED'
+    );
+  });
+
   it('records public reply success', async () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       publicReplyStatus: 'PENDING',
       automation: {
         publicReplyText: 'Public reply',
-        integration: { token: 'secret-token' },
+        integration: event.integration,
       },
     });
     messaging.replyToComment.mockResolvedValue('reply-1');
@@ -193,13 +278,33 @@ describe('InstagramCommentAutomationService', () => {
     );
   });
 
+  it('does not deliver after the integration token becomes unavailable', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue({
+      externalCommentId: 'comment-1',
+      publicReplyStatus: 'PENDING',
+      automation: {
+        publicReplyText: 'Public reply',
+        integration: { ...event.integration, refreshNeeded: true },
+      },
+    });
+    await expect(service.deliverPublicReply('execution-1')).resolves.toBe(
+      false
+    );
+    expect(messaging.replyToComment).not.toHaveBeenCalled();
+    expect(repository.updateDeliveryFailure).toHaveBeenCalledWith(
+      'execution-1',
+      'public',
+      'Instagram public reply capability is unavailable'
+    );
+  });
+
   it('records private reply success', async () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       privateReplyStatus: 'PENDING',
       automation: {
         privateReplyText: 'Private reply',
-        integration: { token: 'secret-token' },
+        integration: event.integration,
       },
     });
     messaging.sendPrivateReplyFromComment.mockResolvedValue('message-1');
@@ -213,13 +318,36 @@ describe('InstagramCommentAutomationService', () => {
     );
   });
 
+  it('does not call Meta after the seven-day private reply window', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue({
+      externalCommentId: 'comment-1',
+      privateReplyStatus: 'PENDING',
+      webhookEvent: {
+        receivedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+      },
+      automation: {
+        privateReplyText: 'Private reply',
+        integration: event.integration,
+      },
+    });
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(
+      false
+    );
+    expect(messaging.sendPrivateReplyFromComment).not.toHaveBeenCalled();
+    expect(repository.updateDeliveryFailure).toHaveBeenCalledWith(
+      'execution-1',
+      'private',
+      'Instagram private reply window expired'
+    );
+  });
+
   it('stores a permanent delivery failure without throwing for retry', async () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       publicReplyStatus: 'PENDING',
       automation: {
         publicReplyText: 'Public reply',
-        integration: { token: 'secret-token' },
+        integration: event.integration,
       },
     });
     messaging.replyToComment.mockRejectedValue(
@@ -241,7 +369,7 @@ describe('InstagramCommentAutomationService', () => {
       publicReplyStatus: 'PENDING',
       automation: {
         publicReplyText: 'Public reply',
-        integration: { token: 'secret-token' },
+        integration: event.integration,
       },
     });
     messaging.replyToComment.mockRejectedValue(

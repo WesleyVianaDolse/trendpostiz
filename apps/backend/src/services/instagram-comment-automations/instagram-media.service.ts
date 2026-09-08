@@ -4,6 +4,8 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { Integration } from '@prisma/client';
+import { INSTAGRAM_FACEBOOK_GRAPH_API_VERSION } from '@gitroom/nestjs-libraries/integrations/social/instagram.provider';
+import { INSTAGRAM_GRAPH_API_VERSION } from '@gitroom/nestjs-libraries/integrations/social/instagram-standalone-messaging.service';
 
 export interface InstagramMediaItem {
   id: string;
@@ -16,18 +18,20 @@ export interface InstagramMediaItem {
 
 @Injectable()
 export class InstagramMediaService {
-  private readonly baseUrl = 'https://graph.instagram.com/v25.0';
   private readonly fields =
     'id,caption,media_type,media_url,thumbnail_url,permalink,timestamp';
 
   async list(integration: Integration, after?: string) {
-    const url = new URL(`${this.baseUrl}/${integration.internalId}/media`);
+    const url = new URL(
+      `${this.baseUrl(integration)}/${encodeURIComponent(
+        integration.internalId
+      )}/media`
+    );
     url.searchParams.set('fields', this.fields);
-    url.searchParams.set('access_token', integration.token);
     url.searchParams.set('limit', '24');
     if (after) url.searchParams.set('after', after);
 
-    const payload = await this.request(url, false);
+    const payload = await this.request(url, integration.token, false);
     return {
       items: (payload.data || []).map((item: any) => this.sanitize(item)),
       nextCursor: payload.paging?.next
@@ -38,15 +42,33 @@ export class InstagramMediaService {
 
   async get(integration: Integration, mediaId: string) {
     if (!mediaId.trim()) throw new BadRequestException('Post inválido.');
-    const url = new URL(`${this.baseUrl}/${encodeURIComponent(mediaId)}`);
+    const url = new URL(
+      `${this.baseUrl(integration)}/${encodeURIComponent(mediaId)}`
+    );
     url.searchParams.set('fields', this.fields);
-    url.searchParams.set('access_token', integration.token);
-    return this.sanitize(await this.request(url, true));
+    return this.sanitize(await this.request(url, integration.token, true));
   }
 
-  private async request(url: URL, invalidMediaIsBadRequest: boolean) {
+  private baseUrl(integration: Integration) {
+    if (integration.providerIdentifier === 'instagram-standalone') {
+      return `https://graph.instagram.com/${INSTAGRAM_GRAPH_API_VERSION}`;
+    }
+    if (integration.providerIdentifier === 'instagram') {
+      return `https://graph.facebook.com/${INSTAGRAM_FACEBOOK_GRAPH_API_VERSION}`;
+    }
+    throw new BadRequestException('A conta selecionada não é do Instagram.');
+  }
+
+  private async request(
+    url: URL,
+    token: string,
+    invalidMediaIsBadRequest: boolean
+  ) {
     try {
-      const response = await fetch(url, { method: 'GET' });
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const payload = await response.json();
       if (!response.ok) {
         if (invalidMediaIsBadRequest) {

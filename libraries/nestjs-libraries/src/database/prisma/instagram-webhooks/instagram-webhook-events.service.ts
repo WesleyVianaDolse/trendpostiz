@@ -22,7 +22,10 @@ export class InstagramWebhookEventsService {
     private _integrationService: IntegrationService
   ) {}
 
-  async receive(payload: InstagramWebhookPayload | unknown) {
+  async receive(
+    payload: InstagramWebhookPayload | unknown,
+    credentialFamilies: Array<'instagram' | 'facebook'> = ['instagram']
+  ) {
     if (!payload || typeof payload !== 'object') {
       return { events: 0, eventIds: [] as string[] };
     }
@@ -48,7 +51,12 @@ export class InstagramWebhookEventsService {
           continue;
         }
 
-        const eventId = await this.recordComment(entry.id, entry.time, change);
+        const eventId = await this.recordComment(
+          entry.id,
+          entry.time,
+          change,
+          credentialFamilies
+        );
         if (eventId) eventIds.push(eventId);
         events += 1;
       }
@@ -60,30 +68,33 @@ export class InstagramWebhookEventsService {
   private async recordComment(
     rawAccountId: unknown,
     entryTime: unknown,
-    change: InstagramWebhookChange
+    change: InstagramWebhookChange,
+    credentialFamilies: Array<'instagram' | 'facebook'>
   ) {
-    const instagramAccountId = asString(rawAccountId) || 'unknown';
+    let instagramAccountId = asString(rawAccountId) || 'unknown';
     const externalCommentId = asString(change.value?.id);
     let status: InstagramWebhookEventStatus = 'INVALID';
     let integrationId: string | undefined;
 
     if (externalCommentId && instagramAccountId !== 'unknown') {
       const resolution =
-        await this._integrationService.resolveActiveInstagramStandalone(
-          instagramAccountId
+        await this._integrationService.resolveActiveInstagramWebhook(
+          instagramAccountId,
+          credentialFamilies
         );
       if (resolution.status === 'found') {
         status = 'RECEIVED';
         integrationId = resolution.integration.id;
+        instagramAccountId = resolution.integration.internalId;
       } else if (resolution.status === 'ambiguous') {
         status = 'AMBIGUOUS';
         this.logger.warn(
-          `Ambiguous Instagram webhook account mapping for account ${instagramAccountId}`
+          `Ambiguous Instagram webhook object mapping for object ${instagramAccountId}`
         );
       } else {
         status = 'UNMATCHED';
         this.logger.warn(
-          `No active Instagram Standalone integration for account ${instagramAccountId}`
+          `No active Instagram integration for webhook object ${instagramAccountId}`
         );
       }
     }
@@ -99,6 +110,7 @@ export class InstagramWebhookEventsService {
       payload: asJson({
         entryId: rawAccountId,
         entryTime,
+        credentialFamilies,
         change,
       }),
       status,

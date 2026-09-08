@@ -16,8 +16,17 @@ const subscribedAccount = {
   picture: null,
   disabled: false,
   refreshNeeded: false,
-  webhookCommentsSubscribed: true,
-  webhookMessagesSubscribed: true,
+  capabilities: {
+    commentsWebhook: true,
+    publicReply: true,
+    privateReply: true,
+    reconnectRequired: false,
+  },
+  status: {
+    comments: 'ACTIVE' as const,
+    publicReply: 'AVAILABLE' as const,
+    privateReply: 'AVAILABLE' as const,
+  },
 };
 
 describe('Instagram automation wizard validation', () => {
@@ -90,24 +99,48 @@ describe('Instagram automation wizard validation', () => {
     );
   });
 
-  it('blocks an active Direct automation without messages subscription', () =>
+  it('blocks Direct when the provider capability is unavailable', () =>
     expect(
       validateAutomationStep(4, valid(), {
         ...subscribedAccount,
-        webhookMessagesSubscribed: false,
+        capabilities: {
+          ...subscribedAccount.capabilities,
+          privateReply: false,
+        },
       })
-    ).toContain('Reconecte'));
+    ).toContain('Direct'));
 
-  it('allows saving that Direct automation as inactive', () => {
+  it('does not bypass provider capabilities when saved inactive', () => {
     const form = valid();
     form.enabled = false;
     expect(
       validateAutomationStep(4, form, {
         ...subscribedAccount,
-        webhookMessagesSubscribed: false,
+        capabilities: {
+          ...subscribedAccount.capabilities,
+          privateReply: false,
+        },
       })
-    ).toBeNull();
+    ).toContain('Direct');
   });
+
+  it('shows the reconnection requirement for an old Facebook/BM account', () =>
+    expect(
+      validateAutomationStep(4, valid(), {
+        ...subscribedAccount,
+        capabilities: {
+          commentsWebhook: false,
+          publicReply: false,
+          privateReply: false,
+          reconnectRequired: true,
+        },
+        status: {
+          comments: 'RECONNECT_REQUIRED',
+          publicReply: 'UNAVAILABLE',
+          privateReply: 'UNAVAILABLE',
+        },
+      })
+    ).toContain('Reconecte esta conta do Instagram'));
 
   it('supports edit data with no account/post revalidation on step three', () =>
     expect(validateAutomationStep(3, valid())).toBeNull());

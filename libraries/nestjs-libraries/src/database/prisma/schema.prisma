@@ -333,6 +333,7 @@ model Integration {
   customInstanceDetails            String?
   customerId                       String?
   rootInternalId                   String?
+  facebookPageId                   String?
   additionalSettings               String?                      @default("[]")
   webhookCommentsSubscribed        Boolean                      @default(false)
   webhookMessagesSubscribed        Boolean                      @default(false)
@@ -350,6 +351,7 @@ model Integration {
 
   @@unique([organizationId, internalId])
   @@index([rootInternalId])
+  @@index([facebookPageId])
   @@index([organizationId])
   @@index([providerIdentifier])
   @@index([updatedAt])

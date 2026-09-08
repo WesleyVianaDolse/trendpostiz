@@ -7,8 +7,17 @@ export interface InstagramAccount {
   picture: string | null;
   disabled: boolean;
   refreshNeeded: boolean;
-  webhookCommentsSubscribed: boolean;
-  webhookMessagesSubscribed: boolean;
+  capabilities: {
+    commentsWebhook: boolean;
+    publicReply: boolean;
+    privateReply: boolean;
+    reconnectRequired: boolean;
+  };
+  status: {
+    comments: 'ACTIVE' | 'RECONNECT_REQUIRED' | 'UNAVAILABLE';
+    publicReply: 'AVAILABLE' | 'UNAVAILABLE';
+    privateReply: 'AVAILABLE' | 'UNAVAILABLE';
+  };
 }
 
 export interface InstagramMedia {
@@ -83,12 +92,21 @@ export const validateAutomationStep = (
     return 'Informe a resposta pública.';
   if (step === 4 && form.privateReplyEnabled && !form.privateReplyText.trim())
     return 'Informe a mensagem no Direct.';
+  if (step >= 4 && !account?.capabilities.commentsWebhook)
+    return account?.capabilities.reconnectRequired
+      ? 'Reconecte esta conta do Instagram para habilitar automações.'
+      : 'Os comentários desta conta estão indisponíveis para automações.';
   if (
     step >= 4 &&
-    form.enabled &&
-    form.privateReplyEnabled &&
-    !account?.webhookMessagesSubscribed
+    form.publicReplyEnabled &&
+    !account?.capabilities.publicReply
   )
-    return 'Reconecte esta conta para ativar automações com Direct.';
+    return 'A resposta pública não está disponível para esta conta.';
+  if (
+    step >= 4 &&
+    form.privateReplyEnabled &&
+    !account?.capabilities.privateReply
+  )
+    return 'O Direct não está disponível para esta conta.';
   return null;
 };

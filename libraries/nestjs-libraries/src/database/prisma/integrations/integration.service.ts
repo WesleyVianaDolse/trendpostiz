@@ -4,6 +4,7 @@ import {
   HttpStatus,
   Inject,
   Injectable,
+  Optional,
 } from '@nestjs/common';
 import { IntegrationRepository } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.repository';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
@@ -25,6 +26,7 @@ import utc from 'dayjs/plugin/utc';
 import { AutopostRepository } from '@gitroom/nestjs-libraries/database/prisma/autopost/autopost.repository';
 import { RefreshIntegrationService } from '@gitroom/nestjs-libraries/integrations/refresh.integration.service';
 import { TemporalService } from 'nestjs-temporal-core';
+import { InstagramWebhookSubscriptionService } from '@gitroom/nestjs-libraries/integrations/social/instagram-webhook-subscription.service';
 
 dayjs.extend(utc);
 
@@ -38,7 +40,9 @@ export class IntegrationService {
     private _notificationService: NotificationService,
     @Inject(forwardRef(() => RefreshIntegrationService))
     private _refreshIntegrationService: RefreshIntegrationService,
-    private _temporalService: TemporalService
+    private _temporalService: TemporalService,
+    @Optional()
+    private _instagramWebhookSubscriptionService?: InstagramWebhookSubscriptionService
   ) {}
 
   async changeActiveCron(orgId: string) {
@@ -177,6 +181,21 @@ export class IntegrationService {
     if (integrations.length > 1) {
       return { status: 'ambiguous' as const };
     }
+    return { status: 'found' as const, integration: integrations[0] };
+  }
+
+  async resolveActiveInstagramWebhook(
+    objectId: string,
+    credentialFamilies: Array<'instagram' | 'facebook'>
+  ) {
+    const integrations =
+      await this._integrationRepository.findActiveInstagramWebhookCandidates(
+        objectId,
+        credentialFamilies
+      );
+
+    if (integrations.length === 0) return { status: 'not_found' as const };
+    if (integrations.length > 1) return { status: 'ambiguous' as const };
     return { status: 'found' as const, integration: integrations[0] };
   }
 
@@ -354,15 +373,30 @@ export class IntegrationService {
       org,
       String(getIntegrationInformation.id)
     );
-    await this._integrationRepository.updateIntegration(id, {
-      picture: getIntegrationInformation.picture,
-      internalId: String(getIntegrationInformation.id),
-      organizationId: org,
-      name: getIntegrationInformation.name,
-      inBetweenSteps: false,
-      token: getIntegrationInformation.access_token,
-      profile: getIntegrationInformation.username,
-    });
+    const updatedIntegration =
+      await this._integrationRepository.updateIntegration(id, {
+        picture: getIntegrationInformation.picture,
+        internalId: String(getIntegrationInformation.id),
+        organizationId: org,
+        name: getIntegrationInformation.name,
+        inBetweenSteps: false,
+        token: getIntegrationInformation.access_token,
+        profile: getIntegrationInformation.username,
+        providerIdentifier: getIntegration.providerIdentifier,
+        facebookPageId:
+          getIntegration.providerIdentifier === 'instagram'
+            ? getIntegrationInformation.facebookPageId
+            : null,
+      });
+
+    if (
+      updatedIntegration.providerIdentifier === 'instagram' &&
+      this._instagramWebhookSubscriptionService
+    ) {
+      await this._instagramWebhookSubscriptionService.subscribeComments(
+        updatedIntegration
+      );
+    }
 
     return { success: true };
   }

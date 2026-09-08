@@ -1,7 +1,10 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import useSWR from 'swr';
-import { InstagramAutomationsPage } from './instagram-automations.component';
+import {
+  InstagramAutomationsPage,
+  InstagramAutomationWizard,
+} from './instagram-automations.component';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -93,5 +96,45 @@ describe('Instagram automations list UI', () => {
     expect(html).toContain('Exatamente igual');
     expect(html).toContain('lg:grid-cols-2');
     expect(html).toContain('/instagram/automations/automation-1/executions');
+  });
+
+  it('shows provider-agnostic capability status and reconnection guidance', () => {
+    mockedSWR.mockImplementation((key: string) => ({
+      isLoading: false,
+      mutate: jest.fn(),
+      data:
+        key === '/instagram-comment-automations/accounts'
+          ? [
+              {
+                id: 'traditional-old',
+                name: 'Minha conta',
+                profile: 'minhaconta',
+                picture: null,
+                disabled: false,
+                refreshNeeded: false,
+                capabilities: {
+                  commentsWebhook: false,
+                  publicReply: false,
+                  privateReply: false,
+                  reconnectRequired: true,
+                },
+                status: {
+                  comments: 'RECONNECT_REQUIRED',
+                  publicReply: 'UNAVAILABLE',
+                  privateReply: 'UNAVAILABLE',
+                },
+              },
+            ]
+          : undefined,
+    }));
+
+    const html = renderToStaticMarkup(<InstagramAutomationWizard />);
+    expect(html).toContain('@minhaconta');
+    expect(html).toContain('Requer reconexão');
+    expect(html).toContain(
+      'Reconecte esta conta do Instagram para habilitar automações.'
+    );
+    expect(html).not.toContain('instagram-standalone');
+    expect(html).not.toContain('Business Manager');
   });
 });

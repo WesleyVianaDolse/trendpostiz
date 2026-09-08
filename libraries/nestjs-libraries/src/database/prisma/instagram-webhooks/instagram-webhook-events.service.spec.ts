@@ -14,7 +14,7 @@ describe('InstagramWebhookEventsService', () => {
       ),
   };
   const integrationService = {
-    resolveActiveInstagramStandalone: jest.fn(),
+    resolveActiveInstagramWebhook: jest.fn(),
   };
   const service = new InstagramWebhookEventsService(
     repository as any,
@@ -23,9 +23,9 @@ describe('InstagramWebhookEventsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    integrationService.resolveActiveInstagramStandalone.mockResolvedValue({
+    integrationService.resolveActiveInstagramWebhook.mockResolvedValue({
       status: 'found',
-      integration: { id: 'integration-1' },
+      integration: { id: 'integration-1', internalId: 'account-1' },
     });
   });
 
@@ -107,7 +107,7 @@ describe('InstagramWebhookEventsService', () => {
     ['not_found', 'UNMATCHED'],
     ['ambiguous', 'AMBIGUOUS'],
   ])('stores %s integration resolution safely', async (resolution, status) => {
-    integrationService.resolveActiveInstagramStandalone.mockResolvedValue({
+    integrationService.resolveActiveInstagramWebhook.mockResolvedValue({
       status: resolution,
     });
 
@@ -127,7 +127,7 @@ describe('InstagramWebhookEventsService', () => {
   });
 
   it('persists but does not dispatch an unmatched event', async () => {
-    integrationService.resolveActiveInstagramStandalone.mockResolvedValue({
+    integrationService.resolveActiveInstagramWebhook.mockResolvedValue({
       status: 'not_found',
     });
 
@@ -143,5 +143,41 @@ describe('InstagramWebhookEventsService', () => {
       })
     ).resolves.toEqual({ events: 1, eventIds: [] });
     expect(repository.record).toHaveBeenCalled();
+  });
+
+  it('routes a Facebook/BM Page payload and normalizes the Instagram account ID', async () => {
+    integrationService.resolveActiveInstagramWebhook.mockResolvedValue({
+      status: 'found',
+      integration: { id: 'facebook-integration', internalId: 'ig-business-1' },
+    });
+
+    await service.receive(
+      {
+        object: 'instagram',
+        entry: [
+          {
+            id: 'facebook-page-1',
+            changes: [
+              {
+                field: 'comments',
+                value: { id: 'comment-1', media: { id: 'media-1' } },
+              },
+            ],
+          },
+        ],
+      },
+      ['facebook']
+    );
+
+    expect(
+      integrationService.resolveActiveInstagramWebhook
+    ).toHaveBeenCalledWith('facebook-page-1', ['facebook']);
+    expect(repository.record).toHaveBeenCalledWith(
+      expect.objectContaining({
+        integrationId: 'facebook-integration',
+        instagramAccountId: 'ig-business-1',
+        status: 'RECEIVED',
+      })
+    );
   });
 });

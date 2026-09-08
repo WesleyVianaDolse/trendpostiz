@@ -43,6 +43,7 @@ export class InstagramCommentAutomationRepository {
     return this._prisma.instagramCommentAutomationExecution.findUnique({
       where: { id },
       include: {
+        webhookEvent: { select: { receivedAt: true } },
         automation: {
           include: { integration: true },
         },

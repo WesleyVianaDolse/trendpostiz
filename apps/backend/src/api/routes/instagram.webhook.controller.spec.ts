@@ -1,4 +1,7 @@
-import { ForbiddenException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { createHmac } from 'node:crypto';
 
 jest.mock(
@@ -28,11 +31,13 @@ describe('InstagramWebhookController', () => {
     eventsService.receive.mockResolvedValue({ events: 0, eventIds: [] });
     process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN = 'verify-token';
     process.env.INSTAGRAM_APP_SECRET = 'app-secret';
+    process.env.FACEBOOK_APP_SECRET = 'facebook-secret';
   });
 
   afterAll(() => {
     delete process.env.INSTAGRAM_WEBHOOK_VERIFY_TOKEN;
     delete process.env.INSTAGRAM_APP_SECRET;
+    delete process.env.FACEBOOK_APP_SECRET;
   });
 
   it('returns the challenge for a valid verification request', () => {
@@ -66,7 +71,7 @@ describe('InstagramWebhookController', () => {
     await expect(
       controller.receive({ rawBody, body } as any, signature)
     ).resolves.toEqual({ received: true });
-    expect(eventsService.receive).toHaveBeenCalledWith(body);
+    expect(eventsService.receive).toHaveBeenCalledWith(body, ['instagram']);
     expect(dispatcher.dispatchMany).toHaveBeenCalledWith([]);
   });
 
@@ -96,7 +101,35 @@ describe('InstagramWebhookController', () => {
     await expect(
       controller.receive({ rawBody, body } as any, signature)
     ).resolves.toEqual({ received: true });
-    expect(eventsService.receive).toHaveBeenCalledWith(body);
+    expect(eventsService.receive).toHaveBeenCalledWith(body, ['instagram']);
+  });
+
+  it('accepts a signature from the Facebook app secret and routes its family', async () => {
+    const body = { object: 'instagram', entry: [] };
+    const rawBody = Buffer.from(JSON.stringify(body));
+    const signature = `sha256=${createHmac('sha256', 'facebook-secret')
+      .update(rawBody)
+      .digest('hex')}`;
+
+    await expect(
+      controller.receive({ rawBody, body } as any, signature)
+    ).resolves.toEqual({ received: true });
+    expect(eventsService.receive).toHaveBeenCalledWith(body, ['facebook']);
+  });
+
+  it('accepts a shared secret without choosing a provider arbitrarily', async () => {
+    process.env.FACEBOOK_APP_SECRET = 'app-secret';
+    const body = { object: 'instagram', entry: [] };
+    const rawBody = Buffer.from(JSON.stringify(body));
+    const signature = `sha256=${createHmac('sha256', 'app-secret')
+      .update(rawBody)
+      .digest('hex')}`;
+
+    await controller.receive({ rawBody, body } as any, signature);
+    expect(eventsService.receive).toHaveBeenCalledWith(body, [
+      'instagram',
+      'facebook',
+    ]);
   });
 
   it.each([undefined, 'sha256=invalid'])(
@@ -127,6 +160,18 @@ describe('InstagramWebhookController', () => {
     await expect(
       controller.receive({ rawBody, body: {} } as any, signature)
     ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(eventsService.receive).not.toHaveBeenCalled();
+  });
+
+  it('rejects every request when no signature secret is configured', async () => {
+    delete process.env.INSTAGRAM_APP_SECRET;
+    delete process.env.FACEBOOK_APP_SECRET;
+    await expect(
+      controller.receive(
+        { rawBody: Buffer.from('{}'), body: {} } as any,
+        `sha256=${'0'.repeat(64)}`
+      )
+    ).rejects.toBeInstanceOf(ServiceUnavailableException);
     expect(eventsService.receive).not.toHaveBeenCalled();
   });
 });

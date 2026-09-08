@@ -412,6 +412,7 @@ export function InstagramAutomationWizard() {
               {accounts?.map((item) => (
                 <button
                   key={item.id}
+                  disabled={!item.capabilities.commentsWebhook}
                   onClick={() =>
                     setForm({ ...form, integrationId: item.id, mediaId: '' })
                   }
@@ -419,7 +420,7 @@ export function InstagramAutomationWizard() {
                     form.integrationId === item.id
                       ? 'border-forth bg-forth/10'
                       : 'border-newTableBorder'
-                  }`}
+                  } disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   <div className="h-12 w-12 overflow-hidden rounded-full bg-white/10">
                     {item.picture && (
@@ -437,14 +438,24 @@ export function InstagramAutomationWizard() {
                     <p className="text-sm text-newTextColor">{item.name}</p>
                     <p className="mt-1 text-xs text-newTextColor">
                       Comentários:{' '}
-                      {item.webhookCommentsSubscribed ? 'ativo' : 'inativo'} ·
-                      Mensagens:{' '}
-                      {item.webhookMessagesSubscribed ? 'ativo' : 'inativo'}
+                      {item.status.comments === 'ACTIVE'
+                        ? 'Ativo'
+                        : item.status.comments === 'RECONNECT_REQUIRED'
+                        ? 'Requer reconexão'
+                        : 'Indisponível'}{' '}
+                      · Resposta pública:{' '}
+                      {item.status.publicReply === 'AVAILABLE'
+                        ? 'Disponível'
+                        : 'Indisponível'}{' '}
+                      · Direct:{' '}
+                      {item.status.privateReply === 'AVAILABLE'
+                        ? 'Disponível'
+                        : 'Indisponível'}
                     </p>
-                    {!item.webhookMessagesSubscribed && (
+                    {item.capabilities.reconnectRequired && (
                       <p className="mt-2 text-xs text-amber-400">
-                        Reconecte esta conta para habilitar automações com
-                        Direct.
+                        Reconecte esta conta do Instagram para habilitar
+                        automações.
                       </p>
                     )}
                   </div>
@@ -633,8 +644,8 @@ export function InstagramAutomationWizard() {
               onValue={(value) => setForm({ ...form, privateReplyText: value })}
               placeholder="Oi! Aqui está o que você pediu: https://..."
               warning={
-                !account?.webhookMessagesSubscribed
-                  ? 'Reconecte esta conta para habilitar automações com Direct.'
+                !account?.capabilities.privateReply
+                  ? 'O Direct não está disponível para esta conta.'
                   : undefined
               }
             />
