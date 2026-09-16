@@ -12,6 +12,7 @@ import { FacebookDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-sett
 import { DribbbleDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/dribbble.dto';
 import { Integration } from '@prisma/client';
 import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
+import { timer } from '@gitroom/helpers/utils/timer';
 
 export class FacebookProvider extends SocialAbstract implements SocialProvider {
   identifier = 'facebook';
@@ -413,10 +414,120 @@ export class FacebookProvider extends SocialAbstract implements SocialProvider {
     postDetails: PostDetails<FacebookDto>[]
   ): Promise<PostResponse[]> {
     const [firstPost] = postDetails;
+    const isStory = firstPost?.settings?.post_type === 'story';
 
     let finalId = '';
     let finalUrl = '';
-    if (isVideoExtension(firstPost?.media?.[0]?.path)) {
+    if (isStory) {
+      const mediaItems = firstPost?.media || [];
+      if (!mediaItems.length) {
+        throw new Error('Facebook Stories require at least one image or video');
+      }
+
+      const videoCount = mediaItems.filter((media) =>
+        isVideoExtension(media.path)
+      ).length;
+      if (videoCount > 0 && videoCount !== mediaItems.length) {
+        throw new Error('Facebook Stories cannot mix images and videos');
+      }
+
+      let lastStoryPostId = '';
+      for (const media of mediaItems) {
+        if (isVideoExtension(media.path)) {
+          const { video_id, upload_url } = await (
+            await this.fetch(
+              `https://graph.facebook.com/v20.0/${id}/video_stories?upload_phase=start&access_token=${accessToken}`,
+              { method: 'POST' },
+              'start video story upload'
+            )
+          ).json();
+
+          await this.fetch(
+            upload_url,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `OAuth ${accessToken}`,
+                file_url: media.path,
+              },
+            },
+            'upload video story'
+          );
+
+          let videoStatus = 'in_progress';
+          let attempts = 0;
+          const maxAttempts = 54;
+          while (videoStatus !== 'upload_complete' && videoStatus !== 'ready') {
+            if (attempts++ >= maxAttempts) {
+              throw new Error('Facebook Story video processing timed out');
+            }
+            const { status } = await (
+              await this.fetch(
+                `https://graph.facebook.com/v20.0/${video_id}?fields=status&access_token=${accessToken}`,
+                undefined,
+                'check video story status',
+                0,
+                true
+              )
+            ).json();
+            videoStatus = status?.video_status || 'in_progress';
+            if (videoStatus === 'error') {
+              throw new Error('Facebook Story video processing failed');
+            }
+            if (videoStatus !== 'upload_complete' && videoStatus !== 'ready') {
+              await timer(10000);
+            }
+          }
+
+          const { post_id: storyPostId } = await (
+            await this.fetch(
+              `https://graph.facebook.com/v20.0/${id}/video_stories?upload_phase=finish&video_id=${video_id}&access_token=${accessToken}`,
+              { method: 'POST' },
+              'finish video story upload'
+            )
+          ).json();
+          lastStoryPostId = storyPostId;
+        } else {
+          const { id: photoId } = await (
+            await this.fetch(
+              `https://graph.facebook.com/v20.0/${id}/photos?access_token=${accessToken}`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: media.path, published: false }),
+              },
+              'upload photo story'
+            )
+          ).json();
+          const { post_id: storyPostId } = await (
+            await this.fetch(
+              `https://graph.facebook.com/v20.0/${id}/photo_stories?photo_id=${photoId}&access_token=${accessToken}`,
+              { method: 'POST' },
+              'publish photo story'
+            )
+          ).json();
+          lastStoryPostId = storyPostId;
+        }
+      }
+
+      finalId = lastStoryPostId;
+      finalUrl = `https://www.facebook.com/stories/${lastStoryPostId}`;
+      try {
+        const { data: stories = [] } = await (
+          await this.fetch(
+            `https://graph.facebook.com/v20.0/${id}/stories?fields=post_id,url&access_token=${accessToken}`,
+            undefined,
+            'get published story url'
+          )
+        ).json();
+        finalUrl =
+          stories.find((story: any) => story.post_id === lastStoryPostId)?.url ||
+          finalUrl;
+      } catch {
+        // The story is already published at this point. Keep the fallback URL
+        // instead of failing the job and risking a duplicate on retry.
+      }
+    } else if (isVideoExtension(firstPost?.media?.[0]?.path)) {
       const video = firstPost.media![0];
       let videoUploadOptions: RequestInit;
 

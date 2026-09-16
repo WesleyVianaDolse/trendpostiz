@@ -78,7 +78,21 @@ export const providerRules: Record<string, ProviderRule> = {
     maximumCharacters: 10_000,
     unavailableReason: `${remoteSelection} Requer publicação e ao menos uma tag.`,
   },
-  facebook: { supported: true, maximumCharacters: 63_206 },
+  facebook: {
+    supported: true,
+    maximumCharacters: 63_206,
+    fields: [
+      {
+        key: 'post_type',
+        label: 'Tipo de publicação',
+        type: 'select',
+        options: [
+          { value: 'post', label: 'Post / Reel' },
+          { value: 'story', label: 'Story' },
+        ],
+      },
+    ],
+  },
   instagram: {
     supported: true,
     maximumCharacters: 2_200,
@@ -212,6 +226,8 @@ export function getDefaultProviderSettings(
       return { title: '', tags: [] };
     case 'medium':
       return { title: '', subtitle: '', tags: [] };
+    case 'facebook':
+      return { post_type: 'post' };
     case 'instagram':
     case 'instagram-standalone':
       return { post_type: 'post', collaborators: [], is_trial_reel: false };
@@ -290,6 +306,8 @@ function validateProviderSettings(
         'subscribers',
         'verified',
       ].includes(String(settings.who_can_reply_post || ''));
+    case 'facebook':
+      return ['post', 'story'].includes(String(settings.post_type || ''));
     case 'instagram':
     case 'instagram-standalone':
       return ['post', 'story'].includes(String(settings.post_type || ''));
@@ -391,7 +409,20 @@ export function validatePublisherForm(
     const invalidMedia = input.selectedIntegrations
       .map((integration) => ({
         integration,
-        message: validateProviderMedia(integration.identifier, input.media),
+        message:
+          integration.identifier === 'facebook' &&
+          input.settingsByIntegration[integration.id]?.post_type === 'story'
+            ? !input.media.length
+              ? 'Stories exigem pelo menos uma imagem ou vídeo.'
+              : input.media.some((media) =>
+                  /\.(mp4|mov)(?:[?#]|$)/i.test(media.path)
+                ) &&
+                input.media.some(
+                  (media) => !/\.(mp4|mov)(?:[?#]|$)/i.test(media.path)
+                )
+              ? 'Stories não podem misturar imagens e vídeos.'
+              : undefined
+            : validateProviderMedia(integration.identifier, input.media),
       }))
       .find((result) => result.message);
     if (invalidMedia) {
