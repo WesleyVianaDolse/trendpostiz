@@ -4,20 +4,22 @@ import {
   proxyActivities,
   setHandler,
   sleep,
+  patched,
 } from '@temporalio/workflow';
 import { Email, emailSignal } from '@gitroom/orchestrator/signals/email.signal';
 import { EmailActivity } from '@gitroom/orchestrator/activities/email.activity';
 
-const { getUserOrgs, sendEmailAsync } = proxyActivities<EmailActivity>({
-  startToCloseTimeout: '10 minute',
-  taskQueue: 'main',
-  cancellationType: 'ABANDON',
-  retry: {
-    maximumAttempts: 3,
-    backoffCoefficient: 1,
-    initialInterval: '2 minutes',
-  },
-});
+const { getUserOrgs, sendEmailAsync, sendNotificationDigest } =
+  proxyActivities<EmailActivity>({
+    startToCloseTimeout: '10 minute',
+    taskQueue: 'main',
+    cancellationType: 'ABANDON',
+    retry: {
+      maximumAttempts: 3,
+      backoffCoefficient: 1,
+      initialInterval: '2 minutes',
+    },
+  });
 
 export async function digestEmailWorkflow({
   organizationId,
@@ -53,14 +55,19 @@ export async function digestEmailWorkflow({
 
       if (toSend.length === 0) continue;
 
-      await sendEmailAsync(
-        user.user.email,
-        toSend.length === 1
-          ? toSend[0].title
-          : `[TrendPostiz] Your latest notifications`,
-        toSend.map((p) => p.message).join('<br/>'),
-        'bottom'
-      );
+      // Preserve the old activity arguments when replaying pre-upgrade histories.
+      if (patched('notification-email-digest-v1')) {
+        await sendNotificationDigest(user.user.email, toSend);
+      } else {
+        await sendEmailAsync(
+          user.user.email,
+          toSend.length === 1
+            ? toSend[0].title
+            : `[TrendPostiz] Your latest notifications`,
+          toSend.map((p) => p.message).join('<br/>'),
+          'bottom'
+        );
+      }
     }
 
     return await continueAsNew({

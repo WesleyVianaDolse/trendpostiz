@@ -5,8 +5,14 @@ import { OrganizationRepository } from '@gitroom/nestjs-libraries/database/prism
 import { TemporalService } from 'nestjs-temporal-core';
 import { TypedSearchAttributes } from '@temporalio/common';
 import { organizationId } from '@gitroom/nestjs-libraries/temporal/temporal.search.attribute';
+import {
+  NotificationType,
+  PostNotificationDetails,
+  postNotificationSubject,
+  renderPostNotification,
+} from '@gitroom/nestjs-libraries/emails/notification.email';
 
-export type NotificationType = 'success' | 'fail' | 'info';
+export type { NotificationType } from '@gitroom/nestjs-libraries/emails/notification.email';
 
 @Injectable()
 export class NotificationService {
@@ -44,12 +50,15 @@ export class NotificationService {
     message: string,
     sendEmail = false,
     digest = false,
-    type: NotificationType = 'success'
+    type: NotificationType = 'success',
+    post?: PostNotificationDetails
   ) {
     await this._notificationRepository.createNotification(orgId, message);
     if (!sendEmail) {
       return;
     }
+
+    const emailSubject = post ? postNotificationSubject(post, type) : subject;
 
     if (digest) {
       try {
@@ -61,9 +70,10 @@ export class NotificationService {
             signalArgs: [
               [
                 {
-                  title: subject,
+                  title: emailSubject,
                   message,
                   type,
+                  ...(post && { post }),
                 },
               ],
             ],
@@ -82,7 +92,12 @@ export class NotificationService {
       return;
     }
 
-    await this.sendEmailsToOrg(orgId, subject, message, type);
+    await this.sendEmailsToOrg(
+      orgId,
+      emailSubject,
+      post ? renderPostNotification({ message, type, post }) : message,
+      type
+    );
   }
 
   async sendEmailsToOrg(

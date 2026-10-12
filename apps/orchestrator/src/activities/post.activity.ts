@@ -23,6 +23,7 @@ import {
   postId as postIdSearchParam,
 } from '@gitroom/nestjs-libraries/temporal/temporal.search.attribute';
 import { SubscriptionService } from '@gitroom/nestjs-libraries/database/prisma/subscriptions/subscription.service';
+import type { PostNotificationDetails } from '@gitroom/nestjs-libraries/emails/notification.email';
 
 // Drops fields the workflow and downstream activities never read — biggest wins are `error` (grows per retry) and `childrenPost` (Prisma side-loads it on every recursive row).
 function slimPost(post: any) {
@@ -270,7 +271,8 @@ export class PostActivity {
     message: string,
     sendEmail = false,
     digest = false,
-    type: NotificationType = 'success'
+    type: NotificationType = 'success',
+    post?: PostNotificationDetails
   ) {
     await this._notificationService.inAppNotification(
       orgId,
@@ -278,7 +280,8 @@ export class PostActivity {
       message,
       sendEmail,
       digest,
-      type
+      type,
+      post
     );
   }
 

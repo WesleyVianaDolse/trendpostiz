@@ -7,6 +7,7 @@ import {
   sleep,
   defineSignal,
   setHandler,
+  patched,
 } from '@temporalio/workflow';
 import dayjs from 'dayjs';
 import { Integration } from '@prisma/client';
@@ -15,6 +16,10 @@ import { PostResponse } from '@gitroom/nestjs-libraries/integrations/social/soci
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { TypedSearchAttributes } from '@temporalio/common';
 import { postId as postIdSearchParam } from '@gitroom/nestjs-libraries/temporal/temporal.search.attribute';
+import type {
+  NotificationType,
+  PostNotificationDetails,
+} from '@gitroom/nestjs-libraries/emails/notification.email';
 
 const proxyTaskQueue = (taskQueue: string) => {
   return proxyActivities<PostActivity>({
@@ -109,6 +114,19 @@ export async function postWorkflowV105({
     return;
   }
 
+  // Do not change recorded notification arguments during a replay.
+  const richNotifications = patched('post-notification-email-details-v1');
+  const notificationDetails = (
+    releaseURL?: string
+  ): PostNotificationDetails => ({
+    accountName: post.integration.name,
+    username: post.integration.profile || undefined,
+    providerIdentifier: post.integration.providerIdentifier,
+    content: post.content,
+    releaseURL,
+    occurredAt: new Date().toISOString(),
+  });
+
   // if refresh is needed from last time, let's inform the user
   if (post.integration?.refreshNeeded) {
     await inAppNotification(
@@ -117,7 +135,8 @@ export async function postWorkflowV105({
       `We couldn't post to ${post.integration?.providerIdentifier} for ${post?.integration?.name} because you need to reconnect it. Please enable it and try again.`,
       true,
       false,
-      'info'
+      'info',
+      ...(richNotifications ? [notificationDetails()] : [])
     );
 
     await changeState(
@@ -137,7 +156,8 @@ export async function postWorkflowV105({
       `We couldn't post to ${post.integration?.providerIdentifier} for ${post?.integration?.name} because it's disabled. Please enable it and try again.`,
       true,
       false,
-      'info'
+      'info',
+      ...(richNotifications ? [notificationDetails()] : [])
     );
 
     await changeState(
@@ -200,6 +220,10 @@ export async function postWorkflowV105({
         );
 
         if (i === 0) {
+          const emailDetails: [NotificationType?, PostNotificationDetails?] =
+            richNotifications
+              ? ['success', notificationDetails(postsResults[0].releaseURL)]
+              : [];
           // send notification on a sucessful post
           await inAppNotification(
             post.integration.organizationId,
@@ -210,7 +234,8 @@ export async function postWorkflowV105({
               post.integration.providerIdentifier
             )} at ${postsResults[0].releaseURL}`,
             true,
-            true
+            true,
+            ...emailDetails
           );
         }
 
@@ -255,7 +280,8 @@ export async function postWorkflowV105({
             }${err?.cause?.message ? `: ${err?.cause?.message}` : ``}`,
             true,
             false,
-            'fail'
+            'fail',
+            ...(richNotifications ? [notificationDetails()] : [])
           );
           return false;
         }

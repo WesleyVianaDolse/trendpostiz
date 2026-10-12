@@ -2,6 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { Activity, ActivityMethod } from 'nestjs-temporal-core';
 import { EmailService } from '@gitroom/nestjs-libraries/services/email.service';
 import { OrganizationService } from '@gitroom/nestjs-libraries/database/prisma/organizations/organization.service';
+import {
+  NotificationEmail,
+  renderNotificationDigest,
+} from '@gitroom/nestjs-libraries/emails/notification.email';
 
 @Injectable()
 @Activity()
@@ -17,8 +21,35 @@ export class EmailActivity {
   }
 
   @ActivityMethod()
-  async sendEmailAsync(to: string, subject: string, html: string, sendTo: 'top' | 'bottom', replyTo?: string) {
-    return await this._emailService.sendEmail(to, subject, html, sendTo, replyTo);
+  async sendEmailAsync(
+    to: string,
+    subject: string,
+    html: string,
+    sendTo: 'top' | 'bottom',
+    replyTo?: string
+  ) {
+    return await this._emailService.sendEmail(
+      to,
+      subject,
+      html,
+      sendTo,
+      replyTo
+    );
+  }
+
+  @ActivityMethod()
+  async sendNotificationDigest(to: string, emails: NotificationEmail[]) {
+    if (emails.length === 0) return;
+    const subject =
+      emails.length === 1
+        ? emails[0].title || '[TrendPostiz] Nova notificação'
+        : `[TrendPostiz] Resumo de notificações (${emails.length})`;
+    return this._emailService.sendEmail(
+      to,
+      subject,
+      renderNotificationDigest(emails),
+      'bottom'
+    );
   }
 
   @ActivityMethod()
