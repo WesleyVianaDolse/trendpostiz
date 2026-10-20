@@ -25,7 +25,7 @@ export class YoutubeSettingsDto {
 
   @IsIn(['yes', 'no'])
   @IsOptional()
-  selfDeclaredMadeForKids: 'no' | 'yes';
+  selfDeclaredMadeForKids?: 'no' | 'yes';
 
   @IsOptional()
   @ValidateNested()

@@ -235,7 +235,6 @@ export function getDefaultProviderSettings(
       return {
         title: '',
         type: 'public',
-        selfDeclaredMadeForKids: 'no',
         tags: [],
       };
     case 'tiktok':

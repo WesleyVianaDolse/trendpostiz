@@ -567,7 +567,7 @@ export class InstagramProvider
     const graphVersion =
       type === 'graph.facebook.com'
         ? INSTAGRAM_FACEBOOK_GRAPH_API_VERSION
-        : 'v20.0';
+        : 'v25.0';
     const [firstPost] = postDetails;
     const isStory = firstPost.settings.post_type === 'story';
     const isTrialReel = !!firstPost.settings.is_trial_reel;
@@ -769,7 +769,7 @@ export class InstagramProvider
     const graphVersion =
       type === 'graph.facebook.com'
         ? INSTAGRAM_FACEBOOK_GRAPH_API_VERSION
-        : 'v20.0';
+        : 'v25.0';
     const [commentPost] = postDetails;
 
     const { id: commentId } = await (

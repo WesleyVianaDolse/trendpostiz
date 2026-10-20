@@ -29,6 +29,10 @@ const type = [
 
 const madeForKids = [
   {
+    label: 'Use channel setting',
+    value: '',
+  },
+  {
     label: 'No',
     value: 'no',
   },
@@ -57,7 +61,7 @@ const YoutubeSettings: FC = () => {
       <Select
         label="Made for kids"
         {...register('selfDeclaredMadeForKids', {
-          value: 'no',
+          setValueAs: (value) => (value === '' ? undefined : value),
         })}
       >
         {madeForKids.map((t) => (
