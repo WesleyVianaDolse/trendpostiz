@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AutopostRepository } from '@gitroom/nestjs-libraries/database/prisma/autopost/autopost.repository';
+import { PlatformService } from '../platform/platform.service';
 import { AutopostDto } from '@gitroom/nestjs-libraries/dtos/autopost/autopost.dto';
 import dayjs from 'dayjs';
 import { END, START, StateGraph } from '@langchain/langgraph';
@@ -64,7 +65,8 @@ export class AutopostService {
     private _autopostsRepository: AutopostRepository,
     private _temporalService: TemporalService,
     private _integrationService: IntegrationService,
-    private _postsService: PostsService
+    private _postsService: PostsService,
+    private _platform: PlatformService
   ) {}
 
   async stopAll(org: string) {
@@ -315,6 +317,7 @@ export class AutopostService {
     if (!getPost || !getPost.active) {
       return;
     }
+    if (!await this._platform.isOrganizationActive(getPost.organizationId)) return;
 
     const load = await this.loadXML(getPost.url);
     if (!load.success || load.url === getPost.lastUrl) {

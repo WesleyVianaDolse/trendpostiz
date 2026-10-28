@@ -88,6 +88,7 @@ export function ProfileShell() {
           </section>
 
           <section className="overflow-hidden rounded-2xl border border-newTableBorder bg-newBgColorInner">
+            {user?.isPlatformAdmin && <Link href="/administration" className="flex min-h-16 items-center gap-3 border-b border-newTableBorder px-4 text-sm font-bold text-newTextColor">Administração da plataforma <span aria-hidden="true">›</span></Link>}
             <Link
               href="/settings"
               className="flex min-h-16 items-center gap-3 border-b border-newTableBorder px-4 text-newTextColor active:bg-boxHover"

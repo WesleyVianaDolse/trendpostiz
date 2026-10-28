@@ -20,7 +20,8 @@ describe('InstagramCommentAutomationService', () => {
   };
   const service = new InstagramCommentAutomationService(
     repository as any,
-    messaging as any
+    messaging as any,
+    { isOrganizationActive: jest.fn().mockResolvedValue(true) } as any
   );
   const event = {
     id: 'event-1',

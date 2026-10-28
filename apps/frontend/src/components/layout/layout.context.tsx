@@ -26,6 +26,10 @@ function LayoutContextInner(params: { children: ReactNode }) {
   const { backendUrl, isGeneral, isSecured } = useVariables();
   const afterRequest = useCallback(
     async (url: string, options: RequestInit, response: Response) => {
+      if (response.status === 423 && typeof window !== 'undefined') {
+        window.location.href = '/account-suspended';
+        return true;
+      }
       if (
         typeof window !== 'undefined' &&
         (window.location.href.includes('/p/') ||
@@ -63,6 +67,10 @@ function LayoutContextInner(params: { children: ReactNode }) {
         setCookie('showorg', '', -10);
         setCookie('impersonate', '', -10);
         window.location.href = '/';
+        return true;
+      }
+      if (response.ok && response.headers.get('reload') === '/administration') {
+        window.location.href = '/administration';
         return true;
       }
       const reloadOrOnboarding =

@@ -16,11 +16,11 @@ export default async function Auth(params: {
 }) {
   const t = await getT();
   const invitation = !!(await cookies()).get('org')?.value;
-  if (process.env.DISABLE_REGISTRATION === 'true' && !invitation) {
+  if (!invitation) {
     const canRegister = (
       await (await internalFetch('/auth/can-register')).json()
     ).register;
-    if (!canRegister && !(await params?.searchParams)?.provider) {
+    if (!canRegister) {
       return (
         <>
           <LoginWithOidc />

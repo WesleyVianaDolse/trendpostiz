@@ -29,7 +29,6 @@ import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { useModals } from '@gitroom/frontend/components/layout/new-modal';
 import { capitalize } from 'lodash';
-import { SelectCustomer } from '@gitroom/frontend/components/launches/select.customer';
 import { CopilotPopup } from '@copilotkit/react-ui';
 import { DummyCodeComponent } from '@gitroom/frontend/components/new-launch/dummy.code.component';
 import { stripHtmlValidation } from '@gitroom/helpers/utils/strip.html.validation';
@@ -82,7 +81,6 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
     tags,
     setTags,
     integrations,
-    setSelectedIntegrations,
     locked,
     current,
     activateExitButton,
@@ -100,7 +98,6 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
       setTags: state.setTags,
       selectedIntegrations: state.selectedIntegrations,
       integrations: state.integrations,
-      setSelectedIntegrations: state.setSelectedIntegrations,
       locked: state.locked,
       activateExitButton: state.activateExitButton,
     }))
@@ -145,21 +142,6 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
       </div>
     );
   }, [current]);
-
-  const changeCustomer = useCallback(
-    (customer: string) => {
-      const neededIntegrations = integrations.filter(
-        (p) => p?.customer?.id === customer
-      );
-      setSelectedIntegrations(
-        neededIntegrations.map((p) => ({
-          settings: {},
-          selectedIntegrations: p,
-        }))
-      );
-    },
-    [integrations]
-  );
 
   const mobileSteps = useMemo(
     () => [
@@ -528,6 +510,11 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                   id="social-content"
                   className="gap-[32px] flex flex-col pe-[8px] pt-[20px] ps-[20px] absolute top-0 left-0 w-full h-full overflow-x-hidden overflow-y-scroll scrollbar scrollbar-thumb-newColColor scrollbar-track-newBgColorInner mobile:gap-[18px] mobile:p-[14px]"
                 >
+                  {existingData.posts.some((post) => post.adminPausedAt) && (
+                    <p role="status" className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-newTextColor">
+                      Esta publicação foi pausada durante a suspensão da organização. Revise o conteúdo e escolha um novo horário para publicá-la.
+                    </p>
+                  )}
                   <div
                     className={clsx(
                       'flex w-full mobile:flex-col mobile:gap-[12px]',
@@ -536,14 +523,6 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                   >
                     <div className="flex flex-1 mobile:min-w-0 mobile:overflow-x-auto">
                       <PicksSocialsComponent toolTip={true} />
-                    </div>
-                    <div>
-                      {!dummy && (
-                        <SelectCustomer
-                          onChange={changeCustomer}
-                          integrations={integrations}
-                        />
-                      )}
                     </div>
                   </div>
                   <div

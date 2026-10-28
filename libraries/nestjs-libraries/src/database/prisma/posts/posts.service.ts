@@ -50,6 +50,7 @@ import { RefreshToken } from '@gitroom/nestjs-libraries/integrations/social.abst
 import { RefreshIntegrationService } from '@gitroom/nestjs-libraries/integrations/refresh.integration.service';
 import { hasExtension } from '@gitroom/helpers/utils/has.extension';
 import { stripLinks } from '@gitroom/helpers/utils/strip.links';
+import { PlatformService } from '../platform/platform.service';
 
 type PostWithConditionals = Post & {
   integration?: Integration;
@@ -68,7 +69,8 @@ export class PostsService {
     private _shortLinkService: ShortLinkService,
     private _openaiService: OpenaiService,
     private _temporalService: TemporalService,
-    private _refreshIntegrationService: RefreshIntegrationService
+    private _refreshIntegrationService: RefreshIntegrationService,
+    private _platform: PlatformService
   ) {}
 
   searchForMissingThreeHoursPosts() {
@@ -798,6 +800,7 @@ export class PostsService {
     body: CreatePostDto,
     creationMethod: CreationMethod
   ): Promise<any[]> {
+    await this._platform.assertOrganizationActive(orgId);
     const postList = [];
     for (const post of body.posts) {
       const provider = this._integrationManager.getSocialIntegration(
@@ -872,6 +875,9 @@ export class PostsService {
     }
 
     const state: State = status === 'draft' ? 'DRAFT' : 'QUEUE';
+    if (state === 'QUEUE' && getPostById.adminPausedAt) {
+      throw new BadRequestException('Esta publicação foi pausada. Abra o editor, revise o conteúdo e escolha um novo horário para reagendar.');
+    }
     await this._postRepository.changeState(id, state);
 
     await this.startWorkflow(

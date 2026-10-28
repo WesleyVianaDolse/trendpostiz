@@ -186,6 +186,8 @@ export class OAuthRepository {
       where: {
         accessToken: encryptedToken,
         revokedAt: null,
+        organization: { suspendedAt: null },
+        user: { disabledAt: null },
       },
       include: {
         organization: {

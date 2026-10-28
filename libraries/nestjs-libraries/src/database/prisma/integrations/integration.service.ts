@@ -27,6 +27,7 @@ import { AutopostRepository } from '@gitroom/nestjs-libraries/database/prisma/au
 import { RefreshIntegrationService } from '@gitroom/nestjs-libraries/integrations/refresh.integration.service';
 import { TemporalService } from 'nestjs-temporal-core';
 import { InstagramWebhookSubscriptionService } from '@gitroom/nestjs-libraries/integrations/social/instagram-webhook-subscription.service';
+import { PlatformService } from '../platform/platform.service';
 
 dayjs.extend(utc);
 
@@ -42,7 +43,8 @@ export class IntegrationService {
     private _refreshIntegrationService: RefreshIntegrationService,
     private _temporalService: TemporalService,
     @Optional()
-    private _instagramWebhookSubscriptionService?: InstagramWebhookSubscriptionService
+    private _instagramWebhookSubscriptionService?: InstagramWebhookSubscriptionService,
+    private _platform?: PlatformService
   ) {}
 
   async changeActiveCron(orgId: string) {
@@ -551,6 +553,7 @@ export class IntegrationService {
     if (!getPlugById) {
       return true;
     }
+    if (!await this._platform!.isOrganizationActive(getPlugById.integration.organizationId)) return true;
 
     const integration = this._integrationManager.getSocialIntegration(
       getPlugById.integration.providerIdentifier

@@ -9,12 +9,14 @@ import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { Organization, ShortLinkPreference } from '@prisma/client';
 import { AutopostService } from '@gitroom/nestjs-libraries/database/prisma/autopost/autopost.service';
 import { CreateTeamMemberDto } from '@gitroom/nestjs-libraries/dtos/settings/create.team.member.dto';
+import { PlatformService } from '../platform/platform.service';
 
 @Injectable()
 export class OrganizationService {
   constructor(
     private _organizationRepository: OrganizationRepository,
-    private _notificationsService: NotificationService
+    private _notificationsService: NotificationService,
+    private _platform: PlatformService
   ) {}
   async createOrgAndUser(
     body: Omit<CreateOrgUserDto, 'providerToken'> & { providerId?: string },
@@ -39,6 +41,7 @@ export class OrganizationService {
     saasName: string,
     email: string
   ) {
+    if (!await this._platform.canRegister()) throw new Error('Registration is disabled');
     return this._organizationRepository.createMaxUser(
       id,
       name,
@@ -47,12 +50,13 @@ export class OrganizationService {
     );
   }
 
-  addUserToOrg(
+  async addUserToOrg(
     userId: string,
     id: string,
     orgId: string,
     role: 'USER' | 'ADMIN'
   ) {
+    await this._platform.assertOrganizationActive(orgId);
     return this._organizationRepository.addUserToOrg(userId, id, orgId, role);
   }
 

@@ -21,7 +21,6 @@ import {
 } from '@gitroom/frontend/components/launches/calendar.context';
 import { BotPicture } from '@gitroom/frontend/components/launches/bot.picture';
 import { CustomerModal } from '@gitroom/frontend/components/launches/customer.modal';
-import { Integration } from '@prisma/client';
 import { SettingsModal } from '@gitroom/frontend/components/launches/settings.modal';
 import { CustomVariables } from '@gitroom/frontend/components/launches/add.provider.component';
 import { useRouter } from 'next/navigation';
@@ -37,11 +36,7 @@ export const Menu: FC<{
   canDisable: boolean;
   canChangeProfilePicture: boolean;
   canChangeNickName: boolean;
-  refreshChannel: (
-    integration: Integration & {
-      identifier: string;
-    }
-  ) => () => void;
+  refreshChannel: (integration: Integrations) => () => void;
   id: string;
   mutate: () => void;
   onChange: (shouldReload: boolean) => void;
@@ -296,7 +291,7 @@ export const Menu: FC<{
         modal: 'md',
       },
       title: t('move_add_to_customer', 'Move / Add to customer'),
-      withCloseButton: false,
+      withCloseButton: true,
       closeOnEscape: true,
       closeOnClickOutside: true,
       children: (

@@ -28,6 +28,7 @@ export class PublicAuthMiddleware implements NestMiddleware {
         }
 
         const org = authorization.organization;
+        if (org.suspendedAt) { res.status(403).json({ msg: 'Organization suspended' }); return; }
         if (!!process.env.STRIPE_SECRET_KEY && !org.subscription) {
           res
             .status(HttpStatus.UNAUTHORIZED)
@@ -46,6 +47,7 @@ export class PublicAuthMiddleware implements NestMiddleware {
           return;
         }
 
+        if (org.suspendedAt) { res.status(403).json({ msg: 'Organization suspended' }); return; }
         if (!!process.env.STRIPE_SECRET_KEY && !org.subscription) {
           res
             .status(HttpStatus.UNAUTHORIZED)

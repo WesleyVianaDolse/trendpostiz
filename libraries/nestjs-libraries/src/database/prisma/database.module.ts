@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { PlatformService } from './platform/platform.service';
 import {
   PrismaRepository,
   PrismaService,
@@ -64,6 +65,7 @@ import { InstagramCommentAutomationService } from '@gitroom/nestjs-libraries/ins
   controllers: [],
   providers: [
     PrismaService,
+    PlatformService,
     PrismaRepository,
     PrismaTransaction,
     UsersService,

@@ -26,10 +26,11 @@ export const startMcp = async (app: INestApplication) => {
   const resolveAuth = async (token: string) => {
     if (token.startsWith('pos_')) {
       const authorization = await oauthService.getOrgByOAuthToken(token);
-      if (!authorization) return null;
+      if (!authorization || authorization.organization.suspendedAt) return null;
       return authorization.organization;
     }
-    return organizationService.getOrgByApiKey(token);
+    const org = await organizationService.getOrgByApiKey(token);
+    return org?.suspendedAt ? null : org;
   };
 
   const mastra = await mastraService.mastra();

@@ -3,8 +3,11 @@
 import { AddProviderButton } from '@gitroom/frontend/components/launches/add.provider.component';
 import { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import SafeImage from '@gitroom/react/helpers/safe.image';
-import { capitalize, groupBy, orderBy } from 'lodash';
-import { CalendarWeekProvider } from '@gitroom/frontend/components/launches/calendar.context';
+import { capitalize } from 'lodash';
+import {
+  CalendarWeekProvider,
+  Integrations,
+} from '@gitroom/frontend/components/launches/calendar.context';
 import { Filters } from '@gitroom/frontend/components/launches/filters';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { LoadingComponent } from '@gitroom/frontend/components/layout/loading';
@@ -12,7 +15,6 @@ import clsx from 'clsx';
 import { useUser } from '../layout/user.context';
 import { Menu } from '@gitroom/frontend/components/launches/menu/menu';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Integration } from '@prisma/client';
 import ImageWithFallback from '@gitroom/react/helpers/image.with.fallback';
 import { useToaster } from '@gitroom/react/toaster/toaster';
 import { useFireEvents } from '@gitroom/helpers/utils/use.fire.events';
@@ -26,6 +28,13 @@ import { useT } from '@gitroom/react/translation/get.transation.service.client';
 import { useIntegrationList } from '@gitroom/frontend/components/launches/helpers/use.integration.list';
 import useCookie from 'react-use-cookie';
 import { Onboarding } from '@gitroom/frontend/components/onboarding/onboarding';
+import {
+  groupAccounts,
+  sortAccounts,
+  getNetworkName,
+} from './helpers/integration-groups';
+import { useModals } from '@gitroom/frontend/components/layout/new-modal';
+import { CustomerModal } from './customer.modal';
 
 export const SVGLine = () => {
   return (
@@ -74,12 +83,12 @@ export const SVGLine = () => {
 };
 interface MenuComponentInterface {
   refreshChannel: (
-    integration: Integration & {
+    integration: Integrations & {
       identifier: string;
     }
   ) => () => void;
   collapsed: boolean;
-  continueIntegration: (integration: Integration) => () => void;
+  continueIntegration: (integration: Integrations) => () => void;
   totalNonDisabledChannels: number;
   mutate: (shouldReload?: boolean) => void;
   update: (shouldReload: boolean) => void;
@@ -114,7 +123,7 @@ export const MenuGroupComponent: FC<
       id: string;
       name: string;
       values: Array<
-        Integration & {
+        Integrations & {
           identifier: string;
           changeProfilePicture: boolean;
           changeNickName: boolean;
@@ -133,16 +142,23 @@ export const MenuGroupComponent: FC<
     changeItemGroup,
     collapsed,
   } = props;
-  const [isOpen, setIsOpen] = useState(
-    !!+(localStorage.getItem(group.name + '_isOpen') || '1')
-  );
+  const t = useT();
+  const storageKey = `client-profiles:${group.id || 'unassigned'}`;
+  const [isOpen, setIsOpen] = useState(true);
+  useEffect(() => {
+    try {
+      setIsOpen(localStorage.getItem(storageKey) !== '0');
+    } catch {}
+  }, [storageKey]);
   const changeOpenClose = useCallback(
     (e: any) => {
       setIsOpen(!isOpen);
-      localStorage.setItem(group.name + '_isOpen', isOpen ? '0' : '1');
+      try {
+        localStorage.setItem(storageKey, isOpen ? '0' : '1');
+      } catch {}
       e.stopPropagation();
     },
-    [isOpen]
+    [isOpen, storageKey]
   );
   const [collectedProps, drop] = useDrop(() => ({
     accept: 'menu',
@@ -171,16 +187,21 @@ export const MenuGroupComponent: FC<
           </div>
         </div>
       )}
-      {!!group.name && (
-        <div
-          className="flex items-center gap-[5px] cursor-pointer"
+      {
+        <button
+          type="button"
+          aria-expanded={collapsed || isOpen}
+          aria-label={
+            group.name || t('customer_profiles_unassigned', 'No client')
+          }
+          className="flex items-center gap-2 text-start text-xs font-semibold text-textItemBlur group-[.sidebar]:justify-center"
           onClick={changeOpenClose}
         >
-          <div>
+          <div className="group-[.sidebar]:hidden">
             <OpenClose isOpen={isOpen} />
           </div>
           <div
-            className="line-clamp-1"
+            className="line-clamp-1 min-w-0 flex-1 group-[.sidebar]:hidden"
             {...(collapsed
               ? {
                   'data-tooltip-id': 'tooltip',
@@ -188,14 +209,20 @@ export const MenuGroupComponent: FC<
                 }
               : {})}
           >
-            {group.name}
+            {group.name || t('customer_profiles_unassigned', 'No client')}
           </div>
-        </div>
-      )}
+          <span
+            className="rounded-md bg-btnSimple px-1.5 py-0.5 text-[10px]"
+            title={group.name || t('customer_profiles_unassigned', 'No client')}
+          >
+            {group.values.length}
+          </span>
+        </button>
+      }
       <div
         className={clsx(
           'gap-[12px] flex flex-col relative',
-          !isOpen && 'hidden'
+          !isOpen && !collapsed && 'hidden'
         )}
       >
         {group.values.map((integration) => (
@@ -216,7 +243,7 @@ export const MenuGroupComponent: FC<
 };
 export const MenuComponent: FC<
   MenuComponentInterface & {
-    integration: Integration & {
+    integration: Integrations & {
       identifier: string;
       changeProfilePicture: boolean;
       changeNickName: boolean;
@@ -326,12 +353,18 @@ export const MenuComponent: FC<
             }
           : {})}
         role="Handle"
+        title={`${integration.name} · ${getNetworkName(
+          integration.identifier
+        )}`}
         className={clsx(
-          'group-[.sidebar]:hidden flex-1 whitespace-nowrap text-ellipsis overflow-hidden cursor-move',
+          'group-[.sidebar]:hidden min-w-0 flex-1 overflow-hidden cursor-move',
           integration.disabled && 'opacity-50'
         )}
       >
-        {integration.name}
+        <div className="truncate text-sm font-medium">{integration.name}</div>
+        <div className="mt-0.5 text-[11px] text-textItemBlur">
+          {getNetworkName(integration.identifier)}
+        </div>
       </div>
       <Menu
         canChangeProfilePicture={integration.changeProfilePicture}
@@ -358,6 +391,7 @@ export const LaunchesComponent = () => {
   const toast = useToaster();
   const fireEvents = useFireEvents();
   const t = useT();
+  const modal = useModals();
   const [reload, setReload] = useState(false);
   const [collapseMenu, setCollapseMenu] = useCookie('collapseMenu', '0');
   const [mode] = useCookie('mode', 'dark');
@@ -376,50 +410,61 @@ export const LaunchesComponent = () => {
           if (integration.id === id) {
             return {
               ...integration,
-              customer: {
-                id: group,
-              },
+              customer: group
+                ? integrations.find(
+                    (item: Integrations) => item.customer?.id === group
+                  )?.customer
+                : null,
             };
           }
           return integration;
         }),
         false
       );
-      await fetch(`/integrations/${id}/group`, {
-        method: 'PUT',
-        body: JSON.stringify({
-          group,
-        }),
-      });
-      mutate();
+      try {
+        const response = await fetch(`/integrations/${id}/group`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            group,
+          }),
+        });
+        if (!response.ok) throw new Error('Could not move account');
+      } catch {
+        await mutate(integrations, false);
+        toast.show(
+          t(
+            'customer_profiles_move_error',
+            'Could not move this account. Please try again.'
+          ),
+          'warning'
+        );
+      } finally {
+        mutate();
+      }
     },
-    [integrations]
+    [integrations, fetch, mutate, toast, t]
   );
   const sortedIntegrations = useMemo(() => {
-    return orderBy(
-      integrations,
-      ['type', 'disabled', 'identifier'],
-      ['desc', 'asc', 'asc']
-    );
+    return sortAccounts<Integrations>(integrations || []);
   }, [integrations]);
   const menuIntegrations = useMemo(() => {
-    return orderBy(
-      Object.values(
-        groupBy(sortedIntegrations, (o) => o?.customer?.id || '')
-      ).map((p) => ({
-        name: (p[0].customer?.name || '') as string,
-        id: (p[0].customer?.id || '') as string,
-        isEmpty: p.length === 0,
-        values: orderBy(
-          p,
-          ['type', 'disabled', 'identifier'],
-          ['desc', 'asc', 'asc']
-        ),
-      })),
-      ['isEmpty', 'name'],
-      ['desc', 'asc']
-    );
+    return groupAccounts(sortedIntegrations);
   }, [sortedIntegrations]);
+  const organizeCustomers = useCallback(() => {
+    modal.openModal({
+      title: t('customer_profiles_manage', 'Organize clients'),
+      size: '100%',
+      classNames: { modal: 'w-full max-w-[560px] text-textColor' },
+      children: (
+        <CustomerModal
+          integrations={sortedIntegrations}
+          onClose={() => {
+            mutate();
+          }}
+        />
+      ),
+    });
+  }, [modal, t, sortedIntegrations, mutate]);
   const update = useCallback(async (shouldReload: boolean) => {
     if (shouldReload) {
       setReload(true);
@@ -439,7 +484,7 @@ export const LaunchesComponent = () => {
   );
   const refreshChannel = useCallback(
     (
-        integration: Integration & {
+        integration: Integrations & {
           identifier: string;
         }
       ) =>
@@ -545,6 +590,15 @@ export const LaunchesComponent = () => {
               </div>
             </div>
             <div className="gap-[32px] flex flex-col select-none flex-1">
+              {sortedIntegrations.length > 0 && (
+                <button
+                  type="button"
+                  className="rounded-lg border border-newTableBorder px-3 py-2 text-start text-xs font-semibold text-textItemBlur hover:bg-boxHover group-[.sidebar]:hidden"
+                  onClick={organizeCustomers}
+                >
+                  {t('customer_profiles_manage', 'Organize clients')}
+                </button>
+              )}
               {sortedIntegrations.length === 0 && collapseMenu === '0' && (
                 <div className="flex-1 max-h-[500px] justify-center items-center flex">
                   <div className="flex flex-col gap-[12px] text-center">
@@ -570,7 +624,7 @@ export const LaunchesComponent = () => {
                 <MenuGroupComponent
                   collapsed={collapseMenu === '1'}
                   changeItemGroup={changeItemGroup}
-                  key={menu.name}
+                  key={menu.id}
                   group={menu}
                   mutate={mutate}
                   continueIntegration={continueIntegration}
@@ -594,6 +648,15 @@ export const LaunchesComponent = () => {
         </div>
         <div className="bg-newBgColorInner flex-1 flex-col flex p-[20px] gap-[12px] mobile:p-[12px] mobile:min-w-0 mobile:min-h-0">
           <div className="hidden mobile:flex gap-[8px] overflow-x-auto pb-[2px] scrollbar scrollbar-thumb-fifth scrollbar-track-newBgColor">
+            {sortedIntegrations.length > 0 && (
+              <button
+                type="button"
+                onClick={organizeCustomers}
+                className="shrink-0 rounded-lg border border-newTableBorder px-3 py-2 text-sm text-newTextColor"
+              >
+                {t('customer_profiles_manage', 'Organize clients')}
+              </button>
+            )}
             <div className="min-w-[172px] flex">
               <AddProviderButton update={() => update(true)} />
             </div>

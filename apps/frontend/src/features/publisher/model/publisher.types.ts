@@ -11,6 +11,7 @@ export interface PublisherIntegration {
   refreshNeeded?: boolean;
   additionalSettings?: string;
   stripLinks?: boolean;
+  customer?: { id?: string; name?: string } | null;
 }
 
 export type PublisherProviderSettings = Record<string, unknown>;

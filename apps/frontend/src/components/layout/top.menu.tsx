@@ -18,6 +18,7 @@ interface MenuItemInterface {
 }
 
 export const useMenuItem = () => {
+  const user = useUser();
   const { isGeneral } = useVariables();
   const t = useT();
   const fetch = useFetch();
@@ -190,6 +191,12 @@ export const useMenuItem = () => {
   ] satisfies MenuItemInterface[] as MenuItemInterface[];
 
   const secondMenu = [
+    {
+      name: 'Administração',
+      path: '/administration',
+      hide: !user?.isPlatformAdmin,
+      icon: <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 7v5c0 5 9 9 9 9s9-4 9-9V7l-9-4Z" stroke="currentColor" strokeWidth="1.7" /><path d="m8 12 3 3 5-6" stroke="currentColor" strokeWidth="1.7" /></svg>,
+    },
     {
       name: t('UGC', 'UGC'),
       icon: (

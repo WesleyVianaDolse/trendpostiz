@@ -3,6 +3,8 @@ import { AuthController } from '@gitroom/backend/api/routes/auth.controller';
 import { AuthService } from '@gitroom/backend/services/auth/auth.service';
 import { UsersController } from '@gitroom/backend/api/routes/users.controller';
 import { AuthMiddleware } from '@gitroom/backend/services/auth/auth.middleware';
+import { PlatformAdminMiddleware } from '@gitroom/backend/services/auth/platform-admin.middleware';
+import { PlatformAdminController } from './routes/platform-admin.controller';
 import { StripeController } from '@gitroom/backend/api/routes/stripe.controller';
 import { StripeService } from '@gitroom/nestjs-libraries/services/stripe.service';
 import { AnalyticsController } from '@gitroom/backend/api/routes/analytics.controller';
@@ -79,6 +81,7 @@ const authenticatedController = [
   imports: [UploadModule],
   controllers: [
     RootController,
+    PlatformAdminController,
     StripeController,
     AuthController,
     PublicController,
@@ -95,6 +98,7 @@ const authenticatedController = [
     OpenaiService,
     ExtractContentService,
     AuthMiddleware,
+    PlatformAdminMiddleware,
     PoliciesGuard,
     PermissionsService,
     CodesService,
@@ -118,6 +122,7 @@ const authenticatedController = [
 })
 export class ApiModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer.apply(PlatformAdminMiddleware).forRoutes(PlatformAdminController);
     consumer.apply(AuthMiddleware).forRoutes(...authenticatedController);
   }
 }

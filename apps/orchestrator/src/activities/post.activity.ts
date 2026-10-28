@@ -24,6 +24,8 @@ import {
 } from '@gitroom/nestjs-libraries/temporal/temporal.search.attribute';
 import { SubscriptionService } from '@gitroom/nestjs-libraries/database/prisma/subscriptions/subscription.service';
 import type { PostNotificationDetails } from '@gitroom/nestjs-libraries/emails/notification.email';
+import { PlatformService } from '@gitroom/nestjs-libraries/database/prisma/platform/platform.service';
+import { ApplicationFailure } from '@temporalio/common';
 
 // Drops fields the workflow and downstream activities never read — biggest wins are `error` (grows per retry) and `childrenPost` (Prisma side-loads it on every recursive row).
 function slimPost(post: any) {
@@ -63,7 +65,8 @@ export class PostActivity {
     private _refreshIntegrationService: RefreshIntegrationService,
     private _webhookService: WebhooksService,
     private _temporalService: TemporalService,
-    private _subscriptionService: SubscriptionService
+    private _subscriptionService: SubscriptionService,
+    private _platform: PlatformService
   ) {}
 
   @ActivityMethod()
@@ -163,6 +166,9 @@ export class PostActivity {
     integration: Integration,
     posts: Post[]
   ) {
+    if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
+      throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
+    }
     const getIntegration = this._integrationManager.getSocialIntegration(
       integration.providerIdentifier
     );
@@ -172,12 +178,7 @@ export class PostActivity {
       posts
     );
 
-    return getIntegration.comment(
-      integration.internalId,
-      postId,
-      lastPostId,
-      integration.token,
-      await Promise.all(
+    const payload = await Promise.all(
         (newPosts || []).map(async (p) => ({
           id: p.id,
           message: stripHtmlValidation(
@@ -195,13 +196,18 @@ export class PostActivity {
             getIntegration?.convertToJPEG || false
           ),
         }))
-      ),
-      integration
     );
+    if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
+      throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
+    }
+    return getIntegration.comment(integration.internalId, postId, lastPostId, integration.token, payload, integration);
   }
 
   @ActivityMethod()
   async postSocial(integration: Integration, posts: Post[]) {
+    if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
+      throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
+    }
     if (process.env.STRIPE_SECRET_KEY) {
       const subscription = await this._subscriptionService.getSubscription(
         integration.organizationId
@@ -221,10 +227,7 @@ export class PostActivity {
       posts
     );
 
-    const postNow = await getIntegration.post(
-      integration.internalId,
-      integration.token,
-      await Promise.all(
+    const payload = await Promise.all(
         (newPosts || []).map(async (p) => ({
           id: p.id,
           message: stripHtmlValidation(
@@ -242,9 +245,11 @@ export class PostActivity {
             getIntegration?.convertToJPEG || false
           ),
         }))
-      ),
-      integration
     );
+    if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
+      throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
+    }
+    const postNow = await getIntegration.post(integration.internalId, integration.token, payload, integration);
 
     await this._temporalService.client
       .getRawClient()
@@ -358,6 +363,7 @@ export class PostActivity {
     delay: number;
     information: any;
   }) {
+    if (!await this._platform.isOrganizationActive(data.orgId)) return;
     await this._integrationService.processInternalPlug(data);
   }
 

@@ -31,6 +31,8 @@ const nextConfig = {
     ];
   },
   reactStrictMode: false,
+  // jsdom reads bundled CSS assets from its package directory on the server.
+  serverExternalPackages: ['isomorphic-dompurify'],
   transpilePackages: ['crypto-hash'],
   // Enable production sourcemaps for Sentry
   productionBrowserSourceMaps: true,

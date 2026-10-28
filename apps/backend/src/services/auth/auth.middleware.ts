@@ -43,8 +43,14 @@ export class AuthMiddleware implements NestMiddleware {
         throw new HttpForbiddenException();
       }
 
-      if (!user.activated) {
+      // JWTs last a year. Permissions and suspension must come from the database on every request.
+      user = await this._userService.getUserById(user.id);
+      if (!user || !user.activated) {
         throw new HttpForbiddenException();
+      }
+      if (user.disabledAt) {
+        res.status(423).json({ code: 'USER_DISABLED', message: 'Sua conta está bloqueada. Entre em contato com o administrador.' });
+        return;
       }
 
       const impersonate = req.cookies.impersonate || req.headers.impersonate;
@@ -54,6 +60,10 @@ export class AuthMiddleware implements NestMiddleware {
         );
 
         if (loadImpersonate) {
+          if (loadImpersonate.user.disabledAt || loadImpersonate.organization.suspendedAt) {
+            res.status(423).json({ code: 'ORGANIZATION_SUSPENDED', message: 'A conta ou organização selecionada está suspensa.' });
+            return;
+          }
           user = loadImpersonate.user;
           user.isSuperAdmin = true;
           delete user.password;
@@ -79,10 +89,13 @@ export class AuthMiddleware implements NestMiddleware {
       const organization = (
         await this._organizationService.getOrgsByUserId(user.id)
       ).filter((f) => !f.users[0].disabled);
-      const setOrg =
-        organization.find((org) => org.id === orgHeader) || organization[0];
-
-      if (!organization) {
+      const activeOrganizations = organization.filter((org) => !org.suspendedAt);
+      const setOrg = activeOrganizations.find((org) => org.id === orgHeader) || activeOrganizations[0];
+      if (!setOrg && organization.length) {
+        res.status(423).json({ code: 'ORGANIZATION_SUSPENDED', message: 'Sua organização está suspensa. Entre em contato com o administrador.' });
+        return;
+      }
+      if (!setOrg) {
         throw new HttpForbiddenException();
       }
 

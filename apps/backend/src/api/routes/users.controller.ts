@@ -216,7 +216,7 @@ export class UsersController {
   @Get('/organizations')
   async getOrgs(@GetUserFromRequest() user: User) {
     return (await this._orgService.getOrgsByUserId(user.id)).filter(
-      (f) => !f.users[0].disabled
+      (f) => !f.users[0].disabled && !f.suspendedAt
     );
   }
 

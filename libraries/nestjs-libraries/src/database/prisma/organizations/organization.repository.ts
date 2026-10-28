@@ -57,6 +57,7 @@ export class OrganizationRepository {
     return this._organization.model.organization.findFirst({
       where: {
         apiKey: api,
+        suspendedAt: null,
       },
       include: {
         subscription: {
@@ -266,6 +267,7 @@ export class OrganizationRepository {
         },
         select: {
           id: true,
+          suspendedAt: true,
           subscription: {
             select: {
               subscriptionTier: true,
@@ -275,7 +277,7 @@ export class OrganizationRepository {
       }
     );
 
-    if (!organization) {
+    if (!organization || organization.suspendedAt) {
       throw new Error('Organization not found');
     }
 

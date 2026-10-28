@@ -47,6 +47,8 @@ export class PostsRepository {
           lt: dayjs.utc().toDate(),
         },
         state: 'QUEUE',
+        adminPausedAt: null,
+        organization: { suspendedAt: null },
         deletedAt: null,
         parentPostId: null,
       },
@@ -407,6 +409,10 @@ export class PostsRepository {
   }
 
   async changeState(id: string, state: State, err?: any, body?: any) {
+    if (state === 'ERROR') {
+      const held = await this._post.model.post.findUnique({ where: { id }, select: { adminPausedAt: true, organization: { select: { suspendedAt: true } } } });
+      if (held?.adminPausedAt || held?.organization.suspendedAt) return;
+    }
     const update = await this._post.model.post.update({
       where: {
         id,
@@ -473,6 +479,7 @@ export class PostsRepository {
               state: isDraft ? 'DRAFT' : 'QUEUE',
               releaseId: null,
               releaseURL: null,
+              adminPausedAt: null,
             }
           : {}),
       },
@@ -515,6 +522,7 @@ export class PostsRepository {
 
     for (const value of body.value) {
       const updateData = (type: 'create' | 'update') => ({
+        ...(state === 'schedule' || state === 'now' ? { adminPausedAt: null, error: null } : {}),
         publishDate: dayjs(date).toDate(),
         integration: {
           connect: {

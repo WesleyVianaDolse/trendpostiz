@@ -147,7 +147,7 @@ export class AuthController {
         throw new Error('Invitation is invalid or has expired');
       }
 
-      const { jwt, addedOrg } = await this._authService.routeAuth(
+      const { jwt, addedOrg, platformAdmin } = await this._authService.routeAuth(
         body.provider,
         body,
         ip,
@@ -200,7 +200,7 @@ export class AuthController {
         }
       }
 
-      response.header('reload', 'true');
+      response.header('reload', platformAdmin ? '/administration' : 'true');
       response.status(200).json({
         login: true,
       });
@@ -306,7 +306,7 @@ export class AuthController {
     @Param('provider') provider: string,
     @Res({ passthrough: false }) response: Response
   ) {
-    const { jwt, token } = await this._authService.checkExists(
+    const { jwt, token, platformAdmin } = await this._authService.checkExists(
       provider,
       code,
       redirect_uri
@@ -332,7 +332,7 @@ export class AuthController {
       response.header('auth', jwt);
     }
 
-    response.header('reload', 'true');
+    response.header('reload', platformAdmin ? '/administration' : 'true');
 
     response.status(200).json({
       login: true,

@@ -136,13 +136,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL('/launches', nextUrl.href));
   }
 
-  if (
-    nextUrl.pathname.startsWith('/auth/register') &&
-    process.env.DISABLE_REGISTRATION === 'true'
-  ) {
-    return NextResponse.redirect(new URL('/auth/login', nextUrl.href));
-  }
-
   const url = new URL(nextUrl).search;
   if (
     !nextUrl.pathname.startsWith('/auth') &&

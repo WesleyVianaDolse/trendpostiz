@@ -12,6 +12,8 @@ model Organization {
   id                  String               @id @default(uuid())
   name                String
   description         String?
+  suspendedAt         DateTime?
+  suspensionReason    String?
   apiKey              String?
   paymentId           String?
   streakSince         DateTime?
@@ -46,7 +48,32 @@ model Organization {
 
   @@index([apiKey])
   @@index([streakSince])
+  @@index([suspendedAt])
   @@index([paymentId])
+}
+
+// One row (id = platform). Missing row preserves the installation's registration default.
+model PlatformSettings {
+  id                          String   @id @default("platform")
+  ownerUserId                 String   @unique
+  owner                       User     @relation(fields: [ownerUserId], references: [id], onDelete: Restrict)
+  registrationEnabled         Boolean  @default(true)
+  organizationCreationEnabled Boolean  @default(true)
+  updatedAt                   DateTime @updatedAt
+}
+
+model AdminAuditLog {
+  id         String   @id @default(uuid())
+  actorId    String
+  action     String
+  targetType String
+  targetId   String
+  reason     String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([targetType, targetId])
 }
 
 model Tags {
@@ -84,6 +111,10 @@ model User {
   name                  String?
   lastName              String?
   isSuperAdmin          Boolean              @default(false)
+  isPlatformAdmin       Boolean              @default(false)
+  ownedPlatform         PlatformSettings?
+  disabledAt            DateTime?
+  disabledReason        String?
   bio                   String?
   audience              Int                  @default(0)
   pictureId             String?
@@ -119,6 +150,7 @@ model User {
   @@index([inviteId])
   @@index([account])
   @@index([lastOnline])
+  @@index([disabledAt])
   @@index([pictureId])
 }
 
@@ -505,6 +537,7 @@ model Comments {
 model Post {
   id                         String                    @id @default(cuid())
   state                      State                     @default(QUEUE)
+  adminPausedAt              DateTime?
   publishDate                DateTime
   organizationId             String
   integrationId              String
@@ -541,6 +574,7 @@ model Post {
   tags                       TagsPosts[]
 
   @@index([group])
+  @@index([organizationId, adminPausedAt])
   @@index([deletedAt])
   @@index([publishDate])
   @@index([state])

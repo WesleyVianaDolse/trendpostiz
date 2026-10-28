@@ -11,6 +11,7 @@ import { NotificationService } from '@gitroom/nestjs-libraries/database/prisma/n
 import { ForgotReturnPasswordDto } from '@gitroom/nestjs-libraries/dtos/auth/forgot-return.password.dto';
 import { EmailService } from '@gitroom/nestjs-libraries/services/email.service';
 import { NewsletterService } from '@gitroom/nestjs-libraries/newsletter/newsletter.service';
+import { PlatformService } from '@gitroom/nestjs-libraries/database/prisma/platform/platform.service';
 
 @Injectable()
 export class AuthService {
@@ -19,17 +20,11 @@ export class AuthService {
     private _organizationService: OrganizationService,
     private _notificationService: NotificationService,
     private _emailService: EmailService,
-    private _providerManager: AuthProviderManager
+    private _providerManager: AuthProviderManager,
+    private _platform: PlatformService
   ) {}
   async canRegister(provider: string) {
-    if (
-      process.env.DISABLE_REGISTRATION !== 'true' ||
-      provider === Provider.GENERIC
-    ) {
-      return true;
-    }
-
-    return (await this._organizationService.getCount()) === 0;
+    return this._platform.canRegister();
   }
 
   async routeAuth(
@@ -52,6 +47,7 @@ export class AuthService {
       }
 
       body.email = body.email.trim().toLowerCase();
+      if (addToOrg && typeof addToOrg !== 'boolean') await this._platform.assertOrganizationActive(addToOrg.orgId);
       if (
         addToOrg &&
         typeof addToOrg !== 'boolean' &&
@@ -63,6 +59,7 @@ export class AuthService {
       }
 
       const user = await this._userService.getUserByEmail(body.email);
+      if (user?.disabledAt) throw new Error('Sua conta está bloqueada. Entre em contato com o administrador.');
       if (body instanceof CreateOrgUserDto) {
         if (user) {
           throw new Error('Email already exists');
@@ -97,7 +94,7 @@ export class AuthService {
           ? { organizationId: invitedUser.organizationId }
           : false;
 
-        const obj = { addedOrg, jwt: await this.jwt(createdUser) };
+        const obj = { addedOrg, jwt: await this.jwt(createdUser), platformAdmin: !!createdUser.isPlatformAdmin };
         await this._emailService.sendEmail(
           body.email,
           'Activate your account',
@@ -125,7 +122,7 @@ export class AuthService {
             )
           : false;
 
-      return { addedOrg, jwt: await this.jwt(user) };
+      return { addedOrg, jwt: await this.jwt(user), platformAdmin: !!user.isPlatformAdmin };
     }
 
     const user = await this.loginOrRegisterProvider(
@@ -144,7 +141,7 @@ export class AuthService {
             addToOrg.role
           )
         : false;
-    return { addedOrg, jwt: await this.jwt(user) };
+    return { addedOrg, jwt: await this.jwt(user), platformAdmin: !!user.isPlatformAdmin };
   }
 
   public getOrgFromCookie(cookie?: string) {
@@ -187,6 +184,7 @@ export class AuthService {
       provider
     );
     if (user) {
+      if (user.disabledAt) throw new Error('Sua conta está bloqueada. Entre em contato com o administrador.');
       return user;
     }
 
@@ -340,13 +338,18 @@ export class AuthService {
       provider as Provider
     );
     if (checkExists) {
-      return { jwt: await this.jwt(checkExists) };
+      return { jwt: await this.jwt(checkExists), platformAdmin: !!checkExists.isPlatformAdmin };
     }
 
     return { token };
   }
 
   private async jwt(user: User) {
+    if (user.disabledAt) throw new Error('Sua conta está bloqueada. Entre em contato com o administrador.');
+    const orgs = (await this._organizationService.getOrgsByUserId(user.id)).filter((org) => !org.users[0]?.disabled);
+    if (user.activated && !user.isPlatformAdmin && orgs.length && orgs.every((org) => org.suspendedAt)) {
+      throw new Error('Sua organização está suspensa. Entre em contato com o administrador.');
+    }
     if (user.password) {
       delete user.password;
     }

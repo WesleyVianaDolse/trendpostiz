@@ -87,6 +87,8 @@ export const CalendarContext = createContext({
 });
 
 export interface Integrations {
+  internalId?: string;
+  refreshNeeded?: boolean;
   name: string;
   id: string;
   disabled?: boolean;

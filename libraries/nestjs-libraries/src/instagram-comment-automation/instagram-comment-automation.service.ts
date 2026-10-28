@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PlatformService } from '@gitroom/nestjs-libraries/database/prisma/platform/platform.service';
 import { InstagramCommentAutomationRepository } from '@gitroom/nestjs-libraries/database/prisma/instagram-comment-automations/instagram-comment-automation.repository';
 import { matchesInstagramComment } from '@gitroom/nestjs-libraries/instagram-comment-automation/instagram-comment-matching';
 import { InstagramMetaApiError } from '@gitroom/nestjs-libraries/integrations/social/instagram-standalone-messaging.service';
@@ -23,7 +24,8 @@ const PRIVATE_REPLY_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 export class InstagramCommentAutomationService {
   constructor(
     private _repository: InstagramCommentAutomationRepository,
-    private _messaging: InstagramCommentMessagingService
+    private _messaging: InstagramCommentMessagingService,
+    private _platform: PlatformService
   ) {}
 
   async prepare(
@@ -31,6 +33,11 @@ export class InstagramCommentAutomationService {
   ): Promise<InstagramCommentAutomationPreparation> {
     const event = await this._repository.findEventForProcessing(webhookEventId);
     if (!event) return { process: false, reason: 'event_not_found' };
+    if (event.automationExecution?.processedAt) return { process: false, reason: 'already_processed' };
+    if (event.integration && !await this._platform.isOrganizationActive(event.integration.organizationId)) {
+      await this._repository.updateEventStatus(event.id, 'SKIPPED');
+      return { process: false, reason: 'organization_suspended' };
+    }
 
     const integrationCapabilities = event.integration
       ? getInstagramIntegrationCapabilities(event.integration)
@@ -235,6 +242,10 @@ export class InstagramCommentAutomationService {
       executionId
     );
     if (!execution) return null;
+    if (!await this._platform.isOrganizationActive(execution.automation.integration.organizationId)) {
+      await this._repository.updateDeliveryFailure(executionId, delivery, 'Organização suspensa.');
+      return null;
+    }
     const status =
       delivery === 'public'
         ? execution.publicReplyStatus
