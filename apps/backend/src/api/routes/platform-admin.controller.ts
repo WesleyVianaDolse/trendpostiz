@@ -1,11 +1,13 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
   Post,
   Query,
+  HttpCode,
 } from '@nestjs/common';
 import {
   IsBoolean,
@@ -24,6 +26,7 @@ import { Type } from 'class-transformer';
 import { User } from '@prisma/client';
 import { GetUserFromRequest } from '@gitroom/nestjs-libraries/user/user.from.request';
 import { PlatformService } from '@gitroom/nestjs-libraries/database/prisma/platform/platform.service';
+import { OrganizationDeletionService } from '../../services/organization-deletion.service';
 
 export class AdminListQuery {
   @IsOptional() @IsString() @MaxLength(200) search = '';
@@ -44,6 +47,9 @@ export class AdminUserStatusDto {
 export class AdminPermissionDto {
   @IsBoolean() enabled: boolean;
 }
+export class AdminDeleteOrganizationDto {
+  @IsString() @Length(1, 500) confirmation: string;
+}
 export class AdminCreateOrganizationDto {
   @IsString() @Length(1, 160) @Matches(/\S/) name: string;
   @IsOptional() @IsString() @Length(1, 100) ownerUserId?: string;
@@ -61,7 +67,10 @@ export class AdminCreateUserDto {
 
 @Controller('/platform-admin')
 export class PlatformAdminController {
-  constructor(private readonly platform: PlatformService) {}
+  constructor(
+    private readonly platform: PlatformService,
+    private readonly deletion: OrganizationDeletionService
+  ) {}
   @Get('/session')
   async session(@GetUserFromRequest() user: User) {
     const settings = await this.platform.settings();
@@ -92,6 +101,29 @@ export class PlatformAdminController {
   }
   @Get('/organizations/:id') organization(@Param('id') id: string) {
     return this.platform.organization(id);
+  }
+  @Get('/organizations/:id/deletion-preview') deletionPreview(
+    @GetUserFromRequest() user: User,
+    @Param('id') id: string
+  ) {
+    return this.platform.organizationDeletionPreview(user.id, id);
+  }
+  @Delete('/organizations/:id')
+  @HttpCode(202)
+  async deleteOrganization(
+    @GetUserFromRequest() user: User,
+    @Param('id') id: string,
+    @Body() body: AdminDeleteOrganizationDto
+  ) {
+    const result = await this.platform.requestOrganizationDeletion(
+      user.id,
+      id,
+      body.confirmation
+    );
+    void this.deletion.process(id).catch(() => {
+      /* Reconciliation retries a transient startup failure. */
+    });
+    return result;
   }
   @Post('/organizations') createOrganization(
     @GetUserFromRequest() user: User,

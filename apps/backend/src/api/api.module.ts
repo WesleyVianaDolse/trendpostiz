@@ -5,6 +5,7 @@ import { UsersController } from '@gitroom/backend/api/routes/users.controller';
 import { AuthMiddleware } from '@gitroom/backend/services/auth/auth.middleware';
 import { PlatformAdminMiddleware } from '@gitroom/backend/services/auth/platform-admin.middleware';
 import { PlatformAdminController } from './routes/platform-admin.controller';
+import { OrganizationDeletionService } from '../services/organization-deletion.service';
 import { StripeController } from '@gitroom/backend/api/routes/stripe.controller';
 import { StripeService } from '@gitroom/nestjs-libraries/services/stripe.service';
 import { AnalyticsController } from '@gitroom/backend/api/routes/analytics.controller';
@@ -99,6 +100,7 @@ const authenticatedController = [
     ExtractContentService,
     AuthMiddleware,
     PlatformAdminMiddleware,
+    OrganizationDeletionService,
     PoliciesGuard,
     PermissionsService,
     CodesService,

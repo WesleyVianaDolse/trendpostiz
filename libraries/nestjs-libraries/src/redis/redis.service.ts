@@ -13,9 +13,25 @@ class MockRedis {
     return 'OK';
   }
 
-  async del(key: string) {
-    this.data.delete(key);
-    return 1;
+  async del(...keys: string[]) {
+    return keys.reduce(
+      (count, key) => count + Number(this.data.delete(key)),
+      0
+    );
+  }
+  async mget(...keys: string[]) {
+    return keys.map((key) => this.data.get(key) ?? null);
+  }
+  async scan(_cursor: string, _match: string, pattern: string) {
+    const expression = new RegExp(
+      '^' +
+        pattern
+          .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+          .replace(/\*/g, '.*')
+          .replace(/\?/g, '.') +
+        '$'
+    );
+    return ['0', [...this.data.keys()].filter((key) => expression.test(key))];
   }
 
   // Add other Redis methods as needed for your tests

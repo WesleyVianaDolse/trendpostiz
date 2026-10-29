@@ -43,6 +43,24 @@ O comando usa o `.env` do diretório atual ou as variáveis do processo. Não ac
 
 Antes da inicialização, a regra de cadastro conserva o valor atual de `DISABLE_REGISTRATION` e a exceção de primeira conta em instalação vazia. Ao inicializar, esse valor é salvo como configuração inicial. Depois disso, o banco passa a ser a fonte das configurações; mudar a variável não sobrepõe o que foi salvo no painel.
 
+## Exclusão definitiva de organizações
+
+Na aba **Organizações**, o titular da plataforma pode clicar em **Excluir**. A tela apresenta uma prévia do impacto e exige digitar exatamente o nome atual da organização; a API confere novamente o nome e a permissão do titular. Administradores delegados não podem iniciar exclusões definitivas.
+
+A operação apaga os registros da organização, vínculos, credenciais, publicações agendadas, automações, eventos de comentários, configurações, histórico administrativo identificável e memória de IA vinculada. Também remove arquivos próprios do armazenamento local ou Cloudflare R2, miniaturas conhecidas, uploads temporários e caches/estados OAuth identificados no Redis. Os agendamentos são encerrados e seus históricos são solicitados para exclusão no Temporal. Não há exportação, arquivo de recuperação ou opção de desfazer.
+
+Usuários exclusivos da organização são excluídos. Contas compartilhadas com outras organizações e contas administrativas são preservadas; suas imagens de perfil podem ser desvinculadas se pertencerem à organização excluída. Arquivos que também possuem registro de propriedade em outra organização são preservados para aquele cliente. Relações opcionais em registros de outras organizações são desvinculadas; seu conteúdo é preservado. Pedidos/conversas do marketplace que impedem a separação entre organizações bloqueiam a operação antes de iniciá-la.
+
+A exclusão ocorre em etapas. A organização é bloqueada imediatamente e aparece como **Exclusão em andamento** até terminar. O backend remove primeiro os dados externos e arquivos e só então conclui a remoção dos registros em uma transação. Falhas deixam uma mensagem de pendência; o backend tenta novamente e o titular também pode usar **Tentar exclusão novamente**. Reiniciar o servidor não perde a solicitação: apenas o estado da operação fica na própria organização até sua eliminação, sem criar cópia dos dados.
+
+O registro técnico final contém o autor administrativo, data, contagens e ID opaco, sem nome, e-mail ou conteúdo do cliente removido. Publicações já feitas nas redes sociais, cobrança em provedores de pagamento, exportações manuais, backups e logs de infraestrutura externos não são apagados por este botão. Esses serviços precisam de tratamento próprio quando fizerem parte da solicitação de eliminação.
+
+Esta alteração exige aplicar o schema com as novas colunas de controle em `Organization`, incluídas na migração `20261028010000_organization_deletion`, e atualizar backend e frontend. A permissão do titular já configurada não precisa ser inicializada novamente. A limpeza física no R2 foi implementada no método `CloudflareStorage.removeFile`.
+
+Os testes de integração usam somente um PostgreSQL local descartável com nome de banco/usuário `deletion_test`, passado explicitamente em `ORGANIZATION_DELETION_TEST_DATABASE_URL`; eles ficam desabilitados sem essa variável e recusam URLs de produção. Os arquivos usados nos testes são fictícios e ficam em diretórios temporários próprios.
+
+Validação da exclusão em 28/10/2026: 37 testes aprovados, incluindo quatro testes com PostgreSQL isolado e arquivos físicos locais, limpeza de memória/rastros de IA identificados, falha e nova tentativa, e proteção de outra organização. Chamadas do Cloudflare, Temporal e Redis foram verificadas com mocks, sem acessar serviços de produção. A confirmação foi exercitada em navegador no desktop/celular, e o build padrão de produção do frontend e as checagens de tipos foram aprovados.
+
 ## Verificações
 
 ```sh

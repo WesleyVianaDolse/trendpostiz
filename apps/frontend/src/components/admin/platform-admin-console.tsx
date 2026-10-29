@@ -34,6 +34,8 @@ interface Organization {
   createdAt: string;
   suspendedAt: string | null;
   suspensionReason: string | null;
+  deletionRequestedAt?: string | null;
+  deletionError?: string | null;
   _count: { users: number; Integration: number };
 }
 interface User {
@@ -74,6 +76,7 @@ interface Audit {
   createdAt: string;
 }
 type Operation =
+  | { kind: 'delete'; organization: Organization }
   | { kind: 'suspend'; organization: Organization }
   | { kind: 'disable'; user: User }
   | { kind: 'admin'; user: User }
@@ -335,8 +338,10 @@ function Overview() {
 
 function Organizations({
   onAction,
+  canDelete,
 }: {
   onAction: (operation: Operation) => void;
+  canDelete: boolean;
 }) {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
@@ -407,25 +412,55 @@ function Organizations({
                     </td>
                     <td className="p-4">
                       <StateBadge suspended={!!org.suspendedAt}>
-                        {org.suspendedAt ? 'Suspensa' : 'Ativa'}
+                        {org.deletionRequestedAt
+                          ? 'Exclusão em andamento'
+                          : org.suspendedAt
+                          ? 'Suspensa'
+                          : 'Ativa'}
                       </StateBadge>
                       {org.suspensionReason && (
                         <p className="mt-2 max-w-xs text-xs text-textItemBlur">
                           {org.suspensionReason}
                         </p>
                       )}
+                      {org.deletionError && (
+                        <p
+                          role="alert"
+                          className="mt-2 max-w-xs text-xs text-red-400"
+                        >
+                          {org.deletionError}
+                        </p>
+                      )}
                     </td>
                     <td className="p-4">{org._count.users}</td>
                     <td className="p-4">{org._count.Integration}</td>
                     <td className="p-4">
-                      <button
-                        className={buttonClass}
-                        onClick={() =>
-                          onAction({ kind: 'suspend', organization: org })
-                        }
-                      >
-                        {org.suspendedAt ? 'Reativar' : 'Suspender'}
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          className={buttonClass}
+                          disabled={!!org.deletionRequestedAt}
+                          onClick={() =>
+                            onAction({ kind: 'suspend', organization: org })
+                          }
+                        >
+                          {org.suspendedAt ? 'Reativar' : 'Suspender'}
+                        </button>
+                        {canDelete && (
+                          <button
+                            className={`${buttonClass} border-red-500/30 text-red-400 hover:bg-red-500/10`}
+                            disabled={
+                              !!org.deletionRequestedAt && !org.deletionError
+                            }
+                            onClick={() =>
+                              onAction({ kind: 'delete', organization: org })
+                            }
+                          >
+                            {org.deletionError
+                              ? 'Tentar exclusão novamente'
+                              : 'Excluir'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -722,6 +757,7 @@ function SettingsPanel({
   );
 }
 const actionNames: Record<string, string> = {
+  'organization.delete': 'Organização excluída permanentemente',
   'admin.initialize': 'Administrador inicial configurado',
   'settings.update': 'Configurações alteradas',
   'organization.suspend': 'Organização suspensa',
@@ -778,6 +814,166 @@ function AuditPanel() {
   );
 }
 
+interface DeletionPreview {
+  id: string;
+  name: string;
+  posts: number;
+  socialAccounts: number;
+  media: number;
+  deletedUsers: number;
+  preservedUsers: number;
+  hasExternalBilling: boolean;
+  blocker: string | null;
+}
+
+function DeleteOrganizationDialog({
+  organization,
+  busy,
+  error,
+  onClose,
+  onSubmit,
+}: {
+  organization: Organization;
+  busy: boolean;
+  error: string;
+  onClose: () => void;
+  onSubmit: (path: string, body: unknown, method?: string) => Promise<boolean>;
+}) {
+  const [confirmation, setConfirmation] = useState('');
+  const {
+    data,
+    error: previewError,
+    isLoading,
+    mutate,
+  } = useAdminData<DeletionPreview>(
+    `/organizations/${encodeURIComponent(organization.id)}/deletion-preview`
+  );
+  const allowed =
+    !!data &&
+    !data.blocker &&
+    confirmation === data.name &&
+    !previewError &&
+    !busy;
+  return (
+    <Dialog
+      title="Excluir organização permanentemente"
+      onClose={onClose}
+      busy={busy}
+    >
+      <form
+        className="space-y-5"
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (
+            allowed &&
+            (await onSubmit(
+              `/organizations/${encodeURIComponent(organization.id)}`,
+              { confirmation },
+              'DELETE'
+            ))
+          )
+            onClose();
+        }}
+      >
+        <p className="text-sm text-red-400">
+          Esta ação é definitiva e não pode ser desfeita. Não será criada uma
+          cópia de recuperação.
+        </p>
+        <p className="break-all font-semibold">
+          {data?.name || organization.name}
+        </p>
+        <p className="break-all text-xs text-textItemBlur">
+          ID: {organization.id}
+        </p>
+        {isLoading && <p role="status">Conferindo os dados vinculados…</p>}
+        {previewError && (
+          <Notice error>
+            {previewError.message}{' '}
+            <button
+              type="button"
+              className="underline"
+              onClick={() => mutate()}
+            >
+              Tentar novamente
+            </button>
+          </Notice>
+        )}
+        {data && (
+          <>
+            <ul className="space-y-1 rounded-xl border border-newTableBorder p-4 text-sm">
+              <li>{data.posts} registros de publicações</li>
+              <li>
+                {data.socialAccounts} contas de redes sociais e credenciais
+              </li>
+              <li>
+                {data.media} itens de mídia, incluindo os arquivos próprios
+                armazenados
+              </li>
+              <li>{data.deletedUsers} usuários exclusivos serão excluídos</li>
+              <li>
+                {data.preservedUsers} usuários compartilhados ou administrativos
+                serão preservados
+              </li>
+            </ul>
+            <p className="text-sm text-textItemBlur">
+              Agendamentos, automações, vínculos e demais dados desta
+              organização serão removidos. A organização ficará bloqueada
+              durante a limpeza e sairá da lista ao concluir.
+            </p>
+            <p className="text-sm text-textItemBlur">
+              Publicações já feitas nas redes sociais não são removidas por esta
+              ação.
+            </p>
+            {data.hasExternalBilling && (
+              <Notice error>
+                Confira e cancele eventuais cobranças no serviço de pagamentos.
+                A exclusão da organização não cancela cobranças externas.
+              </Notice>
+            )}
+            {data.blocker && <Notice error>{data.blocker}</Notice>}
+            <label className="block space-y-2">
+              <span className="block text-sm">
+                Digite exatamente{' '}
+                <strong className="break-all">{data.name}</strong> para
+                confirmar:
+              </span>
+              <input
+                aria-label="Nome da organização para confirmar exclusão"
+                autoComplete="off"
+                spellCheck={false}
+                maxLength={500}
+                required
+                className={inputClass}
+                value={confirmation}
+                disabled={busy || !!data.blocker}
+                onChange={(event) => setConfirmation(event.target.value)}
+              />
+            </label>
+          </>
+        )}
+        {error && <Notice error>{error}</Notice>}
+        <div className="flex flex-wrap justify-end gap-3 border-t border-newTableBorder pt-4">
+          <button
+            type="button"
+            className={buttonClass}
+            disabled={busy}
+            onClick={onClose}
+          >
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            disabled={!allowed}
+            className={`${buttonClass} border-transparent bg-red-600 text-white hover:bg-red-700`}
+          >
+            {busy ? 'Iniciando exclusão…' : 'Excluir permanentemente'}
+          </button>
+        </div>
+      </form>
+    </Dialog>
+  );
+}
+
 function ActionForm({
   operation,
   busy,
@@ -785,7 +981,7 @@ function ActionForm({
   onClose,
   error,
 }: {
-  operation: Operation;
+  operation: Exclude<Operation, { kind: 'delete' }>;
   busy: boolean;
   onSubmit: (path: string, body: unknown, method?: string) => Promise<boolean>;
   onClose: () => void;
@@ -1076,9 +1272,16 @@ export function PlatformAdminConsole() {
         })
       );
       await mutate(
-        (key) => typeof key === 'string' && key.startsWith('/platform-admin')
+        (key) =>
+          typeof key === 'string' &&
+          key.startsWith('/platform-admin') &&
+          !key.endsWith('/deletion-preview')
+      ).catch(() => undefined);
+      setNotice(
+        method === 'DELETE'
+          ? 'Exclusão definitiva iniciada. A organização está bloqueada e sairá da lista quando a limpeza dos dados e arquivos terminar.'
+          : 'Alteração salva com sucesso.'
       );
-      setNotice('Alteração salva com sucesso.');
       return true;
     } catch (failure) {
       setError(
@@ -1158,6 +1361,7 @@ export function PlatformAdminConsole() {
             {tab === 'overview' && <Overview />}
             {tab === 'organizations' && (
               <Organizations
+                canDelete={session.isOwner}
                 onAction={(op) => {
                   setError('');
                   setOperation(op);
@@ -1180,7 +1384,19 @@ export function PlatformAdminConsole() {
               />
             )}
             {tab === 'audit' && <AuditPanel />}
-            {operation && (
+            {operation?.kind === 'delete' && (
+              <DeleteOrganizationDialog
+                organization={operation.organization}
+                busy={busy}
+                error={error}
+                onSubmit={save}
+                onClose={() => {
+                  setOperation(null);
+                  setError('');
+                }}
+              />
+            )}
+            {operation && operation.kind !== 'delete' && (
               <ActionForm
                 operation={operation}
                 busy={busy}

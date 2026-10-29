@@ -72,6 +72,7 @@ export class NoAuthIntegrationsController {
     }
 
     const org = await this._organizationService.getOrgById(organization);
+    if (!org || org.suspendedAt || org.deletionRequestedAt) throw new Error('Organization is unavailable');
 
     if (!integrationProvider.customFields) {
       await ioRedis.del(`login:${body.state}`);
@@ -326,7 +327,7 @@ export class NoAuthIntegrationsController {
     }
 
     const org = await this._organizationService.getOrgById(organization);
-
+    if (!org || org.suspendedAt || org.deletionRequestedAt) throw new Error('Organization is unavailable');
     return this._integrationService.saveProviderPage(org.id, id, body);
   }
 
@@ -345,6 +346,8 @@ export class NoAuthIntegrationsController {
     if (!integrationId || !organizationId || !internalId || !provider) {
       throw new HttpException('Invalid token payload', 400);
     }
+    const organization = await this._organizationService.getOrgById(organizationId);
+    if (!organization || organization.suspendedAt || organization.deletionRequestedAt) throw new HttpException('Organization is unavailable', 403);
 
     const integration = await this._integrationService.getIntegrationById(
       organizationId,

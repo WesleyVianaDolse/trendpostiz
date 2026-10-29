@@ -4,7 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { createReadStream, createWriteStream } from 'fs';
-import { mkdir, readFile, rename, rm, stat, writeFile } from 'fs/promises';
+import {
+  mkdir,
+  readFile,
+  readdir,
+  realpath,
+  rename,
+  rm,
+  stat,
+  writeFile,
+} from 'fs/promises';
 import { randomUUID } from 'crypto';
 import path from 'path';
 import { pipeline } from 'stream/promises';
@@ -46,6 +55,36 @@ interface UploadMetadata {
 
 @Injectable()
 export class ResumableUploadService {
+  async purgeOrganizationUploads(
+    organizationId: string,
+    removeFile: (url: string) => Promise<void>
+  ) {
+    const base = path.resolve(this.temporaryDirectory);
+    const entries = await readdir(base, { withFileTypes: true }).catch(
+      (error) => {
+        if (error.code === 'ENOENT') return [];
+        throw error;
+      }
+    );
+    for (const entry of entries) {
+      if (!entry.isDirectory() || !UPLOAD_ID_PATTERN.test(entry.name)) continue;
+      const target = path.resolve(this.uploadPath(entry.name));
+      const relative = path.relative(base, target);
+      if (!relative || relative.startsWith('..') || path.isAbsolute(relative))
+        throw new Error('Unsafe upload directory');
+      const [actualBase, actualTarget] = await Promise.all([
+        realpath(base),
+        realpath(target),
+      ]);
+      const resolved = path.relative(actualBase, actualTarget);
+      if (!resolved || resolved.startsWith('..') || path.isAbsolute(resolved))
+        throw new Error('Unsafe upload directory');
+      const metadata = await this.readMetadata(entry.name);
+      if (metadata.organizationId !== organizationId) continue;
+      if (metadata.completedPath) await removeFile(metadata.completedPath);
+      await rm(target, { recursive: true, force: true });
+    }
+  }
   get chunkSize() {
     return CHUNK_SIZE;
   }

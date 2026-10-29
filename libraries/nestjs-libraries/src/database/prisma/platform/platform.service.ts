@@ -8,6 +8,7 @@ import { Prisma, Role } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { AuthService } from '@gitroom/helpers/auth/auth.service';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
+import { deletionSummary, organizationDeletionScope } from './organization-deletion';
 
 const userFields = {
   id: true,
@@ -168,6 +169,8 @@ export class PlatformService {
           createdAt: true,
           suspendedAt: true,
           suspensionReason: true,
+          deletionRequestedAt: true,
+          deletionError: true,
           _count: {
             select: {
               users: true,
@@ -190,6 +193,8 @@ export class PlatformService {
         createdAt: true,
         suspendedAt: true,
         suspensionReason: true,
+        deletionRequestedAt: true,
+        deletionError: true,
         users: {
           select: {
             id: true,
@@ -370,6 +375,7 @@ export class PlatformService {
     return this.write(actorId, async (tx) => {
       const org = await tx.organization.findUnique({ where: { id } });
       if (!org) throw new NotFoundException('Organização não encontrada.');
+      if (org.deletionRequestedAt) throw new BadRequestException('A exclusão definitiva já foi iniciada. Não é possível reativar esta organização.');
       if (!!org.suspendedAt === suspended)
         return { id, suspended, heldPosts: 0 };
       const now = new Date();
@@ -435,6 +441,28 @@ export class PlatformService {
         },
       });
       return { id, suspended, heldPosts };
+    });
+  }
+
+  async organizationDeletionPreview(actorId: string, id: string) {
+    const settings = await this.settings();
+    if (actorId !== settings.ownerUserId) throw new ForbiddenException('Somente o titular pode excluir organizações permanentemente.');
+    return deletionSummary(await organizationDeletionScope(this.prisma, id, [actorId, settings.ownerUserId]));
+  }
+
+  requestOrganizationDeletion(actorId: string, id: string, confirmation: string) {
+    return this.write(actorId, async (tx, ownerId) => {
+      if (actorId !== ownerId) throw new ForbiddenException('Somente o titular pode excluir organizações permanentemente.');
+      const scope = await organizationDeletionScope(tx, id, [actorId, ownerId]);
+      if (confirmation !== scope.organization.name) throw new BadRequestException('Digite exatamente o nome da organização para confirmar a exclusão.');
+      if (scope.blocker) throw new BadRequestException(scope.blocker);
+      if (!scope.organization.deletionRequestedAt) {
+        const now = new Date();
+        await tx.organization.update({ where: { id }, data: { deletionRequestedAt: now, deletionRequestedById: actorId, suspendedAt: now, suspensionReason: 'Exclusão definitiva em andamento', deletionError: null } });
+        await tx.post.updateMany({ where: { organizationId: id, deletedAt: null }, data: { adminPausedAt: now } });
+        await tx.autoPost.updateMany({ where: { organizationId: id }, data: { active: false } });
+      }
+      return { id, status: 'deleting' as const };
     });
   }
 
