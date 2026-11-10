@@ -9,9 +9,9 @@ import { YoutubeSettingsDto } from '@gitroom/nestjs-libraries/dtos/posts/provide
 import { useSettings } from '@gitroom/frontend/components/launches/helpers/use.values';
 import { Input } from '@gitroom/react/form/input';
 import { MediumTags } from '@gitroom/frontend/components/new-launch/providers/medium/medium.tags';
-import { MediaComponent } from '@gitroom/frontend/components/media/media.component';
 import { Select } from '@gitroom/react/form/select';
 import { YoutubePreview } from '@gitroom/frontend/components/new-launch/providers/youtube/youtube.preview';
+import { YoutubeThumbnailPicker } from './youtube.thumbnail';
 const type = [
   {
     label: 'Public',
@@ -42,7 +42,7 @@ const madeForKids = [
   },
 ];
 const YoutubeSettings: FC = () => {
-  const { register, control } = useSettings();
+  const { register, watch, setValue } = useSettings();
   return (
     <div className="flex flex-col">
       <Input label="Title" {...register('title')} maxLength={100} />
@@ -72,13 +72,23 @@ const YoutubeSettings: FC = () => {
       </Select>
       <MediumTags label="Tags" {...register('tags')} />
       <div className="mt-[20px]">
-        <MediaComponent
-          type="image"
-          width={1280}
-          height={720}
-          label="Thumbnail"
-          description="Thumbnail picture (optional)"
-          {...register('thumbnail')}
+        <Select label="Formato da capa" {...register('thumbnailLayout')}>
+          <option value="standard">Vídeo comum (16:9)</option>
+          <option value="short">Short (9:16)</option>
+        </Select>
+        <p className="text-xs">
+          Esta escolha orienta a capa. O YouTube determina se o vídeo é um
+          Short.
+        </p>
+        <YoutubeThumbnailPicker
+          short={watch('thumbnailLayout') === 'short'}
+          value={watch('thumbnail')}
+          onChange={(value) =>
+            setValue('thumbnail', value, {
+              shouldValidate: true,
+              shouldDirty: true,
+            })
+          }
         />
       </div>
     </div>

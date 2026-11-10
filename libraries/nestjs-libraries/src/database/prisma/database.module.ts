@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+import { YoutubePublicationService } from '../../integrations/youtube-publication.service';
 import { PlatformService } from './platform/platform.service';
 import {
   PrismaRepository,
@@ -64,6 +65,7 @@ import { InstagramCommentAutomationService } from '@gitroom/nestjs-libraries/ins
   imports: [UploadModule],
   controllers: [],
   providers: [
+    YoutubePublicationService,
     PrismaService,
     PlatformService,
     PrismaRepository,

@@ -7,6 +7,7 @@ import useSWR, { useSWRConfig } from 'swr';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { BottomNavigation } from './bottom-navigation';
 import { ProviderSettings } from './provider-settings';
+import { YoutubeThumbnailStatus } from '@gitroom/frontend/components/new-launch/providers/youtube/youtube.thumbnail-status';
 import { isVideoMedia } from '@gitroom/frontend/features/publisher/media/media-validation';
 import { validatePublisherForm } from '@gitroom/frontend/features/publisher/model/provider-rules';
 import {
@@ -267,6 +268,7 @@ export function ScheduledPostDetailView({ postId }: { postId: string }) {
               <span className="text-xs text-textItemBlur">{formatDate(root.publishDate)}</span>
             </div>
             {root.error ? <p className="mt-3 rounded-xl bg-red-500/10 p-3 text-xs leading-5 text-red-600">{root.error}</p> : null}
+            {integration.identifier === 'youtube' && <YoutubeThumbnailStatus postId={root.id} />}
           </section>
 
           {notice ? <div className="rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4 text-sm text-newTextColor" role="status">{notice}</div> : null}

@@ -1,5 +1,3 @@
-/** @jest-environment jsdom */
-
 jest.mock(
   '@gitroom/frontend/components/new-launch/providers/high.order.provider',
   () => ({
@@ -16,7 +14,30 @@ jest.mock(
   () => ({ MediumTags: () => null })
 );
 jest.mock('@gitroom/frontend/components/media/media.component', () => ({
-  MediaComponent: () => null,
+  MediaComponent: (props: any) => (
+    <div
+      data-testid="thumbnail"
+      data-width={props.width}
+      data-height={props.height}
+    >
+      <button
+        type="button"
+        onClick={() =>
+          props.onChange({
+            target: {
+              name: 'thumbnail',
+              value: {
+                id: 'cover',
+                path: 'https://cdn.example/cover.png',
+              },
+            },
+          })
+        }
+      >
+        Choose cover
+      </button>
+    </div>
+  ),
 }));
 jest.mock(
   '@gitroom/frontend/components/new-launch/providers/youtube/youtube.preview',
@@ -95,5 +116,29 @@ describe('YouTube audience selection', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(submit).toHaveBeenCalledTimes(2));
     expect(submit.mock.calls[1][0].selfDeclaredMadeForKids).toBeUndefined();
+  });
+
+  it('uses a 9:16 cover editor for Shorts and persists the selected image', async () => {
+    render(<Form />);
+    expect(screen.getByTestId('thumbnail').getAttribute('data-width')).toBe(
+      '1280'
+    );
+    fireEvent.change(screen.getAllByRole('combobox')[2], {
+      target: { value: 'short' },
+    });
+    expect(screen.getByTestId('thumbnail').getAttribute('data-width')).toBe(
+      '1080'
+    );
+    expect(screen.getByTestId('thumbnail').getAttribute('data-height')).toBe(
+      '1920'
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Choose cover' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(submit).toHaveBeenCalledTimes(1));
+    expect(submit.mock.calls[0][0]).toMatchObject({
+      thumbnailLayout: 'short',
+      thumbnail: { id: 'cover', path: 'https://cdn.example/cover.png' },
+      type: 'private',
+    });
   });
 });

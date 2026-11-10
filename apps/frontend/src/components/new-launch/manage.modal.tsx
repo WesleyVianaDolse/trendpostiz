@@ -49,6 +49,7 @@ import { Button } from '@gitroom/react/form/button';
 import { MediaComponentInner } from '@gitroom/frontend/components/launches/helpers/media.settings.component';
 import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
 import { useMediaDirectory } from '@gitroom/react/helpers/use.media.directory';
+import { YoutubeThumbnailStatus } from './providers/youtube/youtube.thumbnail-status';
 
 function countCharacters(text: string, type: string): number {
   if (type !== 'x') {
@@ -555,6 +556,10 @@ export const ManageModal: FC<AddEditModalProps> = (props) => {
                         />
                       )}
                     </div>
+                    {existingData?.posts?.[0] && selectedIntegrations.some(({ integration }) =>
+                      integration.id === existingData.integration && integration.identifier === 'youtube') && (
+                      <YoutubeThumbnailStatus postId={existingData.posts[0].id} />
+                    )}
                     <div
                       id="social-empty"
                       className={clsx(

@@ -10,12 +10,11 @@ import { google, youtube_v3 } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library/build/src/auth/oauth2client';
 import axios from 'axios';
 import { YoutubeSettingsDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-settings/youtube.settings.dto';
-import {
-  BadBody,
-  SocialAbstract,
-} from '@gitroom/nestjs-libraries/integrations/social.abstract';
+import { SocialAbstract } from '@gitroom/nestjs-libraries/integrations/social.abstract';
 import * as process from 'node:process';
 import dayjs from 'dayjs';
+import { Readable } from 'node:stream';
+import { fromBuffer } from 'file-type';
 import { GaxiosResponse } from 'gaxios/build/src/common';
 import Schema$Video = youtube_v3.Schema$Video;
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
@@ -303,71 +302,115 @@ export class YoutubeProvider extends SocialAbstract implements SocialProvider {
 
     const { settings }: { settings: YoutubeSettingsDto } = firstPost;
 
+    if (firstPost.youtubeUpload?.videoId) {
+      return this.uploadResult(firstPost.id, firstPost.youtubeUpload.videoId);
+    }
+
     const response = await axios({
       url: firstPost?.media?.[0]?.path,
       method: 'GET',
       responseType: 'stream',
     });
 
-    const all: GaxiosResponse<Schema$Video> = await this.runInConcurrent(
-      async () =>
-        youtubeClient.videos.insert({
-          part: ['id', 'snippet', 'status'],
-          notifySubscribers: true,
-          requestBody: {
-            snippet: {
-              title: settings.title,
-              description: firstPost?.message,
-              ...(settings?.tags?.length
-                ? { tags: settings.tags.map((p) => p.label) }
-                : {}),
-            },
-            status: {
-              privacyStatus: settings.type,
-              ...(settings.selfDeclaredMadeForKids === 'yes' ||
-              settings.selfDeclaredMadeForKids === 'no'
-                ? {
-                    selfDeclaredMadeForKids:
-                      settings.selfDeclaredMadeForKids === 'yes',
-                  }
-                : {}),
-            },
+    const all: GaxiosResponse<Schema$Video> = await youtubeClient.videos.insert(
+      {
+        part: ['id', 'snippet', 'status'],
+        notifySubscribers: true,
+        requestBody: {
+          snippet: {
+            title: settings.title,
+            description: firstPost?.message,
+            ...(settings?.tags?.length
+              ? { tags: settings.tags.map((p) => p.label) }
+              : {}),
           },
-          media: {
-            body: response.data,
+          status: {
+            privacyStatus: settings.type,
+            ...(settings.selfDeclaredMadeForKids === 'yes' ||
+            settings.selfDeclaredMadeForKids === 'no'
+              ? {
+                  selfDeclaredMadeForKids:
+                    settings.selfDeclaredMadeForKids === 'yes',
+                }
+              : {}),
           },
-        }),
-      true
+        },
+        media: {
+          body: response.data,
+        },
+      },
+      { retry: false }
     );
 
-    const thumbnailPath =
-      settings?.thumbnail?.path || firstPost?.media?.[0]?.thumbnail;
-
-    if (thumbnailPath) {
-      await this.runInConcurrent(async () =>
-        youtubeClient.thumbnails.set({
-          videoId: all?.data?.id!,
-          media: {
-            body: (
-              await axios({
-                url: thumbnailPath,
-                method: 'GET',
-                responseType: 'stream',
-              })
-            ).data,
-          },
-        })
+    const videoId = all.data.id;
+    if (!videoId)
+      throw new Error(
+        'YouTube returned no video ID; reconcile the upload before retrying.'
       );
-    }
+    // Persist the ID before any thumbnail work or other fallible side effect.
+    await firstPost.youtubeUpload?.onUploaded(videoId);
+    return this.uploadResult(firstPost.id, videoId);
+  }
 
+  private uploadResult(id: string, videoId: string): PostResponse[] {
     return [
       {
-        id: firstPost.id,
-        releaseURL: `https://www.youtube.com/watch?v=${all?.data?.id}`,
-        postId: all?.data?.id!,
+        id,
+        releaseURL: `https://www.youtube.com/watch?v=${videoId}`,
+        postId: videoId,
         status: 'success',
       },
     ];
+  }
+
+  async processingStatus(accessToken: string, videoId: string) {
+    const { client, youtube } = clientAndYoutube();
+    client.setCredentials({ access_token: accessToken });
+    const response = await youtube(client).videos.list(
+      {
+        part: ['processingDetails'],
+        id: [videoId],
+      },
+      { timeout: 20000, retry: false }
+    );
+    return response.data.items?.[0]?.processingDetails?.processingStatus;
+  }
+
+  async setThumbnail(accessToken: string, videoId: string, path: string) {
+    const response = await axios({
+      url: path,
+      method: 'GET',
+      responseType: 'arraybuffer',
+      timeout: 30000,
+      maxContentLength: 50 * 1024 * 1024,
+    }).catch((error) => {
+      if (error?.message?.includes('maxContentLength')) {
+        throw Object.assign(new Error('A capa deve ter no máximo 50 MB.'), {
+          code: 400,
+        });
+      }
+      throw error;
+    });
+    const buffer = Buffer.from(response.data);
+    const type = await fromBuffer(buffer).catch(() => undefined);
+    if (
+      buffer.length > 50 * 1024 * 1024 ||
+      !['image/jpeg', 'image/png'].includes(type?.mime || '')
+    ) {
+      throw Object.assign(
+        new Error('A capa deve ser JPEG ou PNG e ter no máximo 50 MB.'),
+        { code: 400 }
+      );
+    }
+    const { client, youtube } = clientAndYoutube();
+    client.setCredentials({ access_token: accessToken });
+    await youtube(client).thumbnails.set(
+      {
+        videoId,
+        media: { mimeType: type.mime, body: Readable.from(buffer) },
+      },
+      { timeout: 60000, retry: false }
+    );
   }
 
   async analytics(

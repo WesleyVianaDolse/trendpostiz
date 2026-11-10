@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Context } from '@temporalio/activity';
+import { YoutubePublicationService } from '@gitroom/nestjs-libraries/integrations/youtube-publication.service';
 import {
   Activity,
   ActivityMethod,
@@ -66,7 +68,8 @@ export class PostActivity {
     private _webhookService: WebhooksService,
     private _temporalService: TemporalService,
     private _subscriptionService: SubscriptionService,
-    private _platform: PlatformService
+    private _platform: PlatformService,
+    private _youtube?: YoutubePublicationService
   ) {}
 
   @ActivityMethod()
@@ -249,7 +252,9 @@ export class PostActivity {
     if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
       throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
     }
-    const postNow = await getIntegration.post(integration.internalId, integration.token, payload, integration);
+    const postNow = integration.providerIdentifier === 'youtube'
+      ? await this._youtube!.publish(integration, payload, Context.current().info.workflowExecution.workflowId)
+      : await getIntegration.post(integration.internalId, integration.token, payload, integration);
 
     await this._temporalService.client
       .getRawClient()
@@ -267,6 +272,16 @@ export class PostActivity {
       });
 
     return postNow;
+  }
+
+  @ActivityMethod()
+  async processYoutubeThumbnail(organizationId: string, postId: string, videoId: string) {
+    return this._youtube!.attempt(organizationId, postId, videoId);
+  }
+
+  @ActivityMethod()
+  async stopYoutubeThumbnail(organizationId: string, postId: string, videoId: string) {
+    return this._youtube!.stop(organizationId, postId, videoId);
   }
 
   @ActivityMethod()

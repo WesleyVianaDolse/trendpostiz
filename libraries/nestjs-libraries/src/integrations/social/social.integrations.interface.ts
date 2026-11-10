@@ -111,6 +111,11 @@ export type PostDetails<T = any> = {
   settings: T;
   media?: MediaContent[];
   poll?: PollDetails;
+  // Internal worker checkpoint. Never populated from user settings.
+  youtubeUpload?: {
+    videoId?: string;
+    onUploaded: (videoId: string) => Promise<void>;
+  };
 };
 
 export type PollDetails = {

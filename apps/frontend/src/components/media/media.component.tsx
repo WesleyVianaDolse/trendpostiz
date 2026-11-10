@@ -947,20 +947,26 @@ export const MediaComponent: FC<{
   type?: 'image' | 'video';
   width?: number;
   height?: number;
+  previewAspectRatio?: string;
+  validateMedia?: (media: { path: string; id: string }) => Promise<void>;
 }> = (props) => {
   const t = useT();
 
   const { name, type, label, description, onChange, value, width, height } =
     props;
-  const { getValues } = useSettings();
+  const settingsContext = useSettings();
   const user = useUser();
   useEffect(() => {
-    const settings = getValues()[props.name];
+    const settings = settingsContext?.getValues?.()[props.name];
     if (settings) {
       setCurrentMedia(settings);
     }
   }, []);
   const [currentMedia, setCurrentMedia] = useState(value);
+  const [selectionError, setSelectionError] = useState('');
+  useEffect(() => {
+    if (props.previewAspectRatio) setCurrentMedia(value);
+  }, [value, props.previewAspectRatio]);
   const modals = useModals();
   const mediaDirectory = useMediaDirectory();
 
@@ -981,8 +987,16 @@ export const MediaComponent: FC<{
         />
       ),
     });
-  }, [t]);
-  const changeMedia = useCallback((m: { path: string; id: string }[]) => {
+  }, [t, width, height, props.validateMedia, onChange, name]);
+  const changeMedia = useCallback(async (m: { path: string; id: string }[]) => {
+    if (!m[0]) return;
+    try {
+      if (props.validateMedia) await props.validateMedia(m[0]);
+    } catch (error) {
+      setSelectionError(error instanceof Error ? error.message : 'Unable to select thumbnail.');
+      return;
+    }
+    setSelectionError('');
     setCurrentMedia(m[0]);
     onChange({
       target: {
@@ -990,7 +1004,7 @@ export const MediaComponent: FC<{
         value: m[0],
       },
     });
-  }, []);
+  }, [props.validateMedia, onChange, name]);
   const showModal = useCallback(() => {
     modals.openModal({
       title: t('media_library', 'Media Library'),
@@ -1003,8 +1017,9 @@ export const MediaComponent: FC<{
         <MediaBox setMedia={changeMedia} closeModal={close} type={type} />
       ),
     });
-  }, [t]);
+  }, [t, changeMedia, type]);
   const clearMedia = useCallback(() => {
+    setSelectionError('');
     setCurrentMedia(undefined);
     onChange({
       target: {
@@ -1012,16 +1027,18 @@ export const MediaComponent: FC<{
         value: undefined,
       },
     });
-  }, [value]);
+  }, [onChange, name]);
   return (
     <div className="flex flex-col gap-[8px]">
       <div className="text-[14px]">{label}</div>
       <div className="text-[12px]">{description}</div>
+      {selectionError && <p role="alert" className="text-[12px] text-red-500">{selectionError}</p>}
       {!!currentMedia && (
-        <div className="my-[20px] cursor-pointer w-[200px] h-[200px] border-2 border-tableBorder">
+        <div className="my-[20px] cursor-pointer w-[200px] border-2 border-tableBorder"
+          style={{ aspectRatio: props.previewAspectRatio || '1 / 1' }}>
           <img
             className="w-full h-full object-cover"
-            src={currentMedia.path}
+            src={mediaDirectory.set(currentMedia.path)}
             onClick={() => window.open(mediaDirectory.set(currentMedia.path))}
           />
         </div>

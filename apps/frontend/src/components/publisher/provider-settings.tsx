@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect } from 'react';
+import { YoutubeThumbnailPicker } from '@gitroom/frontend/components/new-launch/providers/youtube/youtube.thumbnail';
 import useSWR from 'swr';
 import { useFetch } from '@gitroom/helpers/utils/custom.fetch';
 import { getProviderRule } from '@gitroom/frontend/features/publisher/model/provider-rules';
@@ -300,6 +301,21 @@ export function ProviderSettings({
                   onChange={onChange}
                 />
               ) : null}
+
+              {integration.identifier === 'youtube' ? <div className="space-y-3">
+                <label className="block text-xs font-semibold">Formato da capa
+                  <select className="mt-2 min-h-12 w-full rounded-xl border border-newTableBorder bg-newTableHeader px-3"
+                    value={String(settingsByIntegration[integration.id]?.thumbnailLayout || 'standard')}
+                    onChange={(event) => onChange(integration.id, 'thumbnailLayout', event.target.value)}>
+                    <option value="standard">Vídeo comum (16:9)</option>
+                    <option value="short">Short (9:16)</option>
+                  </select>
+                </label>
+                <p className="text-xs text-textItemBlur">Esta escolha orienta a capa. O YouTube determina se o vídeo é um Short.</p>
+                <YoutubeThumbnailPicker short={settingsByIntegration[integration.id]?.thumbnailLayout === 'short'}
+                  value={settingsByIntegration[integration.id]?.thumbnail as { id: string; path: string } | undefined}
+                  onChange={(value) => onChange(integration.id, 'thumbnail', value)} />
+              </div> : null}
 
               {integration.identifier !== 'tiktok'
                 ? rule.fields?.map((field) => (

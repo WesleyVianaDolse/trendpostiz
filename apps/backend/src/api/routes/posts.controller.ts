@@ -11,6 +11,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { PostsService } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.service';
+import { YoutubePublicationService } from '@gitroom/nestjs-libraries/integrations/youtube-publication.service';
 import { GetOrgFromRequest } from '@gitroom/nestjs-libraries/user/org.from.request';
 import { Organization, User } from '@prisma/client';
 import { GetPostsDto } from '@gitroom/nestjs-libraries/dtos/posts/get.posts.dto';
@@ -35,8 +36,19 @@ export class PostsController {
   constructor(
     private _postsService: PostsService,
     private _agentGraphService: AgentGraphService,
-    private _shortLinkService: ShortLinkService
+    private _shortLinkService: ShortLinkService,
+    private _youtube: YoutubePublicationService
   ) {}
+
+  @Get('/:id/youtube-thumbnail')
+  youtubeThumbnailStatus(@GetOrgFromRequest() org: Organization, @Param('id') id: string) {
+    return this._youtube.status(org.id, id);
+  }
+
+  @Post('/:id/youtube-thumbnail/retry')
+  retryYoutubeThumbnail(@GetOrgFromRequest() org: Organization, @Param('id') id: string) {
+    return this._youtube.retry(org.id, id);
+  }
 
   @Get('/:id/statistics')
   async getStatistics(
