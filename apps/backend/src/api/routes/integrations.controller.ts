@@ -53,6 +53,15 @@ export class IntegrationsController {
     return this._integrationService.saveProviderPage(org.id, id, body);
   }
 
+  @Post('/:id/instagram-comments/subscribe')
+  @CheckPolicies([AuthorizationActions.Create, Sections.CHANNEL])
+  retryInstagramComments(
+    @GetOrgFromRequest() org: Organization,
+    @Param('id') id: string
+  ) {
+    return this._integrationService.retryInstagramFacebookComments(org.id, id);
+  }
+
   @Get('/:identifier/internal-plugs')
   getInternalPlugs(@Param('identifier') identifier: string) {
     return this._integrationManager.getInternalPlugs(identifier);

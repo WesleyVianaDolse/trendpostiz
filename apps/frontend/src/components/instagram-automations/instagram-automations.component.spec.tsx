@@ -137,4 +137,40 @@ describe('Instagram automations list UI', () => {
     expect(html).not.toContain('instagram-standalone');
     expect(html).not.toContain('Business Manager');
   });
+
+  it.each([
+    ['SUBSCRIPTION_FAILED', 'Falha de inscrição'],
+    ['INSUFFICIENT_PERMISSIONS', 'Permissões insuficientes'],
+    ['WEBHOOK_CONFIGURATION_INCOMPLETE', 'Configuração incompleta'],
+  ])('shows %s while keeping account selection disabled', (comments, label) => {
+    mockedSWR.mockImplementation((key: string) => ({
+      data:
+        key === '/instagram-comment-automations/accounts'
+          ? [
+              {
+                id: 'account-1',
+                name: 'Account',
+                profile: 'account',
+                capabilities: {
+                  commentsWebhook: false,
+                  publicReply: false,
+                  privateReply: false,
+                  reconnectRequired: false,
+                },
+                status: {
+                  comments,
+                  publicReply: 'UNAVAILABLE',
+                  privateReply: 'UNAVAILABLE',
+                  message: 'Orientação específica.',
+                },
+              },
+            ]
+          : undefined,
+    }));
+    const html = renderToStaticMarkup(<InstagramAutomationWizard />);
+    expect(html).toContain(label);
+    expect(html).toContain('Orientação específica.');
+    expect(html).not.toContain('Reconecte esta conta');
+    expect(html).toMatch(/<button[^>]*disabled=""[^>]*>[^]*?@account/);
+  });
 });

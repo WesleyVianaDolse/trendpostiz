@@ -66,7 +66,7 @@ describe('Instagram integration capabilities', () => {
     });
   });
 
-  it('requires a traditional account with no confirmed subscription to reconnect', () => {
+  it('blocks an unconfirmed subscription without incorrectly requiring reconnection', () => {
     expect(
       getInstagramIntegrationCapabilities({
         ...integration,
@@ -76,9 +76,44 @@ describe('Instagram integration capabilities', () => {
       })
     ).toMatchObject({
       commentsWebhook: false,
-      reconnectRequired: true,
+      reconnectRequired: false,
+      unavailableReason: 'SUBSCRIPTION_FAILED',
     });
   });
+
+  it.each([
+    [
+      { code: 100, message: 'Param subscribed_fields must be one of {feed}' },
+      'WEBHOOK_CONFIGURATION_INCOMPLETE',
+      false,
+    ],
+    [{ code: 200 }, 'INSUFFICIENT_PERMISSIONS', false],
+    [{ code: 190 }, 'RECONNECT_REQUIRED', true],
+    [
+      { reason: 'SUBSCRIPTION_FAILED', message: 'network failure' },
+      'SUBSCRIPTION_FAILED',
+      false,
+    ],
+  ])(
+    'classifies an unsuccessful Facebook subscription: %j',
+    (failure, unavailableReason, reconnectRequired) => {
+      expect(
+        getInstagramIntegrationCapabilities({
+          ...integration,
+          providerIdentifier: 'instagram',
+          facebookPageId: 'page-1',
+          webhookCommentsSubscribed: false,
+          webhookSubscriptionError: JSON.stringify(failure),
+        })
+      ).toMatchObject({
+        commentsWebhook: false,
+        publicReply: false,
+        privateReply: false,
+        reconnectRequired,
+        unavailableReason,
+      });
+    }
+  );
 
   it('disables capabilities for an unavailable integration', () => {
     expect(

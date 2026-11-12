@@ -132,18 +132,16 @@ describe('Instagram multi-provider connection safety', () => {
 });
 
 describe('Instagram multi-provider webhook candidate safety', () => {
-  it('routes a Facebook signature by Page ID and active state only', async () => {
+  it('routes Facebook-signed Instagram comments by IG ID and active state only', async () => {
     const { repository, integration } = makeRepository();
-    await repository.findActiveInstagramWebhookCandidates('page-1', [
-      'facebook',
-    ]);
+    await repository.findActiveInstagramWebhookCandidates('ig-1', ['facebook']);
     expect(integration.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
           OR: [
             {
               providerIdentifier: 'instagram',
-              facebookPageId: 'page-1',
+              internalId: 'ig-1',
             },
           ],
           deletedAt: null,
@@ -170,6 +168,42 @@ describe('Instagram multi-provider webhook candidate safety', () => {
 });
 
 describe('IntegrationService Facebook Page persistence', () => {
+  it('persists recovered Facebook Page metadata without changing the provider or canonical account', async () => {
+    const { repository, integration } = makeRepository({
+      ...connected('instagram'),
+      inBetweenSteps: true,
+    });
+    await repository.createOrUpdateIntegration(
+      undefined,
+      false,
+      'org-1',
+      'Account',
+      undefined,
+      'social',
+      'ig-1',
+      'instagram',
+      'new-page-token',
+      'user-token',
+      3600,
+      'account',
+      false,
+      'ig-1',
+      0,
+      undefined,
+      'page-1'
+    );
+    expect(integration.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          facebookPageId: 'page-1',
+          providerIdentifier: 'instagram',
+          internalId: 'ig-1',
+          token: 'new-page-token',
+          inBetweenSteps: false,
+        }),
+      })
+    );
+  });
   it('persists facebookPageId after selecting a traditional Instagram account', async () => {
     const repository = {
       getIntegrationById: jest.fn().mockResolvedValue({
@@ -200,7 +234,9 @@ describe('IntegrationService Facebook Page persistence', () => {
         }),
       }),
     };
-    const subscriptions = { subscribeComments: jest.fn() };
+    const subscriptions = {
+      subscribeComments: jest.fn().mockResolvedValue({ success: true }),
+    };
     const service = new IntegrationService(
       repository as any,
       {} as any,
@@ -238,4 +274,59 @@ describe('IntegrationService Facebook Page persistence', () => {
       })
     );
   });
+});
+
+describe('Instagram Facebook subscription recovery authorization', () => {
+  const setup = (integration: any) => {
+    const repository = {
+      getIntegrationById: jest.fn().mockResolvedValue(integration),
+    };
+    const subscriptions = {
+      subscribeComments: jest.fn().mockResolvedValue({ success: true }),
+    };
+    const service = new IntegrationService(
+      repository as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      {} as any,
+      subscriptions as any
+    );
+    return { service, repository, subscriptions };
+  };
+
+  it('retries only the selected tenant integration, including an unconfirmed subscription', async () => {
+    const integration = {
+      ...connected('instagram'),
+      facebookPageId: 'page-1',
+      webhookCommentsSubscribed: false,
+    };
+    const { service, repository, subscriptions } = setup(integration);
+    await expect(
+      service.retryInstagramFacebookComments('org-1', integration.id)
+    ).resolves.toEqual({ success: true });
+    expect(repository.getIntegrationById).toHaveBeenCalledWith(
+      'org-1',
+      integration.id
+    );
+    expect(subscriptions.subscribeComments).toHaveBeenCalledWith(integration);
+  });
+
+  it.each([
+    null,
+    { ...connected('instagram'), disabled: true },
+    { ...connected('instagram'), deletedAt: new Date() },
+    connected('instagram-standalone'),
+    { ...connected('instagram'), inBetweenSteps: true },
+  ])(
+    'rejects unavailable or unsupported recovery targets: %j',
+    async (integration) => {
+      const { service, subscriptions } = setup(integration);
+      await expect(
+        service.retryInstagramFacebookComments('org-1', 'id')
+      ).rejects.toThrow();
+      expect(subscriptions.subscribeComments).not.toHaveBeenCalled();
+    }
+  );
 });

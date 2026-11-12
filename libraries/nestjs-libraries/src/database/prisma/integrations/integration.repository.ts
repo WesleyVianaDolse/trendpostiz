@@ -235,7 +235,8 @@ export class IntegrationRepository {
     isBetweenSteps = false,
     refresh?: string,
     timezone?: number,
-    customInstanceDetails?: string
+    customInstanceDetails?: string,
+    facebookPageId?: string
   ) {
     const postTimes = timezone
       ? {
@@ -252,7 +253,12 @@ export class IntegrationRepository {
         organizationId: org,
       },
     };
+    const instagramPage =
+      provider === 'instagram' && facebookPageId
+        ? { facebookPageId, inBetweenSteps: false }
+        : {};
     const createData = {
+      ...instagramPage,
       type: type as any,
       name,
       providerIdentifier: provider,
@@ -275,6 +281,7 @@ export class IntegrationRepository {
         : '[]',
     };
     const updateData = {
+      ...instagramPage,
       ...(additionalSettings
         ? { additionalSettings: JSON.stringify(additionalSettings) }
         : {}),
@@ -463,7 +470,7 @@ export class IntegrationRepository {
     if (credentialFamilies.includes('facebook')) {
       providers.push({
         providerIdentifier: 'instagram',
-        facebookPageId: objectId,
+        internalId: objectId,
       });
     }
     if (!providers.length) return Promise.resolve([]);

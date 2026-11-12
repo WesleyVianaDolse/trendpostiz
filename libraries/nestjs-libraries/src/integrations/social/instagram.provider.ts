@@ -13,6 +13,7 @@ import { InstagramDto } from '@gitroom/nestjs-libraries/dtos/posts/providers-set
 import { Integration } from '@prisma/client';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
 import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
+import { BadRequestException } from '@nestjs/common';
 
 export const INSTAGRAM_FACEBOOK_GRAPH_API_VERSION = 'v25.0';
 
@@ -346,6 +347,11 @@ export class InstagramProvider
     const findPage = (await this.pages(accessToken)).find(
       (p) => p.id === requiredId
     );
+    if (!findPage?.pageId) {
+      throw new BadRequestException(
+        'The linked Facebook Page is not authorized for this Instagram account'
+      );
+    }
 
     const information = await this.fetchPageInformation(accessToken, {
       id: requiredId,
@@ -358,6 +364,7 @@ export class InstagramProvider
       accessToken: information.access_token,
       picture: information.picture,
       username: information.username,
+      facebookPageId: information.facebookPageId,
     };
   }
 
@@ -531,13 +538,25 @@ export class InstagramProvider
     accessToken: string,
     data: { pageId: string; id: string }
   ) {
-    const { access_token, ...all } = await (
+    const pageResponse = await (
       await fetch(
         `${facebookGraphUrl(
           `/${data.pageId}`
-        )}?fields=access_token,name,picture.type(large)&access_token=${accessToken}`
+        )}?fields=id,access_token,instagram_business_account,name,picture.type(large)&access_token=${accessToken}`
       )
     ).json();
+
+    if (
+      pageResponse.error ||
+      pageResponse.id !== data.pageId ||
+      pageResponse.instagram_business_account?.id !== data.id ||
+      typeof pageResponse.access_token !== 'string' ||
+      !pageResponse.access_token
+    ) {
+      throw new BadRequestException(
+        'Could not verify the authorized Facebook Page and Instagram account'
+      );
+    }
 
     const { id, name, profile_picture_url, username } = await (
       await fetch(
@@ -547,11 +566,16 @@ export class InstagramProvider
       )
     ).json();
 
+    if (id !== data.id) {
+      throw new BadRequestException(
+        'Could not verify the selected Instagram account'
+      );
+    }
     return {
       id,
       name,
       picture: profile_picture_url,
-      access_token,
+      access_token: pageResponse.access_token,
       username,
       facebookPageId: data.pageId,
     };

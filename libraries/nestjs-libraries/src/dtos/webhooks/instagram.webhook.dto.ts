@@ -10,6 +10,7 @@ export interface InstagramWebhookCommentMedia {
 
 export interface InstagramWebhookCommentValue {
   id?: string;
+  comment_id?: string;
   from?: InstagramWebhookCommentAuthor;
   text?: string;
   media?: InstagramWebhookCommentMedia;

@@ -17,6 +17,7 @@ import {
   getInstagramIntegrationCapabilities,
   isInstagramProviderIdentifier,
 } from '@gitroom/nestjs-libraries/integrations/social/instagram-capabilities';
+import { instagramWebhookIssueMessages } from '@gitroom/nestjs-libraries/integrations/social/instagram-webhook-status';
 
 @Injectable()
 export class InstagramCommentAutomationCrudService {
@@ -32,6 +33,7 @@ export class InstagramCommentAutomationCrudService {
         providerIdentifier: { in: ['instagram-standalone', 'instagram'] },
         deletedAt: null,
         disabled: false,
+        inBetweenSteps: false,
       },
       orderBy: { name: 'asc' },
       select: {
@@ -48,6 +50,7 @@ export class InstagramCommentAutomationCrudService {
         refreshNeeded: true,
         webhookCommentsSubscribed: true,
         webhookMessagesSubscribed: true,
+        webhookSubscriptionError: true,
       },
     });
     return integrations.map((integration) => {
@@ -65,7 +68,13 @@ export class InstagramCommentAutomationCrudService {
             ? ('ACTIVE' as const)
             : capabilities.reconnectRequired
             ? ('RECONNECT_REQUIRED' as const)
-            : ('UNAVAILABLE' as const),
+            : capabilities.unavailableReason || ('UNAVAILABLE' as const),
+          ...(capabilities.unavailableReason
+            ? {
+                message:
+                  instagramWebhookIssueMessages[capabilities.unavailableReason],
+              }
+            : {}),
           publicReply: capabilities.publicReply
             ? ('AVAILABLE' as const)
             : ('UNAVAILABLE' as const),
@@ -347,6 +356,8 @@ export class InstagramCommentAutomationCrudService {
       throw new BadRequestException(
         capabilities.reconnectRequired
           ? 'Reconecte esta conta do Instagram para habilitar automações.'
+          : capabilities.unavailableReason
+          ? instagramWebhookIssueMessages[capabilities.unavailableReason]
           : 'Os comentários desta conta estão indisponíveis para automações.'
       );
     }

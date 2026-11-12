@@ -12,9 +12,21 @@ export interface InstagramAccount {
     publicReply: boolean;
     privateReply: boolean;
     reconnectRequired: boolean;
+    unavailableReason?:
+      | 'RECONNECT_REQUIRED'
+      | 'SUBSCRIPTION_FAILED'
+      | 'INSUFFICIENT_PERMISSIONS'
+      | 'WEBHOOK_CONFIGURATION_INCOMPLETE';
   };
   status: {
-    comments: 'ACTIVE' | 'RECONNECT_REQUIRED' | 'UNAVAILABLE';
+    comments:
+      | 'ACTIVE'
+      | 'RECONNECT_REQUIRED'
+      | 'UNAVAILABLE'
+      | 'SUBSCRIPTION_FAILED'
+      | 'INSUFFICIENT_PERMISSIONS'
+      | 'WEBHOOK_CONFIGURATION_INCOMPLETE';
+    message?: string;
     publicReply: 'AVAILABLE' | 'UNAVAILABLE';
     privateReply: 'AVAILABLE' | 'UNAVAILABLE';
   };

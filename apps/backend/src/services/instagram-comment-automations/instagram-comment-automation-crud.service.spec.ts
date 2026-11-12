@@ -250,6 +250,49 @@ describe('InstagramCommentAutomationCrudService', () => {
     ]);
   });
 
+  it.each([
+    [
+      {
+        code: 100,
+        message: 'Param subscribed_fields[0] must be one of {feed, mention}',
+      },
+      'WEBHOOK_CONFIGURATION_INCOMPLETE',
+    ],
+    [{ code: 200 }, 'INSUFFICIENT_PERMISSIONS'],
+    [{ reason: 'SUBSCRIPTION_FAILED' }, 'SUBSCRIPTION_FAILED'],
+  ])(
+    'keeps a failed traditional account blocked and reports its classified cause: %j',
+    async (error, status) => {
+      const { service, prisma } = makeService();
+      prisma.integration.findMany.mockResolvedValue([
+        {
+          ...integration,
+          providerIdentifier: 'instagram',
+          facebookPageId: 'page-1',
+          webhookCommentsSubscribed: false,
+          webhookSubscriptionError: JSON.stringify({
+            ...error,
+            secret: 'never-return-this',
+          }),
+        },
+      ]);
+      const accounts = await service.listAccounts('org-1');
+      expect(accounts[0]).toMatchObject({
+        capabilities: {
+          commentsWebhook: false,
+          publicReply: false,
+          privateReply: false,
+          reconnectRequired: false,
+        },
+        status: { comments: status, message: expect.any(String) },
+      });
+      expect(JSON.stringify(accounts)).not.toContain('never-return-this');
+      expect(JSON.stringify(accounts)).not.toContain(
+        'webhookSubscriptionError'
+      );
+    }
+  );
+
   it('requires an old Facebook/BM account without Page ID to reconnect', async () => {
     const { service } = makeService({
       integration: {

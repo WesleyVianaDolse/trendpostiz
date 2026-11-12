@@ -71,6 +71,7 @@ export type AuthTokenDetails = {
   expiresIn?: number; // The duration in seconds for which the access token is valid
   picture?: string;
   username: string;
+  facebookPageId?: string;
   additionalSettings?: {
     title: string;
     description: string;

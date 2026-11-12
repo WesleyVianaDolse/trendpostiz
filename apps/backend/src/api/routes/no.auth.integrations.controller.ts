@@ -106,6 +106,7 @@ export class NoAuthIntegrationsController {
       picture,
       username,
       additionalSettings,
+      facebookPageId,
       // eslint-disable-next-line no-async-promise-executor
     } = await new Promise<AuthTokenDetails>(async (res) => {
       try {
@@ -138,7 +139,11 @@ export class NoAuthIntegrationsController {
               refresh,
               auth.accessToken
             );
-            return res({ ...newAuth, refreshToken: body.refresh });
+            return res(
+              integration === 'instagram'
+                ? { ...auth, ...newAuth }
+                : { ...newAuth, refreshToken: body.refresh }
+            );
           } catch (err: any) {
             return res({
               error: err.message,
@@ -239,13 +244,25 @@ export class NoAuthIntegrationsController {
           ? AuthService.signJWT(
               JSON.parse(Buffer.from(body.code, 'base64').toString())
             )
-          : undefined
+          : undefined,
+        integration === 'instagram' && refresh ? facebookPageId : undefined
       );
 
-    if (integration === 'instagram-standalone') {
-      await this._instagramWebhookSubscriptionService.subscribeComments(
-        createUpdate
-      );
+    let webhookSubscription: { success: boolean; reason?: string } | undefined;
+    if (
+      integration === 'instagram-standalone' ||
+      (integration === 'instagram' && refresh)
+    ) {
+      const subscription =
+        await this._instagramWebhookSubscriptionService.subscribeComments(
+          createUpdate
+        );
+      if (integration === 'instagram') {
+        webhookSubscription = {
+          success: subscription.success,
+          reason: 'reason' in subscription ? subscription.reason : undefined,
+        };
+      }
     }
 
     this._refreshIntegrationService
@@ -308,6 +325,7 @@ export class NoAuthIntegrationsController {
 
     return {
       ...createUpdate,
+      ...(webhookSubscription ? { webhookSubscription } : {}),
       onboarding: onboarding === 'true',
       pages,
       ...(returnURL ? { returnURL } : {}),

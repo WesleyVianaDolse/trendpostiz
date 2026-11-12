@@ -186,7 +186,12 @@ describe('InstagramProvider Graph API version', () => {
     jest
       .spyOn(global, 'fetch')
       .mockImplementationOnce(() =>
-        ok({ access_token: 'page-token', name: 'Facebook Page' })
+        ok({
+          id: 'page-1',
+          access_token: 'page-token',
+          name: 'Facebook Page',
+          instagram_business_account: { id: 'ig-1' },
+        })
       )
       .mockImplementationOnce(() =>
         ok({ id: 'ig-1', name: 'Instagram', username: 'instagram' })
@@ -202,5 +207,57 @@ describe('InstagramProvider Graph API version', () => {
       access_token: 'page-token',
       facebookPageId: 'page-1',
     });
+  });
+});
+
+describe('Instagram Facebook Login reconnection', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('recovers the linked Page ID and Page token', async () => {
+    jest
+      .spyOn(provider, 'pages')
+      .mockResolvedValue([{ id: 'ig-1', pageId: 'page-1' }] as any);
+    jest.spyOn(provider, 'fetchPageInformation').mockResolvedValue({
+      id: 'ig-1',
+      name: 'Account',
+      access_token: 'page-token',
+      picture: '',
+      username: 'account',
+      facebookPageId: 'page-1',
+    });
+    await expect(
+      provider.reConnect('fb-user', 'ig-1', 'user-token')
+    ).resolves.toMatchObject({
+      id: 'ig-1',
+      accessToken: 'page-token',
+      facebookPageId: 'page-1',
+    });
+  });
+
+  it('rejects a Page that is not authorized for the required account', async () => {
+    jest.spyOn(provider, 'pages').mockResolvedValue([]);
+    const fetchMock = jest.spyOn(global, 'fetch');
+    await expect(
+      provider.reConnect('fb-user', 'ig-1', 'user-token')
+    ).rejects.toThrow('not authorized');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {
+      id: 'page-1',
+      access_token: 'page-token',
+      instagram_business_account: { id: 'other-ig' },
+    },
+    { id: 'page-1', instagram_business_account: { id: 'ig-1' } },
+    { error: { code: 200 } },
+  ])('rejects invalid Page metadata before persistence: %j', async (body) => {
+    jest.spyOn(global, 'fetch').mockImplementationOnce(() => ok(body));
+    await expect(
+      provider.fetchPageInformation('user-token', {
+        pageId: 'page-1',
+        id: 'ig-1',
+      })
+    ).rejects.toThrow('Could not verify');
   });
 });

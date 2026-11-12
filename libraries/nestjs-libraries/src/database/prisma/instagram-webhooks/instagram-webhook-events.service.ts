@@ -72,7 +72,8 @@ export class InstagramWebhookEventsService {
     credentialFamilies: Array<'instagram' | 'facebook'>
   ) {
     let instagramAccountId = asString(rawAccountId) || 'unknown';
-    const externalCommentId = asString(change.value?.id);
+    const externalCommentId =
+      asString(change.value?.id) || asString(change.value?.comment_id);
     let status: InstagramWebhookEventStatus = 'INVALID';
     let integrationId: string | undefined;
 

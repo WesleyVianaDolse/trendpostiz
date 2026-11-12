@@ -52,7 +52,7 @@ describe('IntegrationService Instagram webhook resolution', () => {
     ).resolves.toEqual({ status: 'ambiguous' });
   });
 
-  it('routes a Facebook-signed Page object only through Facebook candidates', async () => {
+  it('routes a Facebook-signed Instagram object only through Facebook candidates', async () => {
     repository.findActiveInstagramWebhookCandidates.mockResolvedValue([
       {
         id: 'integration-facebook',
@@ -63,14 +63,14 @@ describe('IntegrationService Instagram webhook resolution', () => {
       },
     ]);
     await expect(
-      service.resolveActiveInstagramWebhook('page-1', ['facebook'])
+      service.resolveActiveInstagramWebhook('ig-business-1', ['facebook'])
     ).resolves.toMatchObject({
       status: 'found',
       integration: { id: 'integration-facebook' },
     });
     expect(
       repository.findActiveInstagramWebhookCandidates
-    ).toHaveBeenCalledWith('page-1', ['facebook']);
+    ).toHaveBeenCalledWith('ig-business-1', ['facebook']);
   });
 
   it('does not choose across organizations when a webhook object is ambiguous', async () => {

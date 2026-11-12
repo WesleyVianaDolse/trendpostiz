@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   Optional,
+  BadRequestException,
 } from '@nestjs/common';
 import { IntegrationRepository } from '@gitroom/nestjs-libraries/database/prisma/integrations/integration.repository';
 import { IntegrationManager } from '@gitroom/nestjs-libraries/integrations/integration.manager';
@@ -114,7 +115,8 @@ export class IntegrationService {
     isBetweenSteps = false,
     refresh?: string,
     timezone?: number,
-    customInstanceDetails?: string
+    customInstanceDetails?: string,
+    facebookPageId?: string
   ) {
     const uploadedPicture = picture
       ? picture?.indexOf('imagedelivery.net') > -1
@@ -138,7 +140,8 @@ export class IntegrationService {
       isBetweenSteps,
       refresh,
       timezone,
-      customInstanceDetails
+      customInstanceDetails,
+      facebookPageId
     );
   }
 
@@ -395,12 +398,52 @@ export class IntegrationService {
       updatedIntegration.providerIdentifier === 'instagram' &&
       this._instagramWebhookSubscriptionService
     ) {
-      await this._instagramWebhookSubscriptionService.subscribeComments(
-        updatedIntegration
-      );
+      const subscription =
+        await this._instagramWebhookSubscriptionService.subscribeComments(
+          updatedIntegration
+        );
+      return {
+        success: true,
+        webhookSubscription: {
+          success: subscription.success,
+          reason: 'reason' in subscription ? subscription.reason : undefined,
+        },
+      };
     }
 
     return { success: true };
+  }
+
+  async retryInstagramFacebookComments(org: string, id: string) {
+    const integration = await this._integrationRepository.getIntegrationById(
+      org,
+      id
+    );
+    if (!integration || integration.deletedAt || integration.disabled) {
+      throw new HttpException('Integration not found', HttpStatus.NOT_FOUND);
+    }
+    if (
+      integration.providerIdentifier !== 'instagram' ||
+      integration.inBetweenSteps
+    ) {
+      throw new BadRequestException(
+        'A completed Instagram Facebook Login connection is required'
+      );
+    }
+    if (!this._instagramWebhookSubscriptionService) {
+      throw new HttpException(
+        'Webhook subscription service is unavailable',
+        HttpStatus.SERVICE_UNAVAILABLE
+      );
+    }
+    const result =
+      await this._instagramWebhookSubscriptionService.subscribeComments(
+        integration
+      );
+    return {
+      success: result.success,
+      reason: 'reason' in result ? result.reason : undefined,
+    };
   }
 
   async checkAnalytics(

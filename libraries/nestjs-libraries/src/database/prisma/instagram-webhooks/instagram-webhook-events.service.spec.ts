@@ -145,39 +145,68 @@ describe('InstagramWebhookEventsService', () => {
     expect(repository.record).toHaveBeenCalled();
   });
 
-  it('routes a Facebook/BM Page payload and normalizes the Instagram account ID', async () => {
-    integrationService.resolveActiveInstagramWebhook.mockResolvedValue({
-      status: 'found',
-      integration: { id: 'facebook-integration', internalId: 'ig-business-1' },
-    });
+  it.each(['id', 'comment_id'])(
+    'routes a Facebook-signed Instagram payload using the IG ID and %s',
+    async (commentIdField) => {
+      integrationService.resolveActiveInstagramWebhook.mockResolvedValue({
+        status: 'found',
+        integration: {
+          id: 'facebook-integration',
+          internalId: 'ig-business-1',
+        },
+      });
 
-    await service.receive(
-      {
-        object: 'instagram',
-        entry: [
-          {
-            id: 'facebook-page-1',
-            changes: [
-              {
-                field: 'comments',
-                value: { id: 'comment-1', media: { id: 'media-1' } },
-              },
-            ],
-          },
-        ],
-      },
-      ['facebook']
-    );
+      await service.receive(
+        {
+          object: 'instagram',
+          entry: [
+            {
+              id: 'ig-business-1',
+              changes: [
+                {
+                  field: 'comments',
+                  value: {
+                    [commentIdField]: 'comment-1',
+                    media: { id: 'media-1' },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        ['facebook']
+      );
 
+      expect(
+        integrationService.resolveActiveInstagramWebhook
+      ).toHaveBeenCalledWith('ig-business-1', ['facebook']);
+      expect(repository.record).toHaveBeenCalledWith(
+        expect.objectContaining({
+          integrationId: 'facebook-integration',
+          instagramAccountId: 'ig-business-1',
+          externalCommentId: 'comment-1',
+          status: 'RECEIVED',
+        })
+      );
+    }
+  );
+
+  it('never interprets Page feed events as Instagram comments', async () => {
+    const changes = [{ field: 'feed', value: { id: 'facebook-comment' } }];
+    await expect(
+      service.receive({ object: 'page', entry: [{ id: 'page-1', changes }] }, [
+        'facebook',
+      ])
+    ).resolves.toEqual({ events: 0, eventIds: [] });
+    await expect(
+      service.receive(
+        { object: 'instagram', entry: [{ id: 'ig-business-1', changes }] },
+        ['facebook']
+      )
+    ).resolves.toEqual({ events: 0, eventIds: [] });
+    expect(repository.record).not.toHaveBeenCalled();
     expect(
       integrationService.resolveActiveInstagramWebhook
-    ).toHaveBeenCalledWith('facebook-page-1', ['facebook']);
-    expect(repository.record).toHaveBeenCalledWith(
-      expect.objectContaining({
-        integrationId: 'facebook-integration',
-        instagramAccountId: 'ig-business-1',
-        status: 'RECEIVED',
-      })
-    );
+    ).not.toHaveBeenCalled();
   });
 });

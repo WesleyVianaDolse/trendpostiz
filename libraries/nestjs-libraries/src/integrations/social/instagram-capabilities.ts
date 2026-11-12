@@ -1,4 +1,8 @@
 import { Integration } from '@prisma/client';
+import {
+  getInstagramWebhookIssue,
+  InstagramWebhookIssue,
+} from './instagram-webhook-status';
 
 export const INSTAGRAM_PROVIDER_IDENTIFIERS = [
   'instagram',
@@ -13,6 +17,7 @@ export interface InstagramIntegrationCapabilities {
   publicReply: boolean;
   privateReply: boolean;
   reconnectRequired: boolean;
+  unavailableReason?: InstagramWebhookIssue;
 }
 
 type InstagramCapabilityIntegration = Pick<
@@ -26,7 +31,8 @@ type InstagramCapabilityIntegration = Pick<
   | 'refreshNeeded'
   | 'webhookCommentsSubscribed'
   | 'webhookMessagesSubscribed'
->;
+> &
+  Partial<Pick<Integration, 'webhookSubscriptionError'>>;
 
 export const isInstagramProviderIdentifier = (
   providerIdentifier: string
@@ -57,14 +63,21 @@ export const getInstagramIntegrationCapabilities = (
   }
 
   if (integration.providerIdentifier === 'instagram') {
+    const issue = !integration.webhookCommentsSubscribed
+      ? getInstagramWebhookIssue(integration.webhookSubscriptionError)
+      : undefined;
     const reconnectRequired =
-      !integration.facebookPageId || !integration.webhookCommentsSubscribed;
-    const commentsWebhook = !reconnectRequired;
+      !integration.facebookPageId || issue === 'RECONNECT_REQUIRED';
+    const commentsWebhook =
+      !!integration.facebookPageId && integration.webhookCommentsSubscribed;
     return {
       commentsWebhook,
       publicReply: commentsWebhook,
       privateReply: commentsWebhook,
       reconnectRequired,
+      ...(integration.facebookPageId && issue
+        ? { unavailableReason: issue }
+        : {}),
     };
   }
 

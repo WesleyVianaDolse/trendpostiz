@@ -442,6 +442,13 @@ export function InstagramAutomationWizard() {
                         ? 'Ativo'
                         : item.status.comments === 'RECONNECT_REQUIRED'
                         ? 'Requer reconexão'
+                        : item.status.comments === 'SUBSCRIPTION_FAILED'
+                        ? 'Falha de inscrição'
+                        : item.status.comments === 'INSUFFICIENT_PERMISSIONS'
+                        ? 'Permissões insuficientes'
+                        : item.status.comments ===
+                          'WEBHOOK_CONFIGURATION_INCOMPLETE'
+                        ? 'Configuração incompleta'
                         : 'Indisponível'}{' '}
                       · Resposta pública:{' '}
                       {item.status.publicReply === 'AVAILABLE'
@@ -452,10 +459,11 @@ export function InstagramAutomationWizard() {
                         ? 'Disponível'
                         : 'Indisponível'}
                     </p>
-                    {item.capabilities.reconnectRequired && (
+                    {(item.status.message ||
+                      item.capabilities.reconnectRequired) && (
                       <p className="mt-2 text-xs text-amber-400">
-                        Reconecte esta conta do Instagram para habilitar
-                        automações.
+                        {item.status.message ||
+                          'Reconecte esta conta do Instagram para habilitar automações.'}
                       </p>
                     )}
                   </div>
