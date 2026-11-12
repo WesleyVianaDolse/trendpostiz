@@ -4,6 +4,7 @@ import useSWR from 'swr';
 import {
   InstagramAutomationsPage,
   InstagramAutomationWizard,
+  InstagramAutomationExecutions,
 } from './instagram-automations.component';
 
 jest.mock('next/link', () => ({
@@ -172,5 +173,55 @@ describe('Instagram automations list UI', () => {
     expect(html).toContain('Orientação específica.');
     expect(html).not.toContain('Reconecte esta conta');
     expect(html).toMatch(/<button[^>]*disabled=""[^>]*>[^]*?@account/);
+  });
+});
+
+describe('Instagram automation execution history', () => {
+  it('distinguishes public success from Direct failure and labels the partial failure', () => {
+    mockedSWR.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'execution-1',
+            authorId: 'author-1',
+            publicReplyStatus: 'SUCCESS',
+            privateReplyStatus: 'FAILED',
+            privateReplyError:
+              "(#10) Missing 'instagram_manage_messages' permission",
+            createdAt: '2026-11-12T12:00:00Z',
+            processedAt: '2026-11-12T12:00:01Z',
+          },
+        ],
+        pages: 1,
+      },
+    });
+    const html = renderToStaticMarkup(<InstagramAutomationExecutions />);
+    expect(html).toContain('Resposta pública: Sucesso');
+    expect(html).toContain('Direct: Falhou');
+    expect(html).toContain('Falha parcial');
+    expect(html).toContain('instagram_manage_messages');
+    expect(html).not.toContain('Resultado: Sucesso');
+  });
+
+  it('shows both delivery errors instead of hiding the Direct error behind the public error', () => {
+    mockedSWR.mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'execution-1',
+            authorId: 'author-1',
+            publicReplyStatus: 'FAILED',
+            privateReplyStatus: 'FAILED',
+            publicReplyError: 'Public failure',
+            privateReplyError: 'Direct failure',
+          },
+        ],
+        pages: 1,
+      },
+    });
+    const html = renderToStaticMarkup(<InstagramAutomationExecutions />);
+    expect(html).toContain('Public failure');
+    expect(html).toContain('Direct failure');
+    expect(html).not.toContain('Falha parcial');
   });
 });

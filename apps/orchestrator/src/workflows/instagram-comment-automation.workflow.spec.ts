@@ -73,6 +73,19 @@ describe('instagramCommentAutomationWorkflow', () => {
     expect(mockActivities.finalize).toHaveBeenCalled();
   });
 
+  it('returns the audited failure when Direct fails permanently and never replays the successful public reply', async () => {
+    mockActivities.deliverPrivateReply.mockResolvedValue(false);
+    mockActivities.finalize.mockResolvedValue('FAILED');
+    await expect(
+      instagramCommentAutomationWorkflow({ webhookEventId: 'event-1' })
+    ).resolves.toBe('FAILED');
+    expect(mockActivities.deliverPublicReply).toHaveBeenCalledTimes(1);
+    expect(mockActivities.deliverPrivateReply).toHaveBeenCalledTimes(1);
+    expect(
+      mockActivities.markDeliveryFailedAfterRetries
+    ).not.toHaveBeenCalled();
+  });
+
   it('does not deliver anything when preparation skips the event', async () => {
     mockActivities.prepare.mockResolvedValue({
       process: false,

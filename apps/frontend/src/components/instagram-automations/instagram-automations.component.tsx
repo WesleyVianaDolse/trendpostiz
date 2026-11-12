@@ -880,15 +880,30 @@ export function InstagramAutomationExecutions() {
                   Direct: {deliveryStatus(item.privateReplyStatus)}
                 </Badge>
               </div>
+              {(item.publicReplyStatus === 'FAILED' ||
+                item.privateReplyStatus === 'FAILED') && (
+                <p className="mt-3 text-sm text-red-300">
+                  Resultado:{' '}
+                  {item.publicReplyStatus === 'SUCCESS' ||
+                  item.privateReplyStatus === 'SUCCESS'
+                    ? 'Falha parcial'
+                    : 'Falha'}
+                </p>
+              )}
               <p className="mt-3 text-xs text-newTextColor">
                 Processada em: {date(item.processedAt)}
               </p>
               {(item.publicReplyError || item.privateReplyError) && (
                 <details className="mt-3 text-sm text-red-300">
                   <summary>Ver detalhes</summary>
-                  <p className="mt-2">
-                    {item.publicReplyError || item.privateReplyError}
-                  </p>
+                  {item.publicReplyError && (
+                    <p className="mt-2">
+                      Resposta pública: {item.publicReplyError}
+                    </p>
+                  )}
+                  {item.privateReplyError && (
+                    <p className="mt-2">Direct: {item.privateReplyError}</p>
+                  )}
                 </details>
               )}
             </article>

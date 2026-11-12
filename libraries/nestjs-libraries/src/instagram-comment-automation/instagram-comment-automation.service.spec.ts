@@ -11,6 +11,7 @@ describe('InstagramCommentAutomationService', () => {
     findExecutionWithDeliveryContext: jest.fn(),
     updateDeliverySuccess: jest.fn().mockResolvedValue({}),
     updateDeliveryFailure: jest.fn().mockResolvedValue({}),
+    claimFacebookPrivateReplyAttempt: jest.fn(),
     finalizeExecution: jest.fn().mockResolvedValue('REPLIED'),
   };
   const messaging = {
@@ -62,6 +63,7 @@ describe('InstagramCommentAutomationService', () => {
     repository.findExecutionByPublicReplyId.mockResolvedValue(null);
     repository.findEnabledAutomation.mockResolvedValue({ ...automation });
     repository.claimExecution.mockResolvedValue({ id: 'execution-1' });
+    repository.claimFacebookPrivateReplyAttempt.mockResolvedValue(true);
   });
 
   it.each([
@@ -317,6 +319,70 @@ describe('InstagramCommentAutomationService', () => {
       'private',
       'message-1'
     );
+    expect(repository.claimFacebookPrivateReplyAttempt).not.toHaveBeenCalled();
+  });
+
+  const facebookDelivery = () => ({
+    externalCommentId: 'comment-1', publicReplyStatus: 'SUCCESS', privateReplyStatus: 'PENDING',
+    webhookEvent: { receivedAt: new Date() },
+    automation: { privateReplyText: 'Private reply', integration: {
+      ...event.integration, providerIdentifier: 'instagram', facebookPageId: 'page-1', webhookMessagesSubscribed: false,
+    } },
+  });
+
+  it('reserves a Facebook private reply before delivery and records the confirmed message ID', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue(facebookDelivery());
+    messaging.sendPrivateReplyFromComment.mockResolvedValue('message-1');
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(true);
+    expect(repository.claimFacebookPrivateReplyAttempt).toHaveBeenCalledWith('execution-1');
+    expect(repository.claimFacebookPrivateReplyAttempt.mock.invocationCallOrder[0])
+      .toBeLessThan(messaging.sendPrivateReplyFromComment.mock.invocationCallOrder[0]);
+    expect(repository.updateDeliverySuccess).toHaveBeenCalledWith('execution-1', 'private', 'message-1');
+  });
+
+  it('does not resend the Direct or public reply after the real permission failure', async () => {
+    const execution = facebookDelivery();
+    repository.findExecutionWithDeliveryContext.mockImplementation(async () => execution);
+    repository.claimFacebookPrivateReplyAttempt.mockImplementation(async () => {
+      execution.privateReplyStatus = 'FAILED';
+      return true;
+    });
+    messaging.sendPrivateReplyFromComment.mockRejectedValue(new InstagramMetaApiError("(#10) App is missing the 'instagram_manage_messages' permission to access Instagram user information.", false));
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(false);
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(false);
+    expect(messaging.sendPrivateReplyFromComment).toHaveBeenCalledTimes(1);
+    expect(messaging.replyToComment).not.toHaveBeenCalled();
+    expect(repository.updateDeliveryFailure).toHaveBeenCalledWith('execution-1', 'private', expect.stringContaining('instagram_manage_messages'));
+    expect(repository.updateDeliverySuccess).not.toHaveBeenCalled();
+    expect(execution.publicReplyStatus).toBe('SUCCESS');
+  });
+
+  it('allows only one of two concurrent traditional private delivery attempts to send', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue(facebookDelivery());
+    let claimed = false;
+    repository.claimFacebookPrivateReplyAttempt.mockImplementation(async () => {
+      if (claimed) return false;
+      claimed = true;
+      return true;
+    });
+    messaging.sendPrivateReplyFromComment.mockResolvedValue('message-1');
+    const results = await Promise.all([service.deliverPrivateReply('execution-1'), service.deliverPrivateReply('execution-1')]);
+    expect(results.filter(Boolean)).toHaveLength(1);
+    expect(messaging.sendPrivateReplyFromComment).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not resend when persisting a confirmed private delivery fails', async () => {
+    const execution = facebookDelivery();
+    repository.findExecutionWithDeliveryContext.mockImplementation(async () => execution);
+    repository.claimFacebookPrivateReplyAttempt.mockImplementation(async () => {
+      execution.privateReplyStatus = 'FAILED';
+      return true;
+    });
+    messaging.sendPrivateReplyFromComment.mockResolvedValue('message-1');
+    repository.updateDeliverySuccess.mockRejectedValueOnce(new Error('persistence failed'));
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(false);
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(false);
+    expect(messaging.sendPrivateReplyFromComment).toHaveBeenCalledTimes(1);
   });
 
   it('does not call Meta after the seven-day private reply window', async () => {

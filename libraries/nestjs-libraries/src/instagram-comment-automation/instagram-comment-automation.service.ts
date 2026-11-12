@@ -201,6 +201,12 @@ export class InstagramCommentAutomationService {
       );
       return false;
     }
+    if (
+      context.integration.providerIdentifier === 'instagram' &&
+      !(await this._repository.claimFacebookPrivateReplyAttempt(executionId))
+    ) {
+      return false;
+    }
     try {
       const replyId = await this._messaging.sendPrivateReplyFromComment(
         context.integration,

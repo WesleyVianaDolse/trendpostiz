@@ -23,9 +23,17 @@ export class InstagramFacebookCommentMessagingStrategy {
     commentId: string,
     message: string
   ) {
+    if (!integration.facebookPageId) {
+      throw new InstagramMetaApiError(
+        'Facebook Page ID is required for a Facebook Login private reply',
+        false
+      );
+    }
     return this.request(
       integration,
-      `/${encodeURIComponent(integration.internalId)}/messages`,
+      // Legacy Instagram Messaging / Facebook Login uses the linked Page and
+      // its Page token. IG ID /messages is a different Instagram API contract.
+      `/${encodeURIComponent(integration.facebookPageId)}/messages`,
       {
         recipient: { comment_id: commentId },
         message: { text: message },
@@ -40,7 +48,7 @@ export class InstagramFacebookCommentMessagingStrategy {
     path: string,
     body: object,
     responseId: 'id' | 'message_id',
-    retryUnknownOutcome: boolean
+    allowRetry: boolean
   ) {
     try {
       const response = await fetch(
@@ -56,8 +64,8 @@ export class InstagramFacebookCommentMessagingStrategy {
         }
       );
       const payload = await this.parseResponse(response);
-      if (response.ok) {
-        const id = payload?.[responseId] || payload?.id;
+      if (response.ok && !payload?.error) {
+        const id = payload?.[responseId];
         if (typeof id === 'string' && id) return id;
         throw new InstagramMetaApiError(
           'Instagram reply response did not contain an id',
@@ -71,6 +79,7 @@ export class InstagramFacebookCommentMessagingStrategy {
       );
       const transientCodes = new Set([1, 2, 4, 17, 32, 341, 613]);
       const transient =
+        allowRetry &&
         !alreadyReplied &&
         ([429, 500, 502, 503, 504].includes(response.status) ||
           metaError?.is_transient === true ||
@@ -93,13 +102,13 @@ export class InstagramFacebookCommentMessagingStrategy {
       throw new InstagramMetaApiError(
         this.sanitizeError(
           error instanceof Error
-            ? retryUnknownOutcome
+            ? allowRetry
               ? error.message
               : `Private reply delivery outcome is unknown; automatic retry suppressed: ${error.message}`
             : 'Instagram request failed',
           integration.token
         ),
-        retryUnknownOutcome
+        allowRetry
       );
     }
   }

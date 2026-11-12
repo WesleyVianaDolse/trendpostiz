@@ -107,6 +107,28 @@ export class InstagramCommentAutomationRepository {
     });
   }
 
+  async claimFacebookPrivateReplyAttempt(id: string) {
+    // Reserve before the HTTP request. A crash, timeout, or failure to persist a
+    // successful delivery must never leave a retryable PENDING private reply.
+    // FAILED means unconfirmed until the confirmed message_id is persisted.
+    const result =
+      await this._prisma.instagramCommentAutomationExecution.updateMany({
+        where: {
+          id,
+          processedAt: null,
+          privateReplyStatus: 'PENDING',
+          privateReplyId: null,
+          automation: { integration: { providerIdentifier: 'instagram' } },
+        },
+        data: {
+          privateReplyStatus: 'FAILED',
+          privateReplyError:
+            'Private reply attempt is unconfirmed; automatic retry suppressed',
+        },
+      });
+    return result.count === 1;
+  }
+
   updateDeliveryFailure(
     id: string,
     delivery: 'public' | 'private',
@@ -133,12 +155,11 @@ export class InstagramCommentAutomationRepository {
       ];
       const hasSuccess = statuses.includes('SUCCESS');
       const hasFailure = statuses.includes('FAILED');
-      const eventStatus =
-        hasSuccess && !hasFailure
-          ? 'REPLIED'
-          : hasFailure && !hasSuccess
-          ? 'FAILED'
-          : 'PROCESSED';
+      const eventStatus = hasFailure
+        ? 'FAILED'
+        : hasSuccess && !statuses.includes('PENDING')
+        ? 'REPLIED'
+        : 'PROCESSED';
 
       await transaction.instagramCommentAutomationExecution.update({
         where: { id },

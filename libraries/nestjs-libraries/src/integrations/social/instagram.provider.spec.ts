@@ -35,6 +35,8 @@ describe('InstagramProvider Graph API version', () => {
     const scope = new URL(auth.url).searchParams.get('scope') || '';
     expect(scope.split(',')).toContain('pages_manage_metadata');
     expect(scope.split(',')).not.toContain('instagram_manage_messages');
+    // Scope expansion and App Review are separate from the legacy endpoint fix.
+    expect(scope.split(',')).not.toContain('pages_messaging');
   });
 
   it('uses the supported Facebook Graph version throughout authentication', async () => {
@@ -66,6 +68,30 @@ describe('InstagramProvider Graph API version', () => {
     for (const [input] of fetchMock.mock.calls) {
       expect(String(input).startsWith(versionPrefix)).toBe(true);
     }
+  });
+
+  it('rejects requested permissions that were not effectively granted', async () => {
+    jest
+      .spyOn(global, 'fetch')
+      .mockImplementationOnce(() => ok({ access_token: 'short-token' }))
+      .mockImplementationOnce(() => ok({ access_token: 'user-token' }))
+      .mockImplementationOnce(() =>
+        ok({
+          data: provider.scopes.map((permission) => ({
+            permission,
+            status:
+              permission === 'instagram_manage_comments'
+                ? 'declined'
+                : 'granted',
+          })),
+        })
+      );
+    await expect(
+      provider.authenticate({ code: 'code', codeVerifier: '', refresh: '' })
+    ).rejects.toMatchObject({
+      message: expect.stringContaining('Not enough scopes'),
+    });
+    expect(global.fetch).toHaveBeenCalledTimes(3);
   });
 
   it('uses the supported Facebook Graph version while discovering Pages', async () => {
