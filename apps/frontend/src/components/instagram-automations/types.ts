@@ -17,6 +17,10 @@ export interface InstagramAccount {
       | 'SUBSCRIPTION_FAILED'
       | 'INSUFFICIENT_PERMISSIONS'
       | 'WEBHOOK_CONFIGURATION_INCOMPLETE';
+    privateReplyAuthorization?:
+      | 'GRANTED'
+      | 'RECONNECT_REQUIRED'
+      | 'VERIFICATION_UNAVAILABLE';
   };
   status: {
     comments:
@@ -28,7 +32,11 @@ export interface InstagramAccount {
       | 'WEBHOOK_CONFIGURATION_INCOMPLETE';
     message?: string;
     publicReply: 'AVAILABLE' | 'UNAVAILABLE';
-    privateReply: 'AVAILABLE' | 'UNAVAILABLE';
+    privateReply:
+      | 'AVAILABLE'
+      | 'UNAVAILABLE'
+      | 'RECONNECT_REQUIRED'
+      | 'VERIFICATION_UNAVAILABLE';
   };
 }
 

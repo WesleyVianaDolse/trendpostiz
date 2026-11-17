@@ -57,6 +57,16 @@ const makeService = (overrides: any = {}) => {
 };
 
 describe('InstagramCommentAutomationCrudService', () => {
+  beforeEach(() => {
+    jest.replaceProperty(process, 'env', {
+      ...process.env, FACEBOOK_APP_ID: 'app-1', FACEBOOK_APP_SECRET: 'synthetic-app-secret',
+    });
+    jest.spyOn(global, 'fetch').mockImplementation(async () => new Response(JSON.stringify({ data: {
+      app_id: 'app-1', type: 'PAGE', profile_id: 'page-1', is_valid: true,
+      scopes: ['instagram_basic', 'instagram_manage_comments', 'instagram_manage_messages'],
+    } })));
+  });
+  afterEach(() => jest.restoreAllMocks());
   it('normalizes triggers before create and uses a transaction', async () => {
     const { service, prisma } = makeService();
     const created = { id: 'automation-1' };
@@ -226,6 +236,49 @@ describe('InstagramCommentAutomationCrudService', () => {
     );
     jest.spyOn(service, 'get').mockResolvedValue({ id: 'a' } as any);
     await expect(service.create('org-1', dto)).resolves.toEqual({ id: 'a' });
+  });
+
+  it('lists missing Direct grants without invalidating comments or leaking tokens', async () => {
+    const { service, prisma } = makeService();
+    prisma.integration.findMany.mockResolvedValue([{
+      ...integration, providerIdentifier: 'instagram', facebookPageId: 'page-1',
+    }]);
+    jest.mocked(global.fetch).mockResolvedValueOnce(new Response(JSON.stringify({ data: {
+      app_id: 'app-1', type: 'PAGE', profile_id: 'page-1', is_valid: true,
+      scopes: ['instagram_basic', 'instagram_manage_comments'],
+    } })));
+    const accounts = await service.listAccounts('org-1');
+    expect(accounts[0]).toMatchObject({
+      refreshNeeded: false,
+      capabilities: { publicReply: true, privateReply: false, reconnectRequired: false },
+      status: { comments: 'ACTIVE', publicReply: 'AVAILABLE', privateReply: 'RECONNECT_REQUIRED' },
+    });
+    expect(JSON.stringify(accounts)).not.toContain('app-1');
+  });
+
+  it('reports a failed read as verification unavailable, not reconnection', async () => {
+    const { service, prisma } = makeService();
+    prisma.integration.findMany.mockResolvedValue([{
+      ...integration, providerIdentifier: 'instagram', facebookPageId: 'page-1',
+    }]);
+    jest.mocked(global.fetch).mockRejectedValueOnce(new Error('synthetic transport error'));
+    const accounts = await service.listAccounts('org-1');
+    expect(accounts[0].status).toMatchObject({ comments: 'ACTIVE', privateReply: 'VERIFICATION_UNAVAILABLE' });
+    expect(accounts[0].capabilities.reconnectRequired).toBe(false);
+  });
+
+  it('creates public-only rules without a messages grant or debugger dependency', async () => {
+    const { service, prisma } = makeService({ integration: {
+      findFirst: jest.fn().mockResolvedValue({ ...integration, providerIdentifier: 'instagram', facebookPageId: 'page-1' }),
+    } });
+    delete process.env.FACEBOOK_APP_SECRET;
+    prisma.$transaction.mockImplementation((callback: any) => callback({
+      instagramCommentAutomation: { create: jest.fn().mockResolvedValue({ id: 'a' }) },
+    }));
+    jest.spyOn(service, 'get').mockResolvedValue({ id: 'a' } as any);
+    await expect(service.create('org-1', { ...dto, privateReplyEnabled: false }))
+      .resolves.toEqual({ id: 'a' });
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('returns reconnect status for an old Facebook/BM account without Page ID', async () => {

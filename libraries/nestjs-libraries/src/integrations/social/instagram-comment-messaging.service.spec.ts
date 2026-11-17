@@ -81,6 +81,7 @@ describe('InstagramFacebookCommentMessagingStrategy', () => {
   });
 
   it.each([
+    [403, 230, '(#230) Requires instagram_manage_messages permission to manage the object'],
     [
       400,
       10,

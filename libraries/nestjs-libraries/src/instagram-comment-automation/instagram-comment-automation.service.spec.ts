@@ -59,12 +59,20 @@ describe('InstagramCommentAutomationService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.replaceProperty(process, 'env', {
+      ...process.env, FACEBOOK_APP_ID: 'app-1', FACEBOOK_APP_SECRET: 'synthetic-app-secret',
+    });
+    jest.spyOn(global, 'fetch').mockImplementation(async () => new Response(JSON.stringify({ data: {
+      app_id: 'app-1', type: 'PAGE', profile_id: 'page-1', is_valid: true,
+      scopes: ['instagram_basic', 'instagram_manage_comments', 'instagram_manage_messages'],
+    } })));
     repository.findEventForProcessing.mockResolvedValue({ ...event });
     repository.findExecutionByPublicReplyId.mockResolvedValue(null);
     repository.findEnabledAutomation.mockResolvedValue({ ...automation });
     repository.claimExecution.mockResolvedValue({ id: 'execution-1' });
     repository.claimFacebookPrivateReplyAttempt.mockResolvedValue(true);
   });
+  afterEach(() => jest.restoreAllMocks());
 
   it.each([
     ['without an automation', null],
@@ -340,14 +348,14 @@ describe('InstagramCommentAutomationService', () => {
     expect(repository.updateDeliverySuccess).toHaveBeenCalledWith('execution-1', 'private', 'message-1');
   });
 
-  it('does not resend the Direct or public reply after the real permission failure', async () => {
+  it.each([10, 230])('does not resend Direct or public reply after Meta permission error %s', async (code) => {
     const execution = facebookDelivery();
     repository.findExecutionWithDeliveryContext.mockImplementation(async () => execution);
     repository.claimFacebookPrivateReplyAttempt.mockImplementation(async () => {
       execution.privateReplyStatus = 'FAILED';
       return true;
     });
-    messaging.sendPrivateReplyFromComment.mockRejectedValue(new InstagramMetaApiError("(#10) App is missing the 'instagram_manage_messages' permission to access Instagram user information.", false));
+    messaging.sendPrivateReplyFromComment.mockRejectedValue(new InstagramMetaApiError(`(#${code}) Requires instagram_manage_messages permission`, false));
     await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(false);
     await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(false);
     expect(messaging.sendPrivateReplyFromComment).toHaveBeenCalledTimes(1);
@@ -355,6 +363,30 @@ describe('InstagramCommentAutomationService', () => {
     expect(repository.updateDeliveryFailure).toHaveBeenCalledWith('execution-1', 'private', expect.stringContaining('instagram_manage_messages'));
     expect(repository.updateDeliverySuccess).not.toHaveBeenCalled();
     expect(execution.publicReplyStatus).toBe('SUCCESS');
+  });
+
+  it('delivers the public reply without checking or requiring Direct authorization', async () => {
+    delete process.env.FACEBOOK_APP_SECRET;
+    repository.findExecutionWithDeliveryContext.mockResolvedValue({
+      ...facebookDelivery(), publicReplyStatus: 'PENDING',
+      automation: { ...facebookDelivery().automation, publicReplyText: 'Public reply' },
+    });
+    messaging.replyToComment.mockResolvedValue('public-1');
+    await expect(service.deliverPublicReply('execution-1')).resolves.toBe(true);
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(repository.updateDeliverySuccess).toHaveBeenCalledWith('execution-1', 'public', 'public-1');
+  });
+
+  it('blocks an unauthorized Direct before reservation and never sends it', async () => {
+    repository.findExecutionWithDeliveryContext.mockResolvedValue(facebookDelivery());
+    jest.mocked(global.fetch).mockResolvedValueOnce(new Response(JSON.stringify({ data: {
+      app_id: 'app-1', type: 'PAGE', profile_id: 'page-1', is_valid: true,
+      scopes: ['instagram_basic', 'instagram_manage_comments'],
+    } })));
+    await expect(service.deliverPrivateReply('execution-1')).resolves.toBe(false);
+    expect(repository.claimFacebookPrivateReplyAttempt).not.toHaveBeenCalled();
+    expect(messaging.sendPrivateReplyFromComment).not.toHaveBeenCalled();
+    expect(repository.updateDeliveryFailure).toHaveBeenCalledWith('execution-1', 'private', expect.any(String));
   });
 
   it('allows only one of two concurrent traditional private delivery attempts to send', async () => {

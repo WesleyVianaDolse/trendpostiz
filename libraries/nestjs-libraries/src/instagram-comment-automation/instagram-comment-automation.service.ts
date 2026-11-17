@@ -8,6 +8,7 @@ import {
   getInstagramIntegrationCapabilities,
   isInstagramProviderIdentifier,
 } from '@gitroom/nestjs-libraries/integrations/social/instagram-capabilities';
+import { getInstagramCapabilitiesWithAuthorization } from '@gitroom/nestjs-libraries/integrations/social/instagram-facebook-authorization';
 
 export interface InstagramCommentAutomationPreparation {
   process: boolean;
@@ -181,7 +182,7 @@ export class InstagramCommentAutomationService {
     const context = await this.getDeliveryContext(executionId, 'private');
     if (!context) return false;
     if (
-      !getInstagramIntegrationCapabilities(context.integration).privateReply
+      !(await getInstagramCapabilitiesWithAuthorization(context.integration)).privateReply
     ) {
       await this._repository.updateDeliveryFailure(
         executionId,

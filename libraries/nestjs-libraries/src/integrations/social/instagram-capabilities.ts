@@ -12,15 +12,26 @@ export const INSTAGRAM_PROVIDER_IDENTIFIERS = [
 export type InstagramProviderIdentifier =
   (typeof INSTAGRAM_PROVIDER_IDENTIFIERS)[number];
 
+// Messaging grant evidenced by Meta 230. Optional for publishing/public comments.
+export const INSTAGRAM_FACEBOOK_MESSAGING_SCOPES = [
+  'instagram_manage_messages',
+] as const;
+
+export type InstagramPrivateReplyAuthorization =
+  | 'GRANTED'
+  | 'RECONNECT_REQUIRED'
+  | 'VERIFICATION_UNAVAILABLE';
+
 export interface InstagramIntegrationCapabilities {
   commentsWebhook: boolean;
   publicReply: boolean;
   privateReply: boolean;
   reconnectRequired: boolean;
   unavailableReason?: InstagramWebhookIssue;
+  privateReplyAuthorization?: InstagramPrivateReplyAuthorization;
 }
 
-type InstagramCapabilityIntegration = Pick<
+export type InstagramCapabilityIntegration = Pick<
   Integration,
   | 'providerIdentifier'
   | 'token'
@@ -32,7 +43,7 @@ type InstagramCapabilityIntegration = Pick<
   | 'webhookCommentsSubscribed'
   | 'webhookMessagesSubscribed'
 > &
-  Partial<Pick<Integration, 'webhookSubscriptionError'>>;
+  Partial<Pick<Integration, 'webhookSubscriptionError' | 'internalId'>>;
 
 export const isInstagramProviderIdentifier = (
   providerIdentifier: string
@@ -42,7 +53,8 @@ export const isInstagramProviderIdentifier = (
   );
 
 export const getInstagramIntegrationCapabilities = (
-  integration: InstagramCapabilityIntegration
+  integration: InstagramCapabilityIntegration,
+  privateReplyAuthorization?: InstagramPrivateReplyAuthorization
 ): InstagramIntegrationCapabilities => {
   const tokenValid =
     !!integration.token &&
@@ -73,8 +85,11 @@ export const getInstagramIntegrationCapabilities = (
     return {
       commentsWebhook,
       publicReply: commentsWebhook,
-      privateReply: commentsWebhook,
+      privateReply: commentsWebhook && privateReplyAuthorization === 'GRANTED',
       reconnectRequired,
+      ...(commentsWebhook
+        ? { privateReplyAuthorization: privateReplyAuthorization || 'VERIFICATION_UNAVAILABLE' as const }
+        : {}),
       ...(integration.facebookPageId && issue
         ? { unavailableReason: issue }
         : {}),

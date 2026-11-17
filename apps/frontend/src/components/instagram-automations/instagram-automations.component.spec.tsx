@@ -176,6 +176,27 @@ describe('Instagram automations list UI', () => {
   });
 });
 
+describe('Facebook Direct authorization status', () => {
+  it.each([
+    ['RECONNECT_REQUIRED', 'Requer autorização'],
+    ['VERIFICATION_UNAVAILABLE', 'Verificação indisponível'],
+  ])('keeps the account selectable when Direct is %s', (privateReply, label) => {
+    mockedSWR.mockImplementation((key: string) => ({ data:
+      key === '/instagram-comment-automations/accounts' ? [{
+        id: 'facebook-account', name: 'Account', profile: 'facebook-account',
+        capabilities: { commentsWebhook: true, publicReply: true, privateReply: false,
+          reconnectRequired: false, privateReplyAuthorization: privateReply },
+        status: { comments: 'ACTIVE', publicReply: 'AVAILABLE', privateReply },
+      }] : undefined,
+    }));
+    const html = renderToStaticMarkup(<InstagramAutomationWizard />);
+    expect(html).toContain(label);
+    expect(html).toContain('respostas públicas continuam disponíveis');
+    expect(html).toMatch(/<button(?![^>]*disabled)[^>]*>[^]*?@facebook-account/);
+    expect(html).not.toContain('para habilitar automações');
+  });
+});
+
 describe('Instagram automation execution history', () => {
   it('distinguishes public success from Direct failure and labels the partial failure', () => {
     mockedSWR.mockReturnValue({

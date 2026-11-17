@@ -34,9 +34,9 @@ describe('InstagramProvider Graph API version', () => {
     );
     const scope = new URL(auth.url).searchParams.get('scope') || '';
     expect(scope.split(',')).toContain('pages_manage_metadata');
-    expect(scope.split(',')).not.toContain('instagram_manage_messages');
-    // Scope expansion and App Review are separate from the legacy endpoint fix.
+    expect(scope.split(',')).toContain('instagram_manage_messages');
     expect(scope.split(',')).not.toContain('pages_messaging');
+    expect(new URL(auth.url).searchParams.get('auth_type')).toBe('rerequest');
   });
 
   it('uses the supported Facebook Graph version throughout authentication', async () => {
@@ -70,7 +70,34 @@ describe('InstagramProvider Graph API version', () => {
     }
   });
 
-  it('rejects requested permissions that were not effectively granted', async () => {
+  it.each(['declined', 'expired', 'omitted'])(
+    'keeps publishing and comments authorized with messaging %s', async (status) => {
+      const fetchMock = jest.spyOn(global, 'fetch')
+        .mockImplementationOnce(() => ok({ access_token: 'short-token' }))
+        .mockImplementationOnce(() => ok({ access_token: 'user-token' }))
+        .mockImplementationOnce(() => ok({ data: [
+          ...provider.requiredScopes.map(permission => ({ permission, status: 'granted' })),
+          ...(status === 'omitted' ? [] : ['instagram_manage_messages']
+            .map(permission => ({ permission, status }))),
+        ] }))
+        .mockImplementationOnce(() => ok({ id: 'facebook-user-1', name: 'User', picture: { data: {} } }));
+      await expect(provider.authenticate({ code: 'code', codeVerifier: '', refresh: '' }))
+        .resolves.toMatchObject({ accessToken: 'user-token' });
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+    }
+  );
+
+  it('reconnects the same Instagram identity using a freshly authorized Page token', async () => {
+    jest.spyOn(provider, 'pages').mockResolvedValue([{ id: 'ig-1', pageId: 'page-1' }] as any);
+    const fetchMock = jest.spyOn(global, 'fetch')
+      .mockImplementationOnce(() => ok({ id: 'page-1', access_token: 'new-page-token', instagram_business_account: { id: 'ig-1' } }))
+      .mockImplementationOnce(() => ok({ id: 'ig-1', name: 'Account', username: 'account' }));
+    await expect(provider.reConnect('user-1', 'ig-1', 'new-user-token'))
+      .resolves.toMatchObject({ id: 'ig-1', facebookPageId: 'page-1', accessToken: 'new-page-token' });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('rejects required publishing/comment permissions that were not effectively granted', async () => {
     jest
       .spyOn(global, 'fetch')
       .mockImplementationOnce(() => ok({ access_token: 'short-token' }))

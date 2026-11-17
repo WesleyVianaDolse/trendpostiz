@@ -18,6 +18,7 @@ import {
   isInstagramProviderIdentifier,
 } from '@gitroom/nestjs-libraries/integrations/social/instagram-capabilities';
 import { instagramWebhookIssueMessages } from '@gitroom/nestjs-libraries/integrations/social/instagram-webhook-status';
+import { getInstagramCapabilitiesWithAuthorization } from '@gitroom/nestjs-libraries/integrations/social/instagram-facebook-authorization';
 
 @Injectable()
 export class InstagramCommentAutomationCrudService {
@@ -39,6 +40,7 @@ export class InstagramCommentAutomationCrudService {
       select: {
         id: true,
         name: true,
+        internalId: true,
         profile: true,
         picture: true,
         providerIdentifier: true,
@@ -53,8 +55,8 @@ export class InstagramCommentAutomationCrudService {
         webhookSubscriptionError: true,
       },
     });
-    return integrations.map((integration) => {
-      const capabilities = getInstagramIntegrationCapabilities(integration);
+    return Promise.all(integrations.map(async (integration) => {
+      const capabilities = await getInstagramCapabilitiesWithAuthorization(integration);
       return {
         id: integration.id,
         name: integration.name,
@@ -80,10 +82,14 @@ export class InstagramCommentAutomationCrudService {
             : ('UNAVAILABLE' as const),
           privateReply: capabilities.privateReply
             ? ('AVAILABLE' as const)
+            : capabilities.privateReplyAuthorization === 'RECONNECT_REQUIRED'
+            ? ('RECONNECT_REQUIRED' as const)
+            : capabilities.privateReplyAuthorization === 'VERIFICATION_UNAVAILABLE'
+            ? ('VERIFICATION_UNAVAILABLE' as const)
             : ('UNAVAILABLE' as const),
         },
       };
-    });
+    }));
   }
 
   async listMedia(
@@ -158,7 +164,7 @@ export class InstagramCommentAutomationCrudService {
       organizationId,
       dto.integrationId
     );
-    const data = this.validateConfiguration(dto, integration);
+    const data = await this.validateConfiguration(dto, integration);
     await this.media.get(integration, dto.mediaId);
     try {
       const created = await this.prisma.$transaction((transaction) =>
@@ -188,7 +194,7 @@ export class InstagramCommentAutomationCrudService {
       organizationId,
       automation.integrationId
     );
-    const data = this.validateConfiguration(dto, integration);
+    const data = await this.validateConfiguration(dto, integration);
     try {
       await this.prisma.$transaction(async (transaction) => {
         await transaction.instagramCommentAutomationTrigger.deleteMany({
@@ -215,7 +221,7 @@ export class InstagramCommentAutomationCrudService {
         organizationId,
         automation.integrationId
       );
-      this.assertCapabilities(automation, integration);
+      await this.assertCapabilities(automation, integration);
     }
     return this.prisma.instagramCommentAutomation.update({
       where: { id },
@@ -300,7 +306,7 @@ export class InstagramCommentAutomationCrudService {
     return integration;
   }
 
-  private validateConfiguration(
+  private async validateConfiguration(
     dto: UpdateInstagramCommentAutomationDto,
     integration: Integration
   ) {
@@ -313,7 +319,7 @@ export class InstagramCommentAutomationCrudService {
     if (dto.privateReplyEnabled && !dto.privateReplyText?.trim()) {
       throw new BadRequestException('Informe a mensagem no Direct.');
     }
-    this.assertCapabilities(dto, integration);
+    await this.assertCapabilities(dto, integration);
     const triggers = dto.triggers.map((phrase) => ({
       phrase: phrase.trim(),
       normalizedPhrase: normalizeInstagramCommentPhrase(phrase),
@@ -344,14 +350,16 @@ export class InstagramCommentAutomationCrudService {
     };
   }
 
-  private assertCapabilities(
+  private async assertCapabilities(
     configuration: Pick<
       UpdateInstagramCommentAutomationDto,
       'publicReplyEnabled' | 'privateReplyEnabled'
     >,
     integration: Integration
   ) {
-    const capabilities = getInstagramIntegrationCapabilities(integration);
+    const capabilities = configuration.privateReplyEnabled
+      ? await getInstagramCapabilitiesWithAuthorization(integration)
+      : getInstagramIntegrationCapabilities(integration);
     if (!capabilities.commentsWebhook) {
       throw new BadRequestException(
         capabilities.reconnectRequired
@@ -368,7 +376,11 @@ export class InstagramCommentAutomationCrudService {
     }
     if (configuration.privateReplyEnabled && !capabilities.privateReply) {
       throw new BadRequestException(
-        'O Direct não está disponível para esta conta.'
+        capabilities.privateReplyAuthorization === 'RECONNECT_REQUIRED'
+          ? 'Reconecte esta conta para autorizar o Direct. As respostas públicas continuam disponíveis.'
+          : capabilities.privateReplyAuthorization === 'VERIFICATION_UNAVAILABLE'
+          ? 'Não foi possível verificar a autorização do Direct. Tente novamente; as respostas públicas continuam disponíveis.'
+          : 'O Direct não está disponível para esta conta.'
       );
     }
   }

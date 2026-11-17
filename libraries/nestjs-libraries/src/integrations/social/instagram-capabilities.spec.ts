@@ -43,12 +43,13 @@ describe('Instagram integration capabilities', () => {
         providerIdentifier: 'instagram',
         facebookPageId: 'page-1',
         webhookMessagesSubscribed: false,
-      })
+      }, 'GRANTED')
     ).toEqual({
       commentsWebhook: true,
       publicReply: true,
       privateReply: true,
       reconnectRequired: false,
+      privateReplyAuthorization: 'GRANTED',
     });
   });
 

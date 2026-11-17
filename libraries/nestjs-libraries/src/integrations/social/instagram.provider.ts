@@ -14,6 +14,7 @@ import { Integration } from '@prisma/client';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
 import { isVideoExtension } from '@gitroom/helpers/utils/has.extension';
 import { BadRequestException } from '@nestjs/common';
+import { INSTAGRAM_FACEBOOK_MESSAGING_SCOPES } from './instagram-capabilities';
 
 export const INSTAGRAM_FACEBOOK_GRAPH_API_VERSION = 'v25.0';
 
@@ -42,7 +43,7 @@ export class InstagramProvider
   name = 'Instagram\n(Facebook Business)';
   isBetweenSteps = true;
   toolTip = 'Instagram must be business and connected to a Facebook page';
-  scopes = [
+  requiredScopes = [
     'instagram_basic',
     'pages_show_list',
     'pages_read_engagement',
@@ -52,6 +53,7 @@ export class InstagramProvider
     'instagram_manage_comments',
     'instagram_manage_insights',
   ];
+  scopes = [...this.requiredScopes, ...INSTAGRAM_FACEBOOK_MESSAGING_SCOPES];
   override maxConcurrentJob = 400;
   editor = 'normal' as const;
   dto = InstagramDto;
@@ -378,6 +380,7 @@ export class InstagramProvider
           `${process.env.FRONTEND_URL}/integrations/social/instagram`
         )}` +
         `&state=${state}` +
+        '&auth_type=rerequest' +
         `&scope=${encodeURIComponent(this.scopes.join(','))}`,
       codeVerifier: makeId(10),
       state,
@@ -422,7 +425,8 @@ export class InstagramProvider
     const permissions = data
       .filter((d: any) => d.status === 'granted')
       .map((p: any) => p.permission);
-    this.checkScopes(this.scopes, permissions);
+    // Messaging is optional: a declined Direct grant must not break publishing.
+    this.checkScopes(this.requiredScopes, permissions);
 
     const { id, name, picture } = await (
       await fetch(

@@ -414,7 +414,12 @@ export function InstagramAutomationWizard() {
                   key={item.id}
                   disabled={!item.capabilities.commentsWebhook}
                   onClick={() =>
-                    setForm({ ...form, integrationId: item.id, mediaId: '' })
+                    setForm({
+                      ...form, integrationId: item.id, mediaId: '',
+                      // A missing Facebook Direct grant must still allow a public-only rule.
+                      privateReplyEnabled: item.capabilities.privateReplyAuthorization &&
+                        !item.capabilities.privateReply ? false : form.privateReplyEnabled,
+                    })
                   }
                   className={`flex items-center gap-4 rounded-xl border p-4 text-left ${
                     form.integrationId === item.id
@@ -457,8 +462,22 @@ export function InstagramAutomationWizard() {
                       · Direct:{' '}
                       {item.status.privateReply === 'AVAILABLE'
                         ? 'Disponível'
+                        : item.status.privateReply === 'RECONNECT_REQUIRED'
+                        ? 'Requer autorização'
+                        : item.status.privateReply === 'VERIFICATION_UNAVAILABLE'
+                        ? 'Verificação indisponível'
                         : 'Indisponível'}
                     </p>
+                    {item.status.privateReply === 'RECONNECT_REQUIRED' && (
+                      <p className="mt-2 text-xs text-amber-400">
+                        Reconecte esta conta para autorizar o Direct. Publicações e respostas públicas continuam disponíveis.
+                      </p>
+                    )}
+                    {item.status.privateReply === 'VERIFICATION_UNAVAILABLE' && (
+                      <p className="mt-2 text-xs text-amber-400">
+                        Não foi possível verificar a autorização do Direct. Tente novamente; as respostas públicas continuam disponíveis.
+                      </p>
+                    )}
                     {(item.status.message ||
                       item.capabilities.reconnectRequired) && (
                       <p className="mt-2 text-xs text-amber-400">
