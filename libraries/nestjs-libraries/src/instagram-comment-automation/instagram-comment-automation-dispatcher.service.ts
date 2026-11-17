@@ -5,6 +5,8 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import { TemporalService } from 'nestjs-temporal-core';
+import { AutomationRecoveryService } from '../automation-recovery/automation-recovery.service';
+import { RecoveryHold } from '../automation-recovery/recovery-policy';
 import { InstagramCommentAutomationRepository } from '@gitroom/nestjs-libraries/database/prisma/instagram-comment-automations/instagram-comment-automation.repository';
 
 const RECONCILIATION_INTERVAL_MS = 60_000;
@@ -20,7 +22,8 @@ export class InstagramCommentAutomationDispatcherService
 
   constructor(
     private _temporal: TemporalService,
-    private _repository: InstagramCommentAutomationRepository
+    private _repository: InstagramCommentAutomationRepository,
+    private _recovery: AutomationRecoveryService
   ) {}
 
   onModuleInit() {
@@ -37,6 +40,11 @@ export class InstagramCommentAutomationDispatcherService
   }
 
   async dispatch(webhookEventId: string) {
+    const event = await this._repository.findEventForProcessing(webhookEventId);
+    if (!event?.integration || event.recoverySkipReason || event.automationExecution?.processedAt ||
+      !['RECEIVED', 'PROCESSING'].includes(event.status)) return;
+    try { await this._recovery.guardCommentEvent(webhookEventId, event.integration.organizationId); }
+    catch (error) { if (error instanceof RecoveryHold) return; throw error; }
     const client = this._temporal.client.getRawClient();
     if (!client) throw new Error('Temporal client is unavailable');
 

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InstagramCommentDeliveryStatus, Prisma } from '@prisma/client';
 import { PrismaService } from '@gitroom/nestjs-libraries/database/prisma/prisma.service';
+import { AutomationRecoveryService } from '../../../automation-recovery/automation-recovery.service';
+import { RecoveryHold } from '../../../automation-recovery/recovery-policy';
 
 export interface ClaimInstagramCommentExecutionInput {
   automationId: string;
@@ -13,7 +15,7 @@ export interface ClaimInstagramCommentExecutionInput {
 
 @Injectable()
 export class InstagramCommentAutomationRepository {
-  constructor(private _prisma: PrismaService) {}
+  constructor(private _prisma: PrismaService, private _recovery?: AutomationRecoveryService) {}
 
   findEventForProcessing(id: string) {
     return this._prisma.instagramWebhookEvent.findUnique({
@@ -43,7 +45,7 @@ export class InstagramCommentAutomationRepository {
     return this._prisma.instagramCommentAutomationExecution.findUnique({
       where: { id },
       include: {
-        webhookEvent: { select: { receivedAt: true } },
+        webhookEvent: { select: { receivedAt: true, occurredAt: true, occurredAtSource: true } },
         automation: {
           include: { integration: true },
         },
@@ -54,6 +56,14 @@ export class InstagramCommentAutomationRepository {
   async claimExecution(input: ClaimInstagramCommentExecutionInput) {
     try {
       return await this._prisma.$transaction(async (transaction) => {
+        if (!this._recovery) throw new RecoveryHold('RECOVERY_SERVICE_UNAVAILABLE');
+        const automation = await transaction.instagramCommentAutomation.findUnique({ where: { id: input.automationId } });
+        if (!automation) return null;
+        const integration = await transaction.integration.findUnique({ where: { id: automation.integrationId }, select: { organizationId: true } });
+        if (!integration || !await this._recovery.guardCommentClaim(transaction, input.webhookEventId, integration.organizationId)) return null;
+        const event = await transaction.instagramWebhookEvent.findUnique({ where: { id: input.webhookEventId } });
+        if (!event || event.status !== 'RECEIVED' || event.recoverySkipReason || event.integrationId !== automation.integrationId ||
+          event.authorId !== input.authorId || event.externalCommentId !== input.externalCommentId || !automation.enabled) return null;
         const execution =
           await transaction.instagramCommentAutomationExecution.create({
             data: input,
@@ -79,8 +89,8 @@ export class InstagramCommentAutomationRepository {
     id: string,
     status: Prisma.InstagramWebhookEventUpdateInput['status']
   ) {
-    return this._prisma.instagramWebhookEvent.update({
-      where: { id },
+    return this._prisma.instagramWebhookEvent.updateMany({
+      where: { id, recoverySkipReason: null, status: { in: ['RECEIVED', 'UNMATCHED', 'AMBIGUOUS', 'INVALID'] } },
       data: { status },
     });
   }
@@ -91,7 +101,9 @@ export class InstagramCommentAutomationRepository {
     replyId: string
   ) {
     return this._prisma.instagramCommentAutomationExecution.update({
-      where: { id },
+      where: { id, OR: delivery === 'public'
+        ? [{ publicReplyId: null }, { publicReplyId: replyId }]
+        : [{ privateReplyId: null }, { privateReplyId: replyId }] },
       data:
         delivery === 'public'
           ? {
@@ -134,8 +146,10 @@ export class InstagramCommentAutomationRepository {
     delivery: 'public' | 'private',
     error: string
   ) {
-    return this._prisma.instagramCommentAutomationExecution.update({
-      where: { id },
+    return this._prisma.instagramCommentAutomationExecution.updateMany({
+      where: delivery === 'public'
+        ? { id, publicReplyId: null, publicReplyStatus: { in: ['PENDING', 'FAILED'] } }
+        : { id, privateReplyId: null, privateReplyStatus: { in: ['PENDING', 'FAILED'] } },
       data:
         delivery === 'public'
           ? { publicReplyStatus: 'FAILED', publicReplyError: error }
@@ -145,6 +159,7 @@ export class InstagramCommentAutomationRepository {
 
   async finalizeExecution(id: string, webhookEventId: string) {
     return this._prisma.$transaction(async (transaction) => {
+      await transaction.$queryRaw`SELECT "id" FROM "InstagramWebhookEvent" WHERE "id" = ${webhookEventId} FOR UPDATE`;
       const execution =
         await transaction.instagramCommentAutomationExecution.findUniqueOrThrow(
           { where: { id } }
@@ -153,6 +168,12 @@ export class InstagramCommentAutomationRepository {
         execution.publicReplyStatus,
         execution.privateReplyStatus,
       ];
+      const event = await transaction.instagramWebhookEvent.findUnique({ where: { id: webhookEventId }, select: { recoverySkipReason: true, status: true } });
+      if (event?.recoverySkipReason) return event.status;
+      if (statuses.includes('PENDING')) {
+        await transaction.instagramWebhookEvent.update({ where: { id: webhookEventId }, data: { status: 'PROCESSING' } });
+        return 'PROCESSING';
+      }
       const hasSuccess = statuses.includes('SUCCESS');
       const hasFailure = statuses.includes('FAILED');
       const eventStatus = hasFailure
@@ -175,7 +196,7 @@ export class InstagramCommentAutomationRepository {
 
   findReceivedEventIds(take = 100) {
     return this._prisma.instagramWebhookEvent.findMany({
-      where: { status: 'RECEIVED' },
+      where: { status: 'RECEIVED', recoverySkipReason: null },
       orderBy: { receivedAt: 'asc' },
       take,
       select: { id: true },

@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 import { Integration } from '@prisma/client';
 import { Plug } from '@gitroom/helpers/decorators/plug.decorator';
 import { timer } from '@gitroom/helpers/utils/timer';
+import { derivedMutation, derivedLinkedInResponse, derivedConditionNotMet } from '../../automation-recovery/derived-effect-result';
 import { Rules } from '@gitroom/nestjs-libraries/chat/rules.description.decorator';
 
 @Rules(
@@ -584,7 +585,7 @@ export class LinkedinPageProvider
 
     if (totalLikes >= +fields.likesAmount) {
       await timer(2000);
-      await this.fetch(`https://api.linkedin.com/rest/posts`, {
+      const response = await derivedMutation(() => this.fetch(`https://api.linkedin.com/rest/posts`, {
         body: JSON.stringify({
           author: `urn:li:organization:${integration.internalId}`,
           commentary: '',
@@ -607,10 +608,12 @@ export class LinkedinPageProvider
           'LinkedIn-Version': '202601',
           Authorization: `Bearer ${integration.token}`,
         },
-      });
+      }));
+      await derivedLinkedInResponse(response, 'LINKEDIN_POST_ID');
       return true;
     }
 
+    derivedConditionNotMet(totalLikes, +fields.likesAmount);
     return false;
   }
 
@@ -662,7 +665,7 @@ export class LinkedinPageProvider
 
     if (totalLikes >= fields.likesAmount) {
       await timer(2000);
-      await this.fetch(
+      const response = await derivedMutation(() => this.fetch(
         `https://api.linkedin.com/v2/socialActions/${decodeURIComponent(
           id
         )}/comments`,
@@ -680,10 +683,12 @@ export class LinkedinPageProvider
             },
           }),
         }
-      );
+      ));
+      await derivedLinkedInResponse(response, 'LINKEDIN_COMMENT_ID');
       return true;
     }
 
+    derivedConditionNotMet(totalLikes, +fields.likesAmount);
     return false;
   }
 }

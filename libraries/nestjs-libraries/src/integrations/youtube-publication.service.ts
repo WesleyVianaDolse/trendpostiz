@@ -13,6 +13,7 @@ import { RefreshIntegrationService } from './refresh.integration.service';
 import { RefreshToken, BadBody } from './social.abstract';
 import { PostDetails } from './social/social.integrations.interface';
 import { YoutubeProvider } from './social/youtube.provider';
+import type { RecoveryPostSnapshot } from '../automation-recovery/recovery-policy';
 
 const MAX_ATTEMPTS = 12;
 const RETRYABLE = ['pending', 'retrying'];
@@ -67,9 +68,15 @@ export class YoutubePublicationService {
   async publish(
     integration: Integration,
     details: PostDetails[],
-    uploadKey: string
+    uploadKey: string,
+    recovery?: { snapshot: RecoveryPostSnapshot; onUploaded: (videoId: string) => Promise<void> }
   ) {
     let post = await this.post(integration.organizationId, details[0].id);
+    if (recovery && (recovery.snapshot.group !== post.group || +new Date(recovery.snapshot.publishDate) !== +post.publishDate ||
+      recovery.snapshot.scheduleRevision !== post.scheduleRevision)) {
+      throw ApplicationFailure.nonRetryable('Revisão do agendamento alterada.', 'automation_recovery_hold');
+    }
+    const revision = { scheduleRevision: post.scheduleRevision, group: post.group, publishDate: post.publishDate };
     if (
       post.youtubeUploadKey !== uploadKey ||
       post.youtubeUploadState === 'ready'
@@ -83,6 +90,7 @@ export class YoutubePublicationService {
       const claimed = await this.prisma.post.updateMany({
         where: {
           id: post.id,
+          ...revision,
           youtubeUploadKey: post.youtubeUploadKey,
           youtubeUploadState: post.youtubeUploadState,
         },
@@ -130,8 +138,11 @@ export class YoutubePublicationService {
               videoId: post.youtubeVideoId || undefined,
               onUploaded: async (videoId) => {
                 uploadReturned = true;
+                // Persist positive proof even if an intervening reschedule makes
+                // the Post projection stale. Never authorize another upload.
+                if (recovery) await recovery.onUploaded(videoId);
                 await this.prisma.post.update({
-                  where: { id: post.id, youtubeUploadKey: uploadKey },
+                  where: { id: post.id, youtubeUploadKey: uploadKey, ...revision },
                   data: {
                     youtubeVideoId: videoId,
                     youtubeUploadState: 'uploaded',
@@ -159,7 +170,7 @@ export class YoutubePublicationService {
         status !== 408
       ) {
         await this.prisma.post.updateMany({
-          where: { id: post.id, youtubeUploadKey: uploadKey },
+          where: { id: post.id, youtubeUploadKey: uploadKey, ...revision },
           data: { youtubeUploadState: 'ready' },
         });
         if (status === 401)

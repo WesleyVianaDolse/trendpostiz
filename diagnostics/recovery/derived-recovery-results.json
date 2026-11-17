@@ -1,0 +1,323 @@
+{
+  "scope": "ISOLATED_R27",
+  "postgres": "17.11",
+  "temporal": "1.28.2",
+  "sdk": "1.15.0",
+  "results": [
+    {
+      "name": "R27 confirmed threads/autoPlugPost",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 2
+    },
+    {
+      "name": "R27 confirmed linkedin-page/autoRepostPost",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed linkedin-page/autoPlugPost",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed bluesky/autoRepostPost",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed bluesky/autoPlugPost",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed x/autoRepostPost",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed x/autoPlugPost",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed internal linkedin/addComment",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed internal linkedin/repostPostUsers",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed internal linkedin-page/addComment",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed internal linkedin-page/repostPostUsers",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 confirmed internal x/repostPostUsers",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 no effect threads/autoPlugPost",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 no effect linkedin-page/autoRepostPost",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 no effect linkedin-page/autoPlugPost",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 no effect bluesky/autoRepostPost",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 no effect bluesky/autoPlugPost",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 no effect x/autoRepostPost",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 no effect x/autoPlugPost",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 no-effect check preserves a later configured check",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 uncertain lost cannot retry or run another check",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 uncertain 500 cannot retry or run another check",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 uncertain no-id cannot retry or run another check",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 LinkedIn comment parent object is not a new-comment receipt",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 atproto mutation rejection cannot enter SDK refresh and resend",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 actual process crash before-reservation",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 actual process crash after-reservation",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 actual process crash before-confirmation",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 actual process crash after-confirmation",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 concurrent consumers reserve one logical effect",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 expired parent and derived slots produce zero HTTP",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 future primary and plug survive actual Temporal timers",
+      "result": "PASS",
+      "effects": 2,
+      "mutations": 2
+    },
+    {
+      "name": "R27 recurring V106 preserves next slot and its configured action",
+      "result": "PASS",
+      "effects": 2,
+      "mutations": 2
+    },
+    {
+      "name": "R27 changed config and obsolete revision are retained without effects",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 unsupported contract retains action while primary publication succeeds",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 disabled metadata at admission preserves original future checks and configuration",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 newly disabled provider metadata cannot bypass admission and send",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 missing parent proof retains future configuration without a late primary send",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 expired parent with manually confirmed reference preserves a future plug",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 expired check cannot suppress the next eligible configured check",
+      "result": "PASS",
+      "effects": 1,
+      "mutations": 1
+    },
+    {
+      "name": "R27 obsolete revision cannot send or overwrite the new future schedule",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 persisted expiry survives an inconsistent cutoff rollback without resend",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    },
+    {
+      "name": "R27 legacy V101 no-effect then confirmed without new commands",
+      "result": "PASS",
+      "effects": 2,
+      "mutations": 2
+    },
+    {
+      "name": "R27 legacy V102 no-effect then confirmed without new commands",
+      "result": "PASS",
+      "effects": 2,
+      "mutations": 2
+    },
+    {
+      "name": "R27 legacy V103 no-effect then confirmed without new commands",
+      "result": "PASS",
+      "effects": 2,
+      "mutations": 2
+    },
+    {
+      "name": "R27 legacy V104 no-effect then confirmed without new commands",
+      "result": "PASS",
+      "effects": 2,
+      "mutations": 2
+    },
+    {
+      "name": "R27 legacy V105 no-effect then confirmed without new commands",
+      "result": "PASS",
+      "effects": 2,
+      "mutations": 2
+    },
+    {
+      "name": "R27 replay real successful legacy and V106 histories without network",
+      "result": "PASS",
+      "effects": 0,
+      "mutations": 0
+    }
+  ],
+  "crashExits": [
+    {
+      "caseId": "R27 actual process crash before-reservation",
+      "mode": "before-reservation",
+      "exitCode": 86
+    },
+    {
+      "caseId": "R27 actual process crash after-reservation",
+      "mode": "after-reservation",
+      "exitCode": 86
+    },
+    {
+      "caseId": "R27 actual process crash before-confirmation",
+      "mode": "before-confirmation",
+      "exitCode": 86
+    },
+    {
+      "caseId": "R27 actual process crash after-confirmation",
+      "mode": "after-confirmation",
+      "exitCode": 86
+    }
+  ],
+  "actualWorkflowTasks": 278,
+  "historyCount": 50,
+  "clientApiAccess": false,
+  "productionAuthorized": false,
+  "fullR01R31Certified": false
+}

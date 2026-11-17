@@ -1,0 +1,61 @@
+{
+  "scope": "ISOLATED_R04_R14",
+  "results": [
+    {
+      "id": "R14 pre-ledger started remote work is retained; only a proven different slot is excluded",
+      "result": "PASS"
+    },
+    {
+      "id": "R04 changed signature, cutoff, generation, artifact, inventory and containment cannot approve",
+      "result": "PASS"
+    },
+    {
+      "id": "R04 approval alone and altered OPEN flags cannot authorize any publication",
+      "result": "PASS"
+    },
+    {
+      "id": "R14 changed source prevents a batch without moving cursor",
+      "result": "PASS"
+    },
+    {
+      "id": "R14 actual process crash before commit preserves atomic cursor and decisions",
+      "result": "PASS"
+    },
+    {
+      "id": "R14 actual process crash after commit preserves atomic cursor and decisions",
+      "result": "PASS"
+    },
+    {
+      "id": "R14 concurrent batches resume without duplicate audit or effects",
+      "result": "PASS"
+    },
+    {
+      "id": "R14 expiry, manual/unknown, future recurrence/config, legacy bindings and old comments survive application",
+      "result": "PASS"
+    },
+    {
+      "id": "R04 admission rejects a valid signature bound to another application or artifact",
+      "result": "PASS"
+    },
+    {
+      "id": "R04 delayed resumption cannot reuse the previous cutoff even with a valid signature",
+      "result": "PASS"
+    },
+    {
+      "id": "R04 exact signed application admits the intended generation; audit tampering closes policy",
+      "result": "PASS"
+    },
+    {
+      "id": "R04 second recovery supersedes the previous signed epoch and blocks flag rollback",
+      "result": "PASS"
+    },
+    {
+      "id": "R14 preserved legacy future and prepared V106 occurrence publish once after admission",
+      "result": "PASS"
+    }
+  ],
+  "checks": 13,
+  "httpCalls": 10,
+  "productionAuthorized": false,
+  "operationalR28Certified": false
+}

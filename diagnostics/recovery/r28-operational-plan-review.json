@@ -1,0 +1,77 @@
+{
+  "scope": "OPERATIONAL_PLAN_ONLY",
+  "preparedAt": "2026-11-17T03:20:33.835Z",
+  "productionEvidence": {
+    "source": "USER_REPORTED_R28_V2_INTEGRITY_CONFIRMED",
+    "queuesRead": 32,
+    "workflowPollersObserved": 0,
+    "activityPollersObserved": 0,
+    "mainBacklogHint": 10,
+    "backlogIsPublicationCount": false,
+    "temporalVersion": "1.28.2",
+    "namespace": "default",
+    "observedTls": false,
+    "observedApiKey": false,
+    "sharedNetwork": true,
+    "persistentContainmentProven": false,
+    "postizVersion": "1.7.4",
+    "restartPolicy": "always",
+    "pm2Version": "7.1.2",
+    "orchestratorIdentified": true,
+    "host": {
+      "os": "Ubuntu 24.04",
+      "arch": "x86_64",
+      "vcpus": 2,
+      "ramReported": "8 GB",
+      "swapReported": false
+    },
+    "outputRecords": 44,
+    "outputTruncated": false,
+    "gapsReported": 43,
+    "rawProductionRecordsReceived": false,
+    "observedAtNotProvided": true
+  },
+  "codeEvidence": {
+    "v174Commit": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+    "workerHealthcheckCouplesContainerInRepository": true,
+    "deployedHealthcheckNeedsTargetedVerification": true,
+    "v174LauncherIncludesSchemaPushAndPm2DeleteAll": true,
+    "deployedLauncherNeedsTargetedVerification": true,
+    "backendUsesTemporalClient": true,
+    "productionAdmissionStillDenied": true
+  },
+  "sequence": [
+    "A0 narrow existing records and health/identity checks",
+    "A1 only target container restart policy",
+    "A2 nominal persistent external launcher controls",
+    "A3 only orchestrator PM2 registration and persistence",
+    "B access-boundary proof without productive Poll",
+    "C isolated candidate/resources/deadline validation"
+  ],
+  "localValidation": {
+    "snippetChecks": 8,
+    "result": "PASS",
+    "syntheticOnly": true,
+    "dockerExecuted": false,
+    "pm2Executed": false,
+    "vpsAccessed": false,
+    "unmodifiedPreviouslyReviewedFiles": 1108,
+    "applicationFlagsOrCollectorChanged": false
+  },
+  "operationsPerformedInProduction": 0,
+  "phaseHStarted": false,
+  "phaseIStarted": false,
+  "releaseCreated": false,
+  "operationalR28Certified": false,
+  "fullMatrixCertified": false,
+  "files": [
+    {
+      "file": "docs/v1.7.5-r28-operational-containment-plan.md",
+      "sha256": "b53886204177289caf48b464f70c3b198b6d851189be0370878e58d72cda8a3f"
+    },
+    {
+      "file": "diagnostics/recovery/test-r28-plan-snippets.cjs",
+      "sha256": "cae7d93199fc7085e09a8247055c88f83102cd76bec07c29352af8504cf5a225"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 import { TweetV2, TwitterApi } from 'twitter-api-v2';
+import { derivedMutation, derivedConfirmed, derivedConditionNotMet, isDerivedEffectCaptureActive } from '../../automation-recovery/derived-effect-result';
 import { createHmac, randomBytes } from 'crypto';
 import {
   AnalyticsData,
@@ -140,15 +141,15 @@ export class XProvider extends SocialAbstract implements SocialProvider {
       accessSecret: accessSecretSplit,
     });
 
-    if (
-      (await client.v2.tweetLikedBy(id)).meta.result_count >=
-      +fields.likesAmount
-    ) {
+    const observed = (await client.v2.tweetLikedBy(id)).meta.result_count;
+    if (observed >= +fields.likesAmount) {
       await timer(2000);
-      await client.v2.retweet(integration.internalId, id);
+      const acknowledged = await derivedMutation(() => client.v2.retweet(integration.internalId, id));
+      if (acknowledged?.data?.retweeted === true) await derivedConfirmed({ proof: 'X_RETWEET_ACK', remoteId: id, actorId: integration.internalId });
       return true;
     }
 
+    derivedConditionNotMet(observed, +fields.likesAmount);
     return false;
   }
 
@@ -177,8 +178,11 @@ export class XProvider extends SocialAbstract implements SocialProvider {
       data: { id },
     } = await client.v2.me();
 
+    if (isDerivedEffectCaptureActive() && id !== integration.internalId) throw new Error('DERIVED_ACTOR_MISMATCH');
+
     try {
-      await client.v2.retweet(id, postId);
+      const acknowledged = await derivedMutation(() => client.v2.retweet(id, postId));
+      if (acknowledged?.data?.retweeted === true) await derivedConfirmed({ proof: 'X_RETWEET_ACK', remoteId: postId, actorId: id });
     } catch (err) {
       /** nothing **/
     }
@@ -224,20 +228,20 @@ export class XProvider extends SocialAbstract implements SocialProvider {
       accessSecret: accessSecretSplit,
     });
 
-    if (
-      (await client.v2.tweetLikedBy(id)).meta.result_count >=
-      +fields.likesAmount
-    ) {
+    const observed = (await client.v2.tweetLikedBy(id)).meta.result_count;
+    if (observed >= +fields.likesAmount) {
       await timer(2000);
 
       const plugText = stripHtmlValidation('normal', fields.post, true);
-      await client.v2.tweet({
+      const acknowledged = await derivedMutation(() => client.v2.tweet({
         text: this.stripLinks() ? removeLinks(plugText) : plugText,
         reply: { in_reply_to_tweet_id: id },
-      });
+      }));
+      await derivedConfirmed({ proof: 'X_POST_ID', remoteId: acknowledged?.data?.id });
       return true;
     }
 
+    derivedConditionNotMet(observed, +fields.likesAmount);
     return false;
   }
 

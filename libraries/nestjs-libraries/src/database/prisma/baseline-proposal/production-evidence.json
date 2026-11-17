@@ -1,0 +1,27 @@
+{
+  "status": "PARTIAL_PRODUCTION_METADATA_CONFIRMED_BY_OPERATOR",
+  "source": "Operator report in this conversation; read-only production catalog query. No remote access or dump.",
+  "confirmed": {
+    "postgres": "17.11",
+    "schema": "public",
+    "prismaMigrationsTablePresent": false
+  },
+  "enumOrders": {
+    "InstagramWebhookEventStatus": [
+      "RECEIVED",
+      "UNMATCHED",
+      "AMBIGUOUS",
+      "INVALID",
+      "PROCESSING",
+      "PROCESSED",
+      "REPLIED",
+      "SKIPPED",
+      "FAILED"
+    ]
+  },
+  "unconfirmed": [
+    "The consolidated production check reports enums MATCH and six categories MISMATCH; the affected objects require targeted locate. See diagnostics/recovery/baseline-audit/production-result.json.",
+    "The two index-name differences observed in the historical local fixture are not yet confirmed in production."
+  ],
+  "productionEnumDdlAllowed": false
+}

@@ -7,6 +7,7 @@ import {
 } from '@gitroom/nestjs-libraries/integrations/social/social.integrations.interface';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
 import { timer } from '@gitroom/helpers/utils/timer';
+import { derivedMutation, derivedConfirmed, derivedConditionNotMet } from '../../automation-recovery/derived-effect-result';
 import dayjs from 'dayjs';
 import { SocialAbstract } from '@gitroom/nestjs-libraries/integrations/social.abstract';
 import { capitalize, chunk } from 'lodash';
@@ -512,23 +513,25 @@ export class ThreadsProvider extends SocialAbstract implements SocialProvider {
       form.append('access_token', integration.token);
 
       const { id: replyId } = await (
-        await this.fetch('https://graph.threads.net/v1.0/me/threads', {
+        await derivedMutation(() => this.fetch('https://graph.threads.net/v1.0/me/threads', {
           method: 'POST',
           body: form,
-        })
+        }))
       ).json();
 
-      await (
-        await this.fetch(
+      const published = await (
+        await derivedMutation(() => this.fetch(
           `https://graph.threads.net/v1.0/${integration.internalId}/threads_publish?creation_id=${replyId}&access_token=${integration.token}`,
           {
             method: 'POST',
           }
-        )
+        ))
       ).json();
+      await derivedConfirmed({ proof: 'THREADS_PUBLISH_ID', remoteId: published?.id });
       return true;
     }
 
+    derivedConditionNotMet(value.value, +fields.likesAmount);
     return false;
   }
 

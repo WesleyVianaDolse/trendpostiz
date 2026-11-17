@@ -1,0 +1,14 @@
+test_container_id_target_is_correlated_to_name (__main__.CompactTests.test_container_id_target_is_correlated_to_name) ... ok
+test_extra_queue_references_and_maximum_catalog_fit_budget (__main__.CompactTests.test_extra_queue_references_and_maximum_catalog_fit_budget) ... ok
+test_flood_reproduces_previous_suppression_without_losing_critical_data (__main__.CompactTests.test_flood_reproduces_previous_suppression_without_losing_critical_data) ... ok
+test_full_pipeline_with_real_linux_file_parsers_and_fake_metadata_transport (__main__.CompactTests.test_full_pipeline_with_real_linux_file_parsers_and_fake_metadata_transport) ... ok
+test_mismatched_checksum_blocks_every_collector (__main__.CompactTests.test_mismatched_checksum_blocks_every_collector) ... ok
+test_missing_queues_are_explicit_gaps_never_zero (__main__.CompactTests.test_missing_queues_are_explicit_gaps_never_zero) ... ok
+test_secondary_failure_does_not_prevent_queue_collection (__main__.CompactTests.test_secondary_failure_does_not_prevent_queue_collection) ... ok
+test_unknown_count_is_not_treated_as_zero (__main__.CompactTests.test_unknown_count_is_not_treated_as_zero) ... ok
+test_zero_pollers_is_not_containment_approval (__main__.CompactTests.test_zero_pollers_is_not_containment_approval) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 2.761s
+
+OK

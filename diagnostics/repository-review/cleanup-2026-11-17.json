@@ -1,0 +1,38 @@
+{
+    "scope":  "LOCAL_REGENERABLE_IGNORED_CACHES_ONLY",
+    "snapshotSha256":  "a7989e83e220e03af8bb43f3ecc84288e6501ecc69bfa085f362c99da3a14f69",
+    "removed":  [
+                    {
+                        "path":  "tsconfig.tsbuildinfo",
+                        "absolutePath":  "C:\\Users\\viana\\Documents\\GitHub\\trendpostiz\\tsconfig.tsbuildinfo",
+                        "bytes":  12768145,
+                        "sha256":  "fddd20caf2fed84f148ab6225bd3a08a76785a9acb4915ce4b42fc6cff6021a2",
+                        "reason":  "Ignored TypeScript incremental cache; recoverable snapshot verified"
+                    },
+                    {
+                        "path":  "apps/backend/tsconfig.tsbuildinfo",
+                        "absolutePath":  "C:\\Users\\viana\\Documents\\GitHub\\trendpostiz\\apps\\backend\\tsconfig.tsbuildinfo",
+                        "bytes":  8293934,
+                        "sha256":  "6395e31b64868f097769f29817f9cbb590a1d47591de19acf778701b502895ce",
+                        "reason":  "Ignored TypeScript incremental cache; recoverable snapshot verified"
+                    },
+                    {
+                        "path":  "apps/frontend/tsconfig.tsbuildinfo",
+                        "absolutePath":  "C:\\Users\\viana\\Documents\\GitHub\\trendpostiz\\apps\\frontend\\tsconfig.tsbuildinfo",
+                        "bytes":  1071793,
+                        "sha256":  "955885129d670254bd38af2c548db2095e96db3a91674bd225d9ffd60cb3b83a",
+                        "reason":  "Ignored TypeScript incremental cache; recoverable snapshot verified"
+                    },
+                    {
+                        "path":  "apps/orchestrator/tsconfig.tsbuildinfo",
+                        "absolutePath":  "C:\\Users\\viana\\Documents\\GitHub\\trendpostiz\\apps\\orchestrator\\tsconfig.tsbuildinfo",
+                        "bytes":  6073553,
+                        "sha256":  "431b392eda24f05f5a751713c1d913e578bc95361af431ee19366b7c8c45db0f",
+                        "reason":  "Ignored TypeScript incremental cache; recoverable snapshot verified"
+                    }
+                ],
+    "removedBytes":  28207425,
+    "trackedOrUntrackedFilesDeleted":  0,
+    "branchChanged":  false,
+    "indexChanged":  false
+}

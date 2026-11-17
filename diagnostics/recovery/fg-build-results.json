@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-16",
+  "environment": "sanitized synthetic environment; no application startup",
+  "checks": [
+    {
+      "command": "node diagnostics/recovery/run-check.cjs buildBackend",
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "buildBackend-fg.log"
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs buildOrchestrator",
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "buildOrchestrator-fg.log"
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs buildFrontend",
+      "result": "PASS",
+      "exitCode": 0,
+      "log": "buildFrontend-fg.log"
+    }
+  ],
+  "dockerImageBuilt": false,
+  "productionAuthorized": false,
+  "activationAuthorized": false
+}

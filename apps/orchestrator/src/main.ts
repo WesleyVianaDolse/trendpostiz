@@ -9,6 +9,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@gitroom/orchestrator/app.module';
 import { TemporalService } from 'nestjs-temporal-core';
 import * as dns from 'node:dns';
+import {
+  checkWorkerConsumption,
+  beginWorkerConsumption,
+  workerRuntime,
+} from '../../../libraries/nestjs-libraries/src/automation-recovery/worker-consumption';
 dns.setDefaultResultOrder('ipv4first');
 
 const STARTUP_TIMEOUT_MS = 120_000;
@@ -32,16 +37,33 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
   app.enableShutdownHooks();
+  await app.init();
+  const temporalService = app.get(TemporalService);
+  const initialized = temporalService.getAllWorkers();
+  if (
+    !initialized ||
+    JSON.stringify([...initialized.workers.keys()].sort()) !==
+      JSON.stringify(workerRuntime().queues.sort())
+  )
+    throw new Error('Incomplete worker catalog');
+  await beginWorkerConsumption();
+  await Promise.all(
+    workerRuntime().queues.map((queue) =>
+      temporalService.startWorkerByTaskQueue(queue)
+    )
+  );
   const port = process.env.ORCHESTRATOR_PORT || 3002;
   await app.listen(port);
   clearTimeout(startupWatchdog);
   console.log(`Orchestrator health check listening on port ${port}`);
 
-  const temporalService = app.get(TemporalService);
   let consecutiveUnhealthyChecks = 0;
 
   setTimeout(() => {
     setInterval(() => {
+      void checkWorkerConsumption().catch(() =>
+        exitForRestart('Signed admission revoked, expired or unavailable.')
+      );
       const workers = temporalService.getAllWorkers();
       const workerStatuses = workers
         ? Array.from(workers.workers.entries()).map(([taskQueue, status]) => ({
@@ -52,7 +74,10 @@ async function bootstrap() {
           }))
         : [];
       const allWorkersHealthy =
-        workerStatuses.length > 0 &&
+        workerStatuses.length === workerRuntime().queues.length &&
+        workerRuntime().queues.every((queue) =>
+          workerStatuses.some((worker) => worker.taskQueue === queue)
+        ) &&
         workerStatuses.some((worker) => worker.taskQueue === 'main') &&
         workerStatuses.every((worker) => worker.running && worker.healthy);
 

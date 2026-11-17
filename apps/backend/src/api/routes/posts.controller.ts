@@ -12,6 +12,16 @@ import {
 } from '@nestjs/common';
 import { PostsService } from '@gitroom/nestjs-libraries/database/prisma/posts/posts.service';
 import { YoutubePublicationService } from '@gitroom/nestjs-libraries/integrations/youtube-publication.service';
+import { PublicationReconciliationService } from '@gitroom/nestjs-libraries/automation-recovery/publication-reconciliation.service';
+import { Equals, IsString, IsUUID, MaxLength } from 'class-validator';
+
+class ConfirmManualPublicationDto {
+  @IsString() @MaxLength(128) occurrenceId: string;
+  @IsUUID() requestId: string;
+  @IsString() @MaxLength(2048) remoteId: string;
+  @IsString() @MaxLength(2048) remoteUrl: string;
+  @Equals('CONFIRM_MANUAL_PUBLICATION') attestation: string;
+}
 import { GetOrgFromRequest } from '@gitroom/nestjs-libraries/user/org.from.request';
 import { Organization, User } from '@prisma/client';
 import { GetPostsDto } from '@gitroom/nestjs-libraries/dtos/posts/get.posts.dto';
@@ -37,8 +47,20 @@ export class PostsController {
     private _postsService: PostsService,
     private _agentGraphService: AgentGraphService,
     private _shortLinkService: ShortLinkService,
-    private _youtube: YoutubePublicationService
+    private _youtube: YoutubePublicationService,
+    private _reconciliation: PublicationReconciliationService
   ) {}
+
+  @Get('/:id/recovery-history')
+  recoveryHistory(@GetOrgFromRequest() org: Organization, @GetUserFromRequest() user: User, @Param('id') id: string) {
+    return this._reconciliation.history(org.id, id, user.id);
+  }
+
+  @Post('/:id/manual-publication-confirmation')
+  confirmManualPublication(@GetOrgFromRequest() org: Organization, @GetUserFromRequest() user: User,
+    @Param('id') id: string, @Body() body: ConfirmManualPublicationDto) {
+    return this._reconciliation.confirmManual(org.id, id, user.id, body);
+  }
 
   @Get('/:id/youtube-thumbnail')
   youtubeThumbnailStatus(@GetOrgFromRequest() org: Organization, @Param('id') id: string) {

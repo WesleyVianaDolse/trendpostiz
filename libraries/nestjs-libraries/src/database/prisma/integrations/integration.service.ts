@@ -29,6 +29,9 @@ import { RefreshIntegrationService } from '@gitroom/nestjs-libraries/integration
 import { TemporalService } from 'nestjs-temporal-core';
 import { InstagramWebhookSubscriptionService } from '@gitroom/nestjs-libraries/integrations/social/instagram-webhook-subscription.service';
 import { PlatformService } from '../platform/platform.service';
+import { AutomationRecoveryService } from '../../../automation-recovery/automation-recovery.service';
+import { DerivedPublicationService } from '../../../automation-recovery/derived-publication.service';
+import { RecoveryHold, RecoveryWorkflowContext, recoveryKey } from '../../../automation-recovery/recovery-policy';
 
 dayjs.extend(utc);
 
@@ -45,7 +48,9 @@ export class IntegrationService {
     private _temporalService: TemporalService,
     @Optional()
     private _instagramWebhookSubscriptionService?: InstagramWebhookSubscriptionService,
-    private _platform?: PlatformService
+    private _platform?: PlatformService,
+    private _recovery?: AutomationRecoveryService,
+    @Optional() private _derived?: DerivedPublicationService
   ) {}
 
   async changeActiveCron(orgId: string) {
@@ -545,84 +550,26 @@ export class IntegrationService {
       delay: number;
       information: any;
     },
-    forceRefresh = false
+    forceRefresh = false,
+    execution?: RecoveryWorkflowContext
   ): Promise<any> {
-    const originalIntegration =
-      await this._integrationRepository.getIntegrationById(
-        data.orgId,
-        data.originalIntegration
-      );
-
-    const getIntegration = await this._integrationRepository.getIntegrationById(
-      data.orgId,
-      data.integration
-    );
-
-    if (!getIntegration || !originalIntegration) {
-      return;
-    }
-
-    const getAllInternalPlugs = this._integrationManager
-      .getInternalPlugs(getIntegration.providerIdentifier)
-      .internalPlugs.find((p: any) => p.identifier === data.plugName);
-
-    if (!getAllInternalPlugs) {
-      return;
-    }
-
-    const getSocialIntegration = this._integrationManager.getSocialIntegration(
-      getIntegration.providerIdentifier
-    );
-
-    // @ts-ignore
-    await getSocialIntegration?.[getAllInternalPlugs.methodName]?.(
-      getIntegration,
-      originalIntegration,
-      data.post,
-      data.information
-    );
-
-    return;
+    if (!execution || !this._derived) throw new RecoveryHold('DERIVED_CONTEXT_UNRESOLVED');
+    return this._derived.executeLegacy(execution, `internal:${data.plugName}:${data.integration}`, data);
   }
-
   async processPlugs(data: {
     plugId: string;
     postId: string;
     delay: number;
     totalRuns: number;
     currentRun: number;
-  }) {
-    const getPlugById = await this._integrationRepository.getPlug(data.plugId);
-    if (!getPlugById) {
-      return true;
-    }
-    if (!await this._platform!.isOrganizationActive(getPlugById.integration.organizationId)) return true;
-
-    const integration = this._integrationManager.getSocialIntegration(
-      getPlugById.integration.providerIdentifier
-    );
-
-    // @ts-ignore
-    const process = await integration[getPlugById.plugFunction](
-      getPlugById.integration,
-      data.postId,
-      JSON.parse(getPlugById.data).reduce((all: any, current: any) => {
-        all[current.name] = current.value;
-        return all;
-      }, {})
-    );
-
-    if (process) {
-      return true;
-    }
-
-    if (data.totalRuns === data.currentRun) {
-      return true;
-    }
-
-    return false;
+  }, execution?: RecoveryWorkflowContext) {
+    if (!execution || !this._derived) throw new RecoveryHold('DERIVED_CONTEXT_UNRESOLVED');
+    const key = data.currentRun === undefined ? `plug:${data.plugId}:delay:${data.delay}` : `plug:${data.plugId}:${data.currentRun}`;
+    const result = await this._derived.executeLegacy(execution, key, data);
+    // This boolean only tells V101-V105 whether to stop checking the plug.
+    // The ledger, never this value, records confirmation or uncertainty.
+    return result.kind !== 'NOT_EXECUTED' || data.totalRuns === data.currentRun;
   }
-
   async createOrUpdatePlug(
     orgId: string,
     integrationId: string,

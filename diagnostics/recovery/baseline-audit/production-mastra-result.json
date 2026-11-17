@@ -1,0 +1,18 @@
+{
+  "source": "Operator summary of the manual production-locate.sql result in this conversation; no remote access or dump.",
+  "reportedDivergences": 93,
+  "reportedStructuralScope": [
+    "mastra_* tables and their columns, constraints and indexes",
+    "Additional routine trigger_set_timestamps"
+  ],
+  "reportedApplicationObjectsDivergent": false,
+  "priorEnumsStatus": "MATCH",
+  "environmentalCollationDifference": "RETAINED_SEPARATELY; not normalized to MATCH",
+  "individualObjectRowsProvided": false,
+  "remainingBoundaryQuestions": [
+    "Every external relation name belongs to the explicit SDK/legacy ownership list.",
+    "No cross-boundary foreign key or routine dependency requires shared DDL responsibility.",
+    "The timestamp routine contract and its attachments match the declared SDK responsibility."
+  ],
+  "productionAuthorization": "NONE"
+}

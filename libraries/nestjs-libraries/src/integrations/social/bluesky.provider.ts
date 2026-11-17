@@ -5,6 +5,7 @@ import {
   SocialProvider,
 } from '@gitroom/nestjs-libraries/integrations/social/social.integrations.interface';
 import { makeId } from '@gitroom/nestjs-libraries/services/make.is';
+import { derivedMutation, derivedConfirmed, derivedConditionNotMet, derivedSdkFetch, isDerivedEffectCaptureActive } from '../../automation-recovery/derived-effect-result';
 import {
   BadBody,
   RefreshToken,
@@ -435,6 +436,7 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
     );
     const agent = new BskyAgent({
       service: body.service,
+      ...(isDerivedEffectCaptureActive() ? { fetch: derivedSdkFetch } : {}),
     });
 
     await agent.login({
@@ -450,15 +452,17 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
     // @ts-ignore
     if (getThread.data.thread.post?.likeCount >= +fields.likesAmount) {
       await timer(2000);
-      await agent.repost(
+      const created = await derivedMutation(() => agent.repost(
         // @ts-ignore
         getThread.data.thread.post?.uri,
         // @ts-ignore
         getThread.data.thread.post?.cid
-      );
+      ));
+      await derivedConfirmed({ proof: 'ATPROTO_RECORD', remoteId: created?.uri, cid: created?.cid });
       return true;
     }
 
+    derivedConditionNotMet((getThread.data.thread as any).post?.likeCount, +fields.likesAmount);
     return true;
   }
 
@@ -496,6 +500,7 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
     );
     const agent = new BskyAgent({
       service: body.service,
+      ...(isDerivedEffectCaptureActive() ? { fetch: derivedSdkFetch } : {}),
     });
 
     await agent.login({
@@ -515,7 +520,7 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
         text: stripHtmlValidation('normal', fields.post, true),
       });
 
-      await agent.post({
+      const created = await derivedMutation(() => agent.post({
         text: rt.text,
         facets: rt.facets,
         createdAt: new Date().toISOString(),
@@ -533,10 +538,12 @@ export class BlueskyProvider extends SocialAbstract implements SocialProvider {
             cid: getThread.data.thread.post?.cid,
           },
         },
-      });
+      }));
+      await derivedConfirmed({ proof: 'ATPROTO_RECORD', remoteId: created?.uri, cid: created?.cid });
       return true;
     }
 
+    derivedConditionNotMet((getThread.data.thread as any).post?.likeCount, +fields.likesAmount);
     return true;
   }
 

@@ -1,0 +1,20 @@
+{
+  "targetVersion": "1.7.5",
+  "implementationStage": "F_G_LOCAL_CONTRACTS_READY_FOR_HOMOLOGATION",
+  "migrationChainVerified": true,
+  "deliveryGuardsVerified": false,
+  "recoveryScenariosVerified": false,
+  "workerActivationImplemented": false,
+  "reason": "R04/R14 signed preparation/application contracts and isolated Linux admission implemented. R28 production containment and VPS homologation remain unverified. Production admission and ordinary preflight are deliberately unavailable; no production operation is authorized.",
+  "derivedActionsVerified": true,
+  "inventoryManifestPrepared": true,
+  "ancillaryEffectsVerifiedLocally": true,
+  "isolatedChecksPassed": 42,
+  "manifestApplicationImplemented": true,
+  "isolatedAdmissionImplemented": true,
+  "contractProtocol": 2,
+  "workerRuntimeProtocol": 2,
+  "workflowContextProtocol": 1,
+  "productionAdmissionImplemented": false,
+  "operationalApproval": false
+}

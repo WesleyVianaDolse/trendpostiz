@@ -1,0 +1,119 @@
+{
+  "scope": "LOCAL_DIAGNOSTIC_PREPARATION_ONLY",
+  "verifiedAt": "2026-11-16T20:51:15.001Z",
+  "pythonUnitChecks": [
+    {
+      "id": "test_command_and_reference_sanitization",
+      "result": "PASS"
+    },
+    {
+      "id": "test_catalog_matches_the_tested_candidate_without_provider_imports",
+      "result": "PASS"
+    },
+    {
+      "id": "test_mutating_subprocesses_and_pm2_cli_are_rejected",
+      "result": "PASS"
+    },
+    {
+      "id": "test_failed_reads_never_print_command_stderr_or_exception",
+      "result": "PASS"
+    },
+    {
+      "id": "test_pm2_dump_projection_and_pid_namespace",
+      "result": "PASS"
+    },
+    {
+      "id": "test_systemd_cron_profile_wrapper_and_unknowns",
+      "result": "PASS"
+    },
+    {
+      "id": "test_process_ancestry_detects_outside_consumer_without_argv_export",
+      "result": "PASS"
+    },
+    {
+      "id": "test_remote_docker_context_refuses_daemon_queries",
+      "result": "PASS"
+    },
+    {
+      "id": "test_docker_projection_preserves_restart_and_hides_secrets",
+      "result": "PASS"
+    },
+    {
+      "id": "test_limits_and_missing_probe_do_not_become_match",
+      "result": "PASS"
+    },
+    {
+      "id": "test_global_output_limit_is_a_visible_gap_and_keeps_summary",
+      "result": "PASS"
+    },
+    {
+      "id": "test_container_symlinks_do_not_read_host_targets",
+      "result": "PASS"
+    },
+    {
+      "id": "test_stopped_container_pm2_volume_is_included_without_start",
+      "result": "PASS"
+    },
+    {
+      "id": "test_temporal_output_is_revalidated_not_forwarded",
+      "result": "PASS"
+    },
+    {
+      "id": "test_non_linux_never_runs_infrastructure_commands",
+      "result": "PASS"
+    },
+    {
+      "id": "test_no_environment_logs_or_database_read_paths",
+      "result": "PASS"
+    }
+  ],
+  "sdkSandbox": {
+    "checks": 8,
+    "result": "PASS",
+    "network": false,
+    "docker": false
+  },
+  "python38GrammarParse": "PASS",
+  "pythonTestsRuntime": "3.14.5",
+  "nodeTestsRuntime": "v22.14.0",
+  "linuxInfrastructureScriptExecuted": false,
+  "vpsAccessed": false,
+  "localImageMetadataProjection": {
+    "result": "PASS",
+    "platform": "linux/amd64",
+    "operation": "docker image inspect with projected format only",
+    "imageDigest": "sha256:e9a282f01db5f05c187b5107c61ee8623160a2a08a63680f0dd552bc78b26d58"
+  },
+  "previouslyReviewedFilesUnchanged": 1108,
+  "priorSourceReviewMembershipHistoricalBecauseNewDiagnosticWasAdded": true,
+  "productionFlagsChanged": false,
+  "applicationRuntimeChanged": false,
+  "containerLifecycleOperations": false,
+  "productionOperations": false,
+  "phaseH": false,
+  "phaseI": false,
+  "operationalR28Certified": false,
+  "fullMatrixCertified": false,
+  "files": [
+    {
+      "file": "scripts/recovery/r28-infrastructure-readonly.py",
+      "sha256": "8b01b747716b45efd91ce44e056aa77ec3fca3cd559d977397334557cd87dce3"
+    },
+    {
+      "file": "diagnostics/recovery/test-r28-infrastructure.py",
+      "sha256": "531c7ea8c10d6a7fa9c13a55f14ab435a96efbb5dfc90881e7c650a60f8a6c36"
+    },
+    {
+      "file": "diagnostics/recovery/test-r28-sdk-probe.cjs",
+      "sha256": "a256c01cdca2d415b84c2de513095db446681f457128b00c89899d9906b07be4"
+    },
+    {
+      "file": "docs/v1.7.5-r28-infrastructure-audit.md",
+      "sha256": "0c7598ce34003bf11b5910d5a813b657b3656d38bf3ff7497ee2245ca92f43ca"
+    },
+    {
+      "file": "docs/v1.7.5-r28-candidate-homologation-plan.md",
+      "sha256": "d6dcbe775cf969f758fdfba57e1d5847ad56fc487bd932e8aec0f41abcf5f411"
+    }
+  ]
+}

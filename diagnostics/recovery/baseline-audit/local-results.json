@@ -1,0 +1,135 @@
+{
+  "status": "LOCAL_BASELINE_AND_CANDIDATE_CHAIN_VALIDATED",
+  "productionCompatibility": "BLOCKED_REPORTED_MISMATCHES_PENDING_TARGETED_DIAGNOSIS",
+  "revision": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "reconciliation": [
+    {
+      "object": "InstagramWebhookEventStatus",
+      "property": "enum_label_order",
+      "sourceOrder": [
+        "RECEIVED",
+        "PROCESSING",
+        "PROCESSED",
+        "REPLIED",
+        "SKIPPED",
+        "FAILED",
+        "UNMATCHED",
+        "AMBIGUOUS",
+        "INVALID"
+      ],
+      "confirmedProductionOrder": [
+        "RECEIVED",
+        "UNMATCHED",
+        "AMBIGUOUS",
+        "INVALID",
+        "PROCESSING",
+        "PROCESSED",
+        "REPLIED",
+        "SKIPPED",
+        "FAILED"
+      ],
+      "evidence": "production-evidence.json",
+      "scope": "Local baseline CREATE TYPE and declarative schema only; no production ALTER TYPE"
+    }
+  ],
+  "productionSqlSha256": "31abeb224890efcf246fae3b400794d21450473712f7066baff0afe3495c1c25",
+  "postgres": "17.11",
+  "postgresImageId": "sha256:ff87138949ad9a46f32ff23bd6852b52ce024a13dffe9b4087be98292cdd3b4f",
+  "prisma": "6.5.0",
+  "baselineSha256": "700a0e4016d594ce06b013b0f602cdc074526db4d5af2d6a83dab928fd4ad702",
+  "results": [
+    {
+      "name": "BL01 baseline derives from exact v1.7.4 source with only the confirmed enum-order correction",
+      "result": "PASS"
+    },
+    {
+      "name": "BL02 fresh deploy applies only baseline then additive recovery",
+      "result": "PASS"
+    },
+    {
+      "name": "BL03 local-only adoption preserves synthetic rows then deploys recovery once",
+      "result": "PASS"
+    },
+    {
+      "name": "BL04 legacy files remain byte-for-byte unchanged and cannot replay after full baseline",
+      "result": "PASS"
+    },
+    {
+      "name": "BL05 six historical migrations replay on a local pre-feature fixture; semantic drift is inventoried",
+      "result": "PASS"
+    },
+    {
+      "name": "BL06 equal column counts with changed SQL type are detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL07 nullability changes are detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL08 changed defaults are detected without returning the literal",
+      "result": "PASS"
+    },
+    {
+      "name": "BL09 FK referential actions are detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL10 uniqueness changes are detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL11 missing index is detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL12 enum values/order changes are detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL13 extra columns and objects are detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL14 production checks are SELECT/catalog-only and work without client-table privileges",
+      "result": "PASS"
+    },
+    {
+      "name": "BL15 targeted diagnosis locates member and property without exporting definitions or literals",
+      "result": "PASS"
+    },
+    {
+      "name": "BL16 metadata ignores application rows and physical column order",
+      "result": "PASS"
+    },
+    {
+      "name": "BL17 identical enum label sets in a different order are detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL18 production and targeted results never return a changed default literal",
+      "result": "PASS"
+    },
+    {
+      "name": "BL19 optional locate/detail SQL parses and runs read-only for every category",
+      "result": "PASS"
+    },
+    {
+      "name": "BL20 reconciled enum matches the exact production order; unreconciled source is still detected",
+      "result": "PASS"
+    },
+    {
+      "name": "BL21 consolidated SQL returns exactly seven pairs without application-table SELECT privileges",
+      "result": "PASS"
+    },
+    {
+      "name": "BL22 consolidated SQL detects additional drift with equal column counts without returning literals",
+      "result": "PASS"
+    },
+    {
+      "name": "BL23 historical index-name differences remain visible and targeted diagnosis identifies only affected objects",
+      "result": "PASS"
+    }
+  ],
+  "historicalMigrationsPreserved": 6
+}

@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-16",
+  "scope": "LOCAL_ONLY",
+  "fgChecksPassed": 42,
+  "derivedChecksPassed": 48,
+  "distinctFgWorkflowTasks": 382,
+  "fgRuns": 50,
+  "fgHistorySnapshots": 70,
+  "scenariosCertifiedForExercisedIsolatedContract": 28,
+  "pending": ["R04", "R14", "R28"],
+  "fullMatrixCertified": false,
+  "buildsPassed": 3,
+  "ownedDisposableContainersAndNetworksRemaining": 0,
+  "reviewArtifact": "fg-review-candidate-20261116.json",
+  "reviewArtifactFiles": 1090,
+  "protocolVersion": 1,
+  "sourceDigest": "56198cdccd1bd4a6a08855d0051205fce557b47d260f3dcb5afb67a31752e736",
+  "imageDigest": null,
+  "productionContainmentVerified": false,
+  "productionHomologated": false,
+  "productionAuthorized": false,
+  "activationAuthorized": false
+}

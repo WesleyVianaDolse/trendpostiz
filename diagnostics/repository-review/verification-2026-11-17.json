@@ -1,0 +1,81 @@
+{
+  "scope": "LOCAL_REPOSITORY_REVIEW_ONLY",
+  "branch": "main",
+  "head": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "originalModified": 33,
+  "originalUntracked": 193,
+  "originalFilesSha256Checked": 226,
+  "originalFilesUnchanged": true,
+  "trackedPatchUnchanged": true,
+  "stagedPaths": [],
+  "snapshotSha256": "a7989e83e220e03af8bb43f3ecc84288e6501ecc69bfa085f362c99da3a14f69",
+  "snapshotArchiveSha256Valid": true,
+  "cacheFilesRemoved": 4,
+  "cacheBytesRemoved": 28207425,
+  "trackedOrUntrackedOriginalFilesDeleted": 0,
+  "newReviewFiles": [
+    "diagnostics/README.md",
+    "diagnostics/repository-review/README.md",
+    "diagnostics/repository-review/cleanup-2026-11-17.json",
+    "diagnostics/repository-review/inventory-2026-11-17.json",
+    "diagnostics/repository-review/preservation-receipt-2026-11-17.json",
+    "diagnostics/repository-review/verification-2026-11-17.json",
+    "docs/v1.7.5/README.md",
+    "scripts/README.md"
+  ],
+  "finalModifiedCount": 33,
+  "finalUntrackedCount": 201,
+  "documentationLinksChecked": 21,
+  "missingDocumentationLinks": 0,
+  "checks": [
+    {
+      "name": "ownedChain",
+      "result": "PASS",
+      "databaseUsed": false
+    },
+    {
+      "name": "r28InfrastructureSynthetic",
+      "tests": 16,
+      "result": "PASS"
+    },
+    {
+      "name": "r28CompactSynthetic",
+      "tests": 10,
+      "result": "PASS"
+    },
+    {
+      "name": "r28SdkSynthetic",
+      "tests": 8,
+      "result": "PASS"
+    },
+    {
+      "name": "r28PlanSynthetic",
+      "tests": 8,
+      "result": "PASS"
+    },
+    {
+      "name": "typesBackend --noEmit --incremental false",
+      "result": "PASS"
+    },
+    {
+      "name": "typesOrchestrator --noEmit --incremental false",
+      "result": "PASS"
+    },
+    {
+      "name": "git diff --check",
+      "result": "PASS"
+    }
+  ],
+  "buildsRerun": false,
+  "applicationBehaviorChanged": false,
+  "branchCreated": false,
+  "commitCreated": false,
+  "productionAccess": false,
+  "deployment": false,
+  "limitations": [
+    "No independent production verification",
+    "No Linux or full recovery recertification this task",
+    "Snapshot does not include Docker image bytes",
+    "Approval needed before deleting or moving historical documents/logs"
+  ]
+}

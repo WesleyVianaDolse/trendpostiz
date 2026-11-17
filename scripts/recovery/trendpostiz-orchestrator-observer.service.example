@@ -1,0 +1,16 @@
+# TEMPLATE ONLY. Do not install/enable during C-G. No dependency starts workers.
+[Unit]
+Description=TrendPostiz orchestrator observation only
+
+[Service]
+Type=oneshot
+User=postiz-observer
+WorkingDirectory=/opt/trendpostiz-reviewed
+ExecStart=/usr/bin/node scripts/recovery/watchdog-observe.cjs
+Restart=no
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+
+# Deliberately no [Install], Restart=always, PM2, docker restart, or worker start.

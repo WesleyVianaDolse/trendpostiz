@@ -1,0 +1,75 @@
+{
+  "status": "LOCAL_CHAIN_VALIDATED_PRODUCTION_BOUNDARY_CONFIRMED",
+  "revision": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "prisma": "6.5.0",
+  "postgres": "17.11",
+  "productionBoundaryConfirmed": true,
+  "baseline": {
+    "name": "00000000000000_v1_7_4_prisma_owned",
+    "sha256": "8d6cd1a1c712401b67c9b8021a49a6a5b76092d7d01d90f864550e3f63bc9f4f"
+  },
+  "migrationChain": [
+    {
+      "name": "00000000000000_v1_7_4_prisma_owned",
+      "sha256": "8d6cd1a1c712401b67c9b8021a49a6a5b76092d7d01d90f864550e3f63bc9f4f"
+    },
+    {
+      "name": "20261114000000_safe_recovery_foundation",
+      "sha256": "c0f27b0e008e1326ed244c665190d9fabd5adabd6148ebc209d7baedf94d3edd"
+    },
+    {
+      "name": "20261115000000_recovery_effect_attempt",
+      "sha256": "2c862d666003b065bf31b71c6792f6f4f5438a6d5db21b5605a6b08246e12c2a"
+    },
+    {
+      "name": "20261115010000_schedule_intents_and_evidence",
+      "sha256": "50fad31fed985f3927564a3f5cec002a1fb10012c6bb6c8a41f36d3abc5934d3"
+    },
+    {
+      "name": "20261115020000_derived_action_contract",
+      "sha256": "c4c39b35bd99e3b29169f5b26ee6edb2b2cc2a3a70d54258551d7e3e9ff44459"
+    },
+    {
+      "name": "20261116000000_recovery_manifest",
+      "sha256": "6bed22bc3bbff51eaed3c937815a7357eddb02fd2e395beb6c619984212c9352"
+    },
+    {
+      "name": "20261117000000_recovery_authorization",
+      "sha256": "fe184f730f76a30bfc042f37c0d5f34873bc0c2c82219434ff869f625198e813"
+    }
+  ],
+  "runtimeSchemaSha256": "3bce20279af492347611317216eaf9187dd1c39882012a73097f24d2127772fc",
+  "baselineSchemaSha256": "da064e82b6255c2f862487ddb813e0fc9404a6ded9466c255e9ab555ef1a89e0",
+  "currentSchemaSha256": "8b57539a61a199de236b73ee7d0f00e48521b6bb1dca2b9158c73463abccb976",
+  "supersedesForFutureAdoption": "The older full-schema baseline includes Mastra DDL; retained only as source/audit evidence. Never adopt both baselines.",
+  "historicalMigrationsPreserved": [
+    {
+      "name": "20260905000000_instagram_webhook_phase_one",
+      "sha256": "bee61d8d1f2e0d49b4426f175f767712d710e3fd3920132da6e5d69c6dfbc959"
+    },
+    {
+      "name": "20260907000000_instagram_comment_automation_phase_two",
+      "sha256": "84ee4bc5e522ac945559607c5cf8185ffdee89e98ec61746cdeb6df0f0bfbb8c"
+    },
+    {
+      "name": "20260907010000_instagram_multi_provider_foundation",
+      "sha256": "8c6af37f901e982d0958aa571b6ca455ef00c9981c5d2235ce7b6d974bb77cf4"
+    },
+    {
+      "name": "20261028000000_platform_administration",
+      "sha256": "3638413cef2741be8b1729e68313a583bc52a3fe1c1df6f1ea62a29dc7490727"
+    },
+    {
+      "name": "20261028010000_organization_deletion",
+      "sha256": "503f72a46c154bc4c3841ebbc42fddef44baa738bf080fa9e153d40189c6b574"
+    },
+    {
+      "name": "20261109000000_youtube_thumbnail_delivery",
+      "sha256": "8b5fe986723b701e359f651888fcb35b72eaf3e0717d856e7e33aa96fe7da8a1"
+    }
+  ],
+  "mastraPgSourceSha256": "f92bd67b0af3a98d6104b3d5caa242221c522a1583e61adc983401783fa67258",
+  "lockfileSha256": "b49efedc6326ced26b6d656ad153d6dce24ee5467913f0bf9190c9ba2eba78bf",
+  "ownershipPolicySha256": "dbbef113556622bae2d4643244d6ecce3417635f6897f491e27c7b211a99bfba",
+  "release": "No activation or production migration authorization. C-G not started by this test."
+}

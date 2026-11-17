@@ -1,0 +1,9 @@
+# TEMPLATE ONLY. Manual observation does not authorize H/I.
+[Unit]
+Description=Observe orchestrator availability without recovery actions
+
+[Timer]
+OnUnitActiveSec=60s
+Unit=trendpostiz-orchestrator-observer.service
+
+# Deliberately not enabled or installable automatically.

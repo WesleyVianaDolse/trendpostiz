@@ -3,11 +3,12 @@ import { InstagramCommentAutomationRepository } from './instagram-comment-automa
 describe('Instagram comment execution delivery audit', () => {
   function setup(execution: any) {
     const transaction = {
+      $queryRaw: jest.fn().mockResolvedValue([]),
       instagramCommentAutomationExecution: {
         findUniqueOrThrow: jest.fn().mockResolvedValue(execution),
         update: jest.fn().mockResolvedValue({}),
       },
-      instagramWebhookEvent: { update: jest.fn().mockResolvedValue({}) },
+      instagramWebhookEvent: { update: jest.fn().mockResolvedValue({}), findUnique: jest.fn().mockResolvedValue({ recoverySkipReason: null }) },
     };
     const prisma = {
       $transaction: jest.fn((callback) => callback(transaction)),
@@ -28,7 +29,7 @@ describe('Instagram comment execution delivery audit', () => {
     ['SUCCESS', 'SKIPPED', 'REPLIED'],
     ['SKIPPED', 'SUCCESS', 'REPLIED'],
     ['SKIPPED', 'SKIPPED', 'PROCESSED'],
-    ['SUCCESS', 'PENDING', 'PROCESSED'],
+    ['SUCCESS', 'PENDING', 'PROCESSING'],
   ])(
     'finalizes public=%s / Direct=%s as %s without overwriting individual results',
     async (publicReplyStatus, privateReplyStatus, status) => {
@@ -46,9 +47,8 @@ describe('Instagram comment execution delivery audit', () => {
         where: { id: 'event-1' },
         data: { status },
       });
-      expect(
-        transaction.instagramCommentAutomationExecution.update
-      ).toHaveBeenCalledWith({
+      if (status === 'PROCESSING') expect(transaction.instagramCommentAutomationExecution.update).not.toHaveBeenCalled();
+      else expect(transaction.instagramCommentAutomationExecution.update).toHaveBeenCalledWith({
         where: { id: 'execution-1' },
         data: { processedAt: expect.any(Date) },
       });

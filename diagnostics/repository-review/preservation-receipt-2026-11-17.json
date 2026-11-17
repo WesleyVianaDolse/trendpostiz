@@ -1,0 +1,17 @@
+{
+  "snapshotDirectory": "C:\\Users\\viana\\Documents\\GitHub\\trendpostiz-preservation\\2026-11-17-8b69a646fc",
+  "archive": "C:\\Users\\viana\\Documents\\GitHub\\trendpostiz-preservation\\2026-11-17-8b69a646fc\\worktree-private.zip",
+  "archiveSha256": "a7989e83e220e03af8bb43f3ecc84288e6501ecc69bfa085f362c99da3a14f69",
+  "archiveBytes": 2879429,
+  "originalWorktreeFiles": 226,
+  "additionalInventoryFiles": 1,
+  "cacheFiles": 4,
+  "verifiedEntries": 231,
+  "zipCrc": "PASS",
+  "allEntrySha256": "PASS",
+  "patchAgainstUnchangedIndex": "PASS",
+  "indexUnchanged": "PASS",
+  "branch": "main",
+  "head": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "credentialsExcluded": true
+}

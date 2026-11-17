@@ -1,0 +1,9 @@
+{
+  "Audit": true,
+  "resource_snapshot": true,
+  "docker_snapshot": true,
+  "process_snapshot": true,
+  "discover_pm2": true,
+  "startup_snapshot": true,
+  "probe_temporal": true
+}

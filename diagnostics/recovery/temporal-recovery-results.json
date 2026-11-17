@@ -1,0 +1,167 @@
+{
+  "postgres": "17.11",
+  "temporal": "1.28.2",
+  "realWorkflowTasksCompleted": 161,
+  "httpRequests": 14,
+  "results": [
+    {
+      "id": "R01",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R02",
+      "result": "PASS",
+      "httpRequests": 2
+    },
+    {
+      "id": "R03",
+      "result": "PASS",
+      "httpRequests": 1
+    },
+    {
+      "id": "R04",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R05",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R06",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R07",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R08",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R09",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R10",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R11",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R12",
+      "result": "PASS",
+      "httpRequests": 1
+    },
+    {
+      "id": "R13",
+      "result": "PASS",
+      "httpRequests": 1
+    },
+    {
+      "id": "R14",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R15",
+      "result": "PASS",
+      "httpRequests": 1
+    },
+    {
+      "id": "R16",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R17",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R18",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R19",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R20",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R21",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R22",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R23",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R24",
+      "result": "PASS",
+      "httpRequests": 2
+    },
+    {
+      "id": "R25",
+      "result": "PASS",
+      "httpRequests": 6
+    },
+    {
+      "id": "R26",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R27",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R28",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R29",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R30",
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "R31",
+      "result": "PASS",
+      "httpRequests": 0
+    }
+  ],
+  "fullMatrixCertified": false,
+  "productionHomologated": false,
+  "clientApiAccess": false,
+  "activationAuthorized": false
+}

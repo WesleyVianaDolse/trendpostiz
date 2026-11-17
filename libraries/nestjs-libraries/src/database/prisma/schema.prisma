@@ -402,14 +402,14 @@ model Integration {
 
 enum InstagramWebhookEventStatus {
   RECEIVED
+  UNMATCHED
+  AMBIGUOUS
+  INVALID
   PROCESSING
   PROCESSED
   REPLIED
   SKIPPED
   FAILED
-  UNMATCHED
-  AMBIGUOUS
-  INVALID
 }
 
 model InstagramWebhookEvent {
@@ -424,6 +424,9 @@ model InstagramWebhookEvent {
   payload             Json
   status              InstagramWebhookEventStatus
   receivedAt          DateTime                             @default(now())
+  occurredAt          DateTime?
+  occurredAtSource    String?
+  recoverySkipReason  String?
   integration         Integration?                         @relation(fields: [integrationId], references: [id])
   automationExecution InstagramCommentAutomationExecution?
 
@@ -542,6 +545,7 @@ model Comments {
 model Post {
   id                         String                    @id @default(cuid())
   state                      State                     @default(QUEUE)
+  scheduleRevision           Int                       @default(0)
   adminPausedAt              DateTime?
   publishDate                DateTime
   organizationId             String
@@ -602,6 +606,249 @@ model Post {
   @@index([updatedAt])
   @@index([releaseURL])
   @@index([integrationId])
+}
+
+// Additive recovery ledger. Subject IDs intentionally do not cascade: deleting
+// an account/content must never delete proof of a recovery or delivery decision.
+model AutomationRecoveryRun {
+  id              String   @id @default(uuid())
+  cutoffAt        DateTime
+  protocolVersion Int      @default(1)
+  phase           String   @default("BLOCKED")
+  authorizedById  String?
+  authorizedAt    DateTime?
+  manifestHash    String?
+  createdAt       DateTime @default(now())
+}
+
+model AutomationRecoveryControl {
+  id              String   @id
+  runId           String?
+  phase           String   @default("BLOCKED")
+  generation      Int      @default(0)
+  protocolVersion Int      @default(1)
+  updatedAt       DateTime @updatedAt
+}
+
+// Preparation only: immutable proposed decisions, never an authorization to send.
+model RecoveryManifest {
+  id            String   @id
+  recoveryId    String
+  version       Int
+  cutoffAt      DateTime
+  protocolVersion Int    @default(1)
+  scope         Json
+  sourceHash    String
+  itemCount     Int
+  cursor        Int      @default(0)
+  phase         String   @default("COLLECTING")
+  manifestHash  String?
+  createdById   String
+  invalidReason String?
+  createdAt     DateTime @default(now())
+  checkedAt     DateTime?
+  checkedById   String?
+  items         RecoveryManifestItem[]
+
+  @@unique([recoveryId, version])
+}
+
+model RecoveryManifestItem {
+  manifestId    String
+  ordinal       Int
+  organizationId String?
+  subjectKey    String
+  postId        String?
+  decision      String
+  reason        String
+  fingerprint   String
+  metadata      Json
+  manifest      RecoveryManifest @relation(fields: [manifestId], references: [id], onDelete: Restrict)
+
+  @@id([manifestId, ordinal])
+  @@unique([manifestId, subjectKey])
+  @@index([organizationId, postId])
+}
+
+// Signed preparation/application contract. No client object cascades into audit.
+model RecoveryAuthorization {
+  id                String   @id
+  manifestId        String   @unique
+  generation        Int
+  phase             String   @default("APPROVED")
+  approval          Json
+  approvalSignature String
+  authorityHash     String
+  plan              Json
+  source            Json
+  expectedDbHash    String
+  cursor            Int      @default(0)
+  resultHash        String
+  admitted          Json?
+  admittedSignature String?
+  approvedById      String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model RecoveryApplicationItem {
+  authorizationId String
+  ordinal         Int
+  fingerprint     String
+  result          Json
+  previousHash    String
+  resultHash      String
+  createdAt       DateTime @default(now())
+
+  @@id([authorizationId, ordinal])
+}
+
+model PublicationOccurrence {
+  id                String   @id
+  organizationId    String
+  postId            String
+  scheduleRevision  Int
+  scheduledAt       DateTime
+  groupSnapshot     String
+  outcome           String   @default("PENDING")
+  attemptState      String   @default("UNATTEMPTED")
+  claimId           String?
+  claimGeneration   Int?
+  remoteId          String?
+  remoteUrl         String?
+  failureReason     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([organizationId, postId, scheduleRevision, scheduledAt])
+  @@index([organizationId, scheduledAt])
+  @@index([postId])
+}
+
+model AutomationRecoveryDecision {
+  id             String   @id @default(uuid())
+  recoveryId     String
+  organizationId String
+  subjectKey     String
+  action         String
+  reason         String
+  createdAt      DateTime @default(now())
+
+  @@unique([subjectKey, action])
+  @@index([organizationId, recoveryId])
+}
+
+model AutomationWorkflowBinding {
+  id             String   @id @default(uuid())
+  organizationId String
+  workflowId     String
+  runId          String
+  occurrenceId   String
+  actionKey      String   @default("publication")
+  expectedRequestHash String?
+  derivedActionId String?
+  derivedCheckIndex Int?
+  createdAt      DateTime @default(now())
+
+  @@unique([workflowId, runId, actionKey])
+  @@index([occurrenceId])
+}
+
+model PublicationEvidence {
+  id             String   @id @default(uuid())
+  organizationId String
+  occurrenceId   String
+  origin         String
+  remoteId       String?
+  remoteUrl      String?
+  confirmedById  String?
+  confirmedAt    DateTime @default(now())
+
+  @@index([organizationId, occurrenceId])
+}
+
+// One irreversible reservation per logical external effect. A crash after a
+// reservation is unconfirmed, never a lease that authorizes another POST.
+model AutomationEffectAttempt {
+  id             String   @id
+  organizationId String
+  subjectKey     String
+  actionKey      String
+  requestHash    String
+  occurrenceId   String?
+  postId         String?
+  claimId        String
+  generation     Int
+  phase          String   @default("CLAIMED")
+  remoteId       String?
+  receipt        Json?
+  failureReason  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([organizationId, subjectKey, actionKey])
+  @@index([organizationId, occurrenceId])
+}
+
+// Reviewed metadata only: no content, media URLs or credentials in workflow
+// admission. Legacy revision zero requires an explicitly reviewed manifest.
+model PublicationScheduleIntent {
+  occurrenceId   String   @id
+  organizationId String
+  workflowId     String   @unique
+  generation     Int
+  snapshot       Json
+  source         String
+  seriesAnchor   DateTime?
+  intervalDays   Int?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId])
+}
+
+// Preserve pre-ledger remote references before an explicit user revision.
+// The captured current row is evidence, not proof of a historic occurrence.
+model PublicationRecordEvidence {
+  id             String   @id
+  organizationId String
+  postId         String
+  revision       Int
+  groupSnapshot  String
+  dateSnapshot   DateTime
+  stateSnapshot  String
+  remoteId       String?
+  remoteUrl      String?
+  youtubeVideoId String?
+  uploadKey      String?
+  origin         String   @default("unknown")
+  capturedAt     DateTime @default(now())
+
+  @@index([organizationId, postId])
+}
+
+// One logical derived action per parent occurrence. Poll/check ordinals do not
+// create a new business effect after confirmation or an uncertain attempt.
+model PublicationDerivedAction {
+  id                    String   @id
+  organizationId        String
+  rootOccurrenceId      String
+  postId                String
+  sourceIntegrationId   String
+  targetIntegrationId   String
+  actionKey             String
+  kind                  String
+  identifier            String
+  method                String
+  configurationHash     String
+  configurationSnapshot Json
+  schedule              Json
+  phase                 String   @default("PENDING")
+  reason                String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@unique([rootOccurrenceId, actionKey])
+  @@index([organizationId, rootOccurrenceId])
 }
 
 model Notifications {

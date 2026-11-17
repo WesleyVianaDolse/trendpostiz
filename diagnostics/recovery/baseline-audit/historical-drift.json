@@ -1,0 +1,76 @@
+[
+  {
+    "section": "indexes",
+    "object": "InstagramCommentAutomationTrigger",
+    "member": "InstagramCommentAutomationTrigger_automationId_normalizedPhrase",
+    "status": "EXTRA_IN_REPLAY",
+    "sameDefinitionExceptNameAs": "InstagramCommentAutomationTrigger_automationId_normalizedPh_key",
+    "properties": [
+      "definition",
+      "unique",
+      "primary",
+      "exclusion",
+      "valid",
+      "ready",
+      "live",
+      "nulls_not_distinct",
+      "immediate",
+      "options"
+    ]
+  },
+  {
+    "section": "indexes",
+    "object": "InstagramCommentAutomationExecution",
+    "member": "InstagramCommentAutomationExecution_automationId_externalCommen",
+    "status": "EXTRA_IN_REPLAY",
+    "sameDefinitionExceptNameAs": "InstagramCommentAutomationExecution_automationId_externalCo_key",
+    "properties": [
+      "definition",
+      "unique",
+      "primary",
+      "exclusion",
+      "valid",
+      "ready",
+      "live",
+      "nulls_not_distinct",
+      "immediate",
+      "options"
+    ]
+  },
+  {
+    "section": "indexes",
+    "object": "InstagramCommentAutomationTrigger",
+    "member": "InstagramCommentAutomationTrigger_automationId_normalizedPh_key",
+    "status": "MISSING_FROM_REPLAY",
+    "properties": [
+      "definition",
+      "unique",
+      "primary",
+      "exclusion",
+      "valid",
+      "ready",
+      "live",
+      "nulls_not_distinct",
+      "immediate",
+      "options"
+    ]
+  },
+  {
+    "section": "indexes",
+    "object": "InstagramCommentAutomationExecution",
+    "member": "InstagramCommentAutomationExecution_automationId_externalCo_key",
+    "status": "MISSING_FROM_REPLAY",
+    "properties": [
+      "definition",
+      "unique",
+      "primary",
+      "exclusion",
+      "valid",
+      "ready",
+      "live",
+      "nulls_not_distinct",
+      "immediate",
+      "options"
+    ]
+  }
+]

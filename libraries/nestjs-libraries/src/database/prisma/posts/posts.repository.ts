@@ -1,5 +1,6 @@
-import { PrismaRepository } from '@gitroom/nestjs-libraries/database/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { PrismaRepository, PrismaService } from '@gitroom/nestjs-libraries/database/prisma/prisma.service';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { PublicationMutationGuard } from '../../../automation-recovery/publication-mutation-guard';
 import { Post as PostBody } from '@gitroom/nestjs-libraries/dtos/posts/create.post.dto';
 import {
   APPROVED_SUBMIT_FOR_ORDER,
@@ -30,7 +31,9 @@ export class PostsRepository {
     private _comments: PrismaRepository<'comments'>,
     private _tags: PrismaRepository<'tags'>,
     private _tagsPosts: PrismaRepository<'tagsPosts'>,
-    private _errors: PrismaRepository<'errors'>
+    private _errors: PrismaRepository<'errors'>,
+    private _prisma: PrismaService,
+    private _mutation: PublicationMutationGuard
   ) {}
 
   searchForMissingThreeHoursPosts() {
@@ -465,24 +468,19 @@ export class PostsRepository {
     isDraft: boolean,
     action: 'schedule' | 'update' = 'schedule'
   ) {
-    return this._post.model.post.update({
-      where: {
-        organizationId: orgId,
-        id,
-      },
-      data: {
-        publishDate: dayjs(date).toDate(),
-        // schedule: set state to QUEUE (or DRAFT if it was a draft)
-        // update: don't change the state
-        ...(action === 'schedule'
-          ? {
-              state: isDraft ? 'DRAFT' : 'QUEUE',
-              releaseId: null,
-              releaseURL: null,
-              adminPausedAt: null,
-            }
-          : {}),
-      },
+    const publishDate = dayjs(date).toDate();
+    if (!Number.isFinite(+publishDate) || (action === 'schedule' && +publishDate < Date.now())) {
+      throw new BadRequestException('Escolha um novo horário futuro para reagendar.');
+    }
+    return this._prisma.$transaction(async tx => {
+    const current = await tx.post.findFirstOrThrow({ where: { id, organizationId: orgId } });
+    const group = await tx.post.findMany({ where: { group: current.group, organizationId: orgId, deletedAt: null }, select: { id: true } });
+    await this._mutation.lock(tx, orgId, group.map(p => p.id));
+    await tx.post.updateMany({ where: { organizationId: orgId, id: { in: group.map(p => p.id) } }, data: {
+      publishDate, scheduleRevision: { increment: 1 },
+      ...(action === 'schedule' ? { state: isDraft ? 'DRAFT' : 'QUEUE', releaseId: null, releaseURL: null, adminPausedAt: null } : {}),
+    } });
+    return tx.post.findFirstOrThrow({ where: { id, organizationId: orgId } });
     });
   }
 
@@ -517,13 +515,28 @@ export class PostsRepository {
     creationMethod: CreationMethod,
     inter?: number
   ) {
+    const requestedDate = dayjs(date).toDate();
+    if (!Number.isFinite(+requestedDate) || (state === 'schedule' && +requestedDate < Date.now())) {
+      throw new BadRequestException('Escolha um horário futuro para agendar.');
+    }
+    return this._prisma.$transaction(async tx => {
+    const existing = await tx.post.findMany({ where: { organizationId: orgId, OR: [
+      { id: { in: body.value.map(p => p.id).filter(Boolean) } },
+      ...(body.group ? [{ group: body.group }] : []),
+    ] }, select: { id: true } });
+    // A supplied id belonging to another tenant must never reach upsert/update.
+    for (const value of body.value) if (value.id && !existing.some(p => p.id === value.id)) {
+      const occupied = await tx.post.findUnique({ where: { id: value.id }, select: { id: true } });
+      if (occupied) throw new BadRequestException('Publicação não encontrada.');
+    }
+    await this._mutation.lock(tx, orgId, existing.map(p => p.id));
     const posts: Post[] = [];
     const uuid = uuidv4();
 
     for (const value of body.value) {
       const updateData = (type: 'create' | 'update') => ({
-        ...(state === 'schedule' || state === 'now' ? { adminPausedAt: null, error: null } : {}),
-        publishDate: dayjs(date).toDate(),
+        ...(state === 'schedule' || state === 'now' ? { adminPausedAt: null, error: null, releaseId: null, releaseURL: null } : {}),
+        publishDate: requestedDate,
         integration: {
           connect: {
             id: body.integration.id,
@@ -567,13 +580,14 @@ export class PostsRepository {
       });
 
       posts.push(
-        await this._post.model.post.upsert({
+        await tx.post.upsert({
           where: {
             id: value.id || uuidv4(),
           },
-          create: { ...updateData('create') },
+          create: { ...updateData('create'), scheduleRevision: 1 },
           update: {
             ...updateData('update'),
+            scheduleRevision: { increment: 1 },
             lastMessage: {
               disconnect: true,
             },
@@ -585,7 +599,7 @@ export class PostsRepository {
       );
 
       if (posts.length === 1) {
-        await this._tagsPosts.model.tagsPosts.deleteMany({
+        await tx.tagsPosts.deleteMany({
           where: {
             post: {
               id: posts[0].id,
@@ -594,7 +608,7 @@ export class PostsRepository {
         });
 
         if (tags.length) {
-          const tagsList = await this._tags.model.tags.findMany({
+          const tagsList = await tx.tags.findMany({
             where: {
               orgId: orgId,
               name: {
@@ -604,7 +618,7 @@ export class PostsRepository {
           });
 
           if (tagsList.length) {
-            await this._post.model.post.update({
+            await tx.post.update({
               where: {
                 id: posts[posts.length - 1].id,
               },
@@ -625,8 +639,9 @@ export class PostsRepository {
 
     const previousPost = body.group
       ? (
-          await this._post.model.post.findFirst({
+          await tx.post.findFirst({
             where: {
+              organizationId: orgId,
               group: body.group,
               deletedAt: null,
               parentPostId: null,
@@ -639,8 +654,9 @@ export class PostsRepository {
       : undefined;
 
     if (body.group) {
-      await this._post.model.post.updateMany({
+      await tx.post.updateMany({
         where: {
+          organizationId: orgId,
           group: body.group,
           deletedAt: null,
         },
@@ -652,6 +668,7 @@ export class PostsRepository {
     }
 
     return { previousPost, posts };
+    }, { maxWait: 10000, timeout: 20000 });
   }
 
   async submit(id: string, order: string, buyerOrganizationId: string) {

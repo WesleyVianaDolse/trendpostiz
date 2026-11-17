@@ -51,6 +51,7 @@ import { RefreshIntegrationService } from '@gitroom/nestjs-libraries/integration
 import { hasExtension } from '@gitroom/helpers/utils/has.extension';
 import { stripLinks } from '@gitroom/helpers/utils/strip.links';
 import { PlatformService } from '../platform/platform.service';
+import { PublicationSchedulingService } from '../../../automation-recovery/publication-scheduling.service';
 
 type PostWithConditionals = Post & {
   integration?: Integration;
@@ -70,12 +71,15 @@ export class PostsService {
     private _openaiService: OpenaiService,
     private _temporalService: TemporalService,
     private _refreshIntegrationService: RefreshIntegrationService,
-    private _platform: PlatformService
+    private _platform: PlatformService,
+    private _scheduling: PublicationSchedulingService
   ) {}
 
   searchForMissingThreeHoursPosts() {
     return this._postRepository.searchForMissingThreeHoursPosts();
   }
+
+  reconcileSafeSchedules() { return this._scheduling.reconcile(); }
 
   updatePost(id: string, postId: string, releaseURL: string) {
     return this._postRepository.updatePost(id, postId, releaseURL);
@@ -691,110 +695,10 @@ export class PostsService {
     return this._postRepository.getPostByForWebhookId(id);
   }
 
-  async startWorkflow(
-    taskQueue: string,
-    postId: string,
-    orgId: string,
-    state: State
-  ) {
-    try {
-      const workflows = this._temporalService.client
-        .getRawClient()
-        .workflow.list({
-          query: `postId="${postId}" AND ExecutionStatus="Running"`,
-        });
-
-      for await (const executionInfo of workflows) {
-        try {
-          const workflow = await this._temporalService.client.getWorkflowHandle(
-            executionInfo.workflowId
-          );
-          if (
-            workflow &&
-            (await workflow.describe()).status.name !== 'TERMINATED'
-          ) {
-            await workflow.terminate();
-          }
-        } catch (error) {
-          this.logger.warn(
-            `Could not terminate previous workflow ${
-              executionInfo.workflowId
-            }: ${error instanceof Error ? error.message : String(error)}`
-          );
-        }
-      }
-    } catch (error) {
-      this.logger.warn(
-        `Could not inspect previous workflows for post ${postId}: ${
-          error instanceof Error ? error.message : String(error)
-        }`
-      );
-    }
-
-    if (state === 'DRAFT') {
-      return;
-    }
-
-    const workflowId = `post_${postId}`;
-    const client = this._temporalService.client.getRawClient();
-
-    try {
-      await client.workflow.start('postWorkflowV105', {
-        workflowId,
-        taskQueue: 'main',
-        workflowIdConflictPolicy: 'TERMINATE_EXISTING',
-        args: [
-          {
-            taskQueue: taskQueue,
-            postId: postId,
-            organizationId: orgId,
-          },
-        ],
-        typedSearchAttributes: new TypedSearchAttributes([
-          {
-            key: postIdSearchParam,
-            value: postId,
-          },
-          {
-            key: organizationId,
-            value: orgId,
-          },
-        ]),
-      });
-      this.logger.log(
-        `Scheduling confirmed for post ${postId} on task queue ${taskQueue}.`
-      );
-    } catch (error) {
-      // A network timeout may happen after Temporal accepted the request. Check
-      // before reporting a false scheduling failure to the user.
-      try {
-        const existing = await client.workflow.getHandle(workflowId).describe();
-        if (existing.status.name === 'RUNNING') {
-          this.logger.warn(
-            `Temporal start returned an error, but ${workflowId} is running.`
-          );
-          return;
-        }
-      } catch {
-        // The workflow really could not be confirmed below.
-      }
-
-      const message = `Scheduling was not confirmed for post ${postId}: ${
-        error instanceof Error ? error.message : String(error)
-      }`;
-      this.logger.error(message, error instanceof Error ? error.stack : '');
-      await this._postRepository
-        .changeState(postId, 'ERROR', message, [{ id: postId }])
-        .catch((stateError) =>
-          this.logger.error(
-            `Could not persist scheduling failure for post ${postId}.`,
-            stateError instanceof Error ? stateError.stack : String(stateError)
-          )
-        );
-      throw error;
-    }
+  async startWorkflow(taskQueue: string, postId: string, orgId: string, state: State) {
+    if (state !== 'QUEUE') return;
+    return this._scheduling.schedulePost(orgId, postId);
   }
-
   async createPost(
     orgId: string,
     body: CreatePostDto,
@@ -826,7 +730,7 @@ export class PostsService {
       const { posts } = await this._postRepository.createOrUpdatePost(
         body.type,
         orgId,
-        body.type === 'now' ? dayjs().format('YYYY-MM-DDTHH:mm:00') : body.date,
+        body.type === 'now' ? new Date().toISOString() : body.date,
         post,
         body.tags,
         creationMethod,
@@ -837,7 +741,7 @@ export class PostsService {
         return [] as any[];
       }
 
-      if (body.type !== 'update') {
+      if (posts[0].state === 'QUEUE') {
         await this.startWorkflow(
           post.settings.__type.split('-')[0].toLowerCase(),
           posts[0].id,
@@ -875,6 +779,7 @@ export class PostsService {
     }
 
     const state: State = status === 'draft' ? 'DRAFT' : 'QUEUE';
+    await this._scheduling.assertSimpleStatusChange(orgId, id);
     if (state === 'QUEUE' && getPostById.adminPausedAt) {
       throw new BadRequestException('Esta publicação foi pausada. Abra o editor, revise o conteúdo e escolha um novo horário para reagendar.');
     }
@@ -908,7 +813,7 @@ export class PostsService {
       action
     );
 
-    if (action === 'schedule') {
+    if (newDate.state === 'QUEUE') {
       await this.startWorkflow(
         getPostById.integration.providerIdentifier.split('-')[0].toLowerCase(),
         getPostById.id,

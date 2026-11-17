@@ -1,0 +1,3157 @@
+{
+  "scope": "LOCAL_GIT_WORKTREE_ONLY",
+  "capturedAt": "2026-11-17T04:10:37.947Z",
+  "branch": "main",
+  "head": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "headSubject": "fix: direct message instagram business v1.7.4",
+  "upstream": "origin/main",
+  "upstreamCommit": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "stagedPaths": [],
+  "modifiedCount": 33,
+  "untrackedCount": 193,
+  "totalChangedOrUntracked": 226,
+  "totalBytes": 3362523,
+  "counts": {
+    "APPLICATION_OR_BUILD_CONFIGURATION": 49,
+    "REGRESSION_TEST": 9,
+    "DIAGNOSTIC_CODE": 68,
+    "DIAGNOSTIC_EVIDENCE_OR_GENERATED": 36,
+    "DOCUMENTATION": 24,
+    "OPERATIONAL_EXPERIMENTAL": 13,
+    "MIGRATION_OR_BASELINE_PRESERVE": 27
+  },
+  "ignoredGroups": [
+    ".env",
+    "apps/backend/dist/",
+    "apps/backend/tsconfig.tsbuildinfo",
+    "apps/frontend/.next/",
+    "apps/frontend/next-env.d.ts",
+    "apps/frontend/node_modules/",
+    "apps/frontend/tsconfig.tsbuildinfo",
+    "apps/orchestrator/dist/",
+    "apps/orchestrator/tsconfig.tsbuildinfo",
+    "node_modules/",
+    "tmp/",
+    "tsconfig.tsbuildinfo"
+  ],
+  "cacheCandidates": [
+    {
+      "path": "tsconfig.tsbuildinfo",
+      "bytes": 12768145,
+      "sha256": "fddd20caf2fed84f148ab6225bd3a08a76785a9acb4915ce4b42fc6cff6021a2",
+      "securityFindings": []
+    },
+    {
+      "path": "apps/backend/tsconfig.tsbuildinfo",
+      "bytes": 8293934,
+      "sha256": "6395e31b64868f097769f29817f9cbb590a1d47591de19acf778701b502895ce",
+      "securityFindings": []
+    },
+    {
+      "path": "apps/frontend/tsconfig.tsbuildinfo",
+      "bytes": 1071793,
+      "sha256": "955885129d670254bd38af2c548db2095e96db3a91674bd225d9ffd60cb3b83a",
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/tsconfig.tsbuildinfo",
+      "bytes": 6073553,
+      "sha256": "431b392eda24f05f5a751713c1d913e578bc95361af431ee19366b7c8c45db0f",
+      "securityFindings": []
+    }
+  ],
+  "duplicateGroups": [
+    {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "paths": [
+        "diagnostics/recovery/buildBackend-fg.log",
+        "diagnostics/recovery/buildBackend-r27.log",
+        "diagnostics/recovery/buildOrchestrator-fg.log",
+        "diagnostics/recovery/buildOrchestrator-r27.log"
+      ],
+      "warning": "Identical bytes do not prove redundant ownership or references"
+    },
+    {
+      "sha256": "c0f27b0e008e1326ed244c665190d9fabd5adabd6148ebc209d7baedf94d3edd",
+      "paths": [
+        "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261114000000_safe_recovery_foundation/migration.sql",
+        "libraries/nestjs-libraries/src/database/prisma/migrations/20261114000000_safe_recovery_foundation/migration.sql"
+      ],
+      "warning": "Identical bytes do not prove redundant ownership or references"
+    },
+    {
+      "sha256": "2c862d666003b065bf31b71c6792f6f4f5438a6d5db21b5605a6b08246e12c2a",
+      "paths": [
+        "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261115000000_recovery_effect_attempt/migration.sql",
+        "libraries/nestjs-libraries/src/database/prisma/migrations/20261115000000_recovery_effect_attempt/migration.sql"
+      ],
+      "warning": "Identical bytes do not prove redundant ownership or references"
+    },
+    {
+      "sha256": "50fad31fed985f3927564a3f5cec002a1fb10012c6bb6c8a41f36d3abc5934d3",
+      "paths": [
+        "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261115010000_schedule_intents_and_evidence/migration.sql",
+        "libraries/nestjs-libraries/src/database/prisma/migrations/20261115010000_schedule_intents_and_evidence/migration.sql"
+      ],
+      "warning": "Identical bytes do not prove redundant ownership or references"
+    },
+    {
+      "sha256": "c4c39b35bd99e3b29169f5b26ee6edb2b2cc2a3a70d54258551d7e3e9ff44459",
+      "paths": [
+        "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261115020000_derived_action_contract/migration.sql",
+        "libraries/nestjs-libraries/src/database/prisma/migrations/20261115020000_derived_action_contract/migration.sql"
+      ],
+      "warning": "Identical bytes do not prove redundant ownership or references"
+    },
+    {
+      "sha256": "6bed22bc3bbff51eaed3c937815a7357eddb02fd2e395beb6c619984212c9352",
+      "paths": [
+        "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261116000000_recovery_manifest/migration.sql",
+        "libraries/nestjs-libraries/src/database/prisma/migrations/20261116000000_recovery_manifest/migration.sql"
+      ],
+      "warning": "Identical bytes do not prove redundant ownership or references"
+    },
+    {
+      "sha256": "fe184f730f76a30bfc042f37c0d5f34873bc0c2c82219434ff869f625198e813",
+      "paths": [
+        "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261117000000_recovery_authorization/migration.sql",
+        "libraries/nestjs-libraries/src/database/prisma/migrations/20261117000000_recovery_authorization/migration.sql"
+      ],
+      "warning": "Identical bytes do not prove redundant ownership or references"
+    }
+  ],
+  "records": [
+    {
+      "path": ".dockerignore",
+      "status": "MODIFIED",
+      "bytes": 649,
+      "sha256": "49abf49d878651d71ff13a4a83ee813af3d370e33100dca04defd7db307bb242",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/backend/src/api/routes/posts.controller.ts",
+      "status": "MODIFIED",
+      "bytes": 8414,
+      "sha256": "0d7d884b07c38d966b54e1a297ccd3dc70ea815ea6281e568967050935600544",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/backend/src/services/instagram-comment-automations/instagram-version-regression.integration.spec.ts",
+      "status": "UNTRACKED",
+      "bytes": 18852,
+      "sha256": "d0382b62ba10e6d9085570fa664650bb8179c6561f640e3d570aa251d09cfda2",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/frontend/jest.recovery.config.cjs",
+      "status": "UNTRACKED",
+      "bytes": 265,
+      "sha256": "340bfdf12811e1bb1128cdb931f859434c5d1be52c2fdf2d8b54aa613e19bf03",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/frontend/src/components/new-launch/manage.modal.tsx",
+      "status": "MODIFIED",
+      "bytes": 37222,
+      "sha256": "97a49d5db566340d64aba07c04831d8a1ebf16a286db2a483465b1eb659d4148",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/frontend/src/components/new-launch/publication-recovery-history.spec.tsx",
+      "status": "UNTRACKED",
+      "bytes": 5973,
+      "sha256": "586045b394bf32806dc0e32b6131d273873d14d72888ad370726fcdfc4dd450c",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/frontend/src/components/new-launch/publication-recovery-history.tsx",
+      "status": "UNTRACKED",
+      "bytes": 8722,
+      "sha256": "589c6ed845971e0408e7d5c57f120d027283a87ecde051887b9443ad4cc93029",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/package.json",
+      "status": "MODIFIED",
+      "bytes": 544,
+      "sha256": "8227e741db5e197e17d94bbe6ca0d4446038b8b6cecf31ee4c67c4c231e671fa",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/activities/post-access.spec.ts",
+      "status": "MODIFIED",
+      "bytes": 4460,
+      "sha256": "3f73156aecb4ee57e7e7db13e239101d77f8d7a7b6eddbee35e0147e603ab74f",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/activities/post.activity.ts",
+      "status": "MODIFIED",
+      "bytes": 15097,
+      "sha256": "0b8b234f38536c67316b91572d4032ab560c60acd6dff6a976e4455501bfc3e6",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/activities/recovery-publication.activity.ts",
+      "status": "UNTRACKED",
+      "bytes": 4990,
+      "sha256": "52daa5b5ce56ef75c5dac764a229473c5acff1b7754b53ee87e6a5ae4e1af1c5",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/admitted-main.ts",
+      "status": "UNTRACKED",
+      "bytes": 1470,
+      "sha256": "36ab56054c04d80757df76ab4f7e67cdba1b3ac208b1203a7e4a8dbc6420aa05",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/app.module.ts",
+      "status": "MODIFIED",
+      "bytes": 1327,
+      "sha256": "0cb112c27481596be4d99fcaced97f5b0a78d4e9695b5a42f7f75ebf141324da",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/health.controller.ts",
+      "status": "MODIFIED",
+      "bytes": 2727,
+      "sha256": "a2457105c12520246d7b2ed883b1442f49585c1fae2adbc00feb8db1cbb6f07a",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/main.ts",
+      "status": "MODIFIED",
+      "bytes": 3535,
+      "sha256": "28b65b9ce91e643be717ce2da08e3c995e51e53bc96cbb93aa7e99300918d518",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/workflows/derived-publication.workflow.ts",
+      "status": "UNTRACKED",
+      "bytes": 1430,
+      "sha256": "ea66522ce9c3b9707dc812a6802d4934a69272f68a59061b7df92e2c82ad6cb6",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/workflows/index.ts",
+      "status": "MODIFIED",
+      "bytes": 716,
+      "sha256": "d25580acb5edd0c296a2b81345a3d92c85934dc4f8b340dc051fb93147c644e1",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "apps/orchestrator/src/workflows/post-workflows/post.workflow.v1.0.6.ts",
+      "status": "UNTRACKED",
+      "bytes": 3456,
+      "sha256": "a4b46b264901599804221315df19d556831d46400636853b892b5ff0ab579c74",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "diagnostics/instagram-regression/run-local.mjs",
+      "status": "UNTRACKED",
+      "bytes": 3702,
+      "sha256": "195e88e32ff361244fd9f4e424c206a22035fd469a099342f56f9138338777b5",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/instagram-regression-v1.7.3-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/fg-cold-import-deadlines-results.json",
+      "status": "UNTRACKED",
+      "bytes": 9157,
+      "sha256": "b3e6ef8802cf0b398ed64fddbbf38d25f445ffd541fca04d0ea44ba7255b83df",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/fg-contention-second-run-results.json",
+      "status": "UNTRACKED",
+      "bytes": 9044,
+      "sha256": "0c0a8735d9165c821496a3002ce0e66521f530c8fe6b126bdbf3546f2783a310",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/fg-final-verification-before-r04-r14-20261116.json",
+      "status": "UNTRACKED",
+      "bytes": 745,
+      "sha256": "f59ca57aa086e0346bb3829d140a9b557fd66ee281db90a3415e5d3669519332",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/fg-relative-import-loader-results.json",
+      "status": "UNTRACKED",
+      "bytes": 9155,
+      "sha256": "593cc344dbbfa9d5b636e70a68e98ac56cd465dfdde7fd87a60095b96cba88e5",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/fg-resource-contention-failed-results.json",
+      "status": "UNTRACKED",
+      "bytes": 8849,
+      "sha256": "f45c54234e9a95762054615ee62d7f312b12805fb8d2a8d848da1a6f90e01743",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/fg-review-candidate-before-final-20261116.json",
+      "status": "UNTRACKED",
+      "bytes": 216146,
+      "sha256": "46620bfca7c25a5f42bdb33cf86b4f2ab6a243f3bc3f44b8ba104082a38cd9c1",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/implementation-progress-before-fg.md",
+      "status": "UNTRACKED",
+      "bytes": 2377,
+      "sha256": "187f06b5ead6d5e59272a21d4e8171eb2aae3933604a8be35a3aae4c26cf4dfa",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/implementation-status-before-boundary-closure.md",
+      "status": "UNTRACKED",
+      "bytes": 11002,
+      "sha256": "7253883664984a1e63a6885f09efe14000019907942473c8f8fec14ee680c3b3",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-status-before-r27.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/implementation-status-before-r27.md",
+      "status": "UNTRACKED",
+      "bytes": 2531,
+      "sha256": "adbc5054e545fa525a74d8b57e9e8dc68363e0e805196f376f2cefeb57798238",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/archive/v1.7.5-implementation-status-before-fg.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+      "status": "UNTRACKED",
+      "bytes": 16851,
+      "sha256": "6536b15d618be260dd8c3477db2c64a068bf863cf6fb6c16521c4a8472d5026e",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/matrix-before-fg.json",
+      "status": "UNTRACKED",
+      "bytes": 7329,
+      "sha256": "c5e7623373bde233989a64833ffb8b051913927ff7deca5f9704462b9784a4a7",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/matrix-before-r04-r14-20261116.json",
+      "status": "UNTRACKED",
+      "bytes": 21861,
+      "sha256": "76ffce897fa6abd176848a96124e874fb736c3c97d76d4addaae4311f3f88937",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/prisma-mastra-before-boundary-closure.md",
+      "status": "UNTRACKED",
+      "bytes": 17370,
+      "sha256": "25348ae477aff673a7a4daf40aec68b44dc21b40c76c039beae4dcf5050d06d1",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/r28-infrastructure-readonly-v1-8b01b747.py",
+      "status": "UNTRACKED",
+      "bytes": 47603,
+      "sha256": "8b01b747716b45efd91ce44e056aa77ec3fca3cd559d977397334557cd87dce3",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json",
+          "diagnostics/recovery/test-r28-compact.py",
+          "docs/v1.7.5-r28-compact-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/read-only-schema-audit.sql",
+      "status": "UNTRACKED",
+      "bytes": 1637,
+      "sha256": "0a3099c9bc781e7b329b3189fd92ac43fd50bbf1d3f34f8346fb0827cb153dbd",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-status-before-boundary-closure.md",
+          "diagnostics/recovery/read-only-schema-audit.sql"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/v1.7.5-implementation-status-before-fg.md",
+      "status": "UNTRACKED",
+      "bytes": 2522,
+      "sha256": "0c231bdb7800ee5d963ab62b398cf8f2378e5953c620f6ebd2111194789df50a",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-implementation-status.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+      "status": "UNTRACKED",
+      "bytes": 17025,
+      "sha256": "78281c0167470cc86ce4befd69ff181243763d6d1b1dd98230d1f7f4ed9e0fc8",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-local-recovery-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/01-database.sql",
+      "status": "UNTRACKED",
+      "bytes": 833,
+      "sha256": "baad50c22c02e84fa1abf3c75fb1ee9d2fb405daf169b97167b66f4761fa88de",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/02-tables.sql",
+      "status": "UNTRACKED",
+      "bytes": 1242,
+      "sha256": "48934f755be1a6d783f5b18b29ee67fb438b85400695ecb87d9a1d9e229bce5f",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/03-columns.sql",
+      "status": "UNTRACKED",
+      "bytes": 1484,
+      "sha256": "5d9cfd8a9ea6bf807755804734b9b8fed681fb3736028bfd0afdbbeb8a54c6cc",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/04-constraints.sql",
+      "status": "UNTRACKED",
+      "bytes": 1075,
+      "sha256": "1f73cfbe0ea7a1050cc5f9b87a914d3b945840091ae9e514c0a09e6497f048fe",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/05-indexes.sql",
+      "status": "UNTRACKED",
+      "bytes": 1129,
+      "sha256": "62ff780d329664c264ce76784517f0b720abb941977900b492ac56c9652bc105",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/06-enums.sql",
+      "status": "UNTRACKED",
+      "bytes": 911,
+      "sha256": "2cbd3c8a36a14482234c1b3f9e8689118796824464d16332987b71887a45b841",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/07-extras.sql",
+      "status": "UNTRACKED",
+      "bytes": 3064,
+      "sha256": "fbe0fc7a02ad299081a248b6673cd25b6a497d3e4bafd7a0a017b6528cc20227",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/diagnostic-results.json",
+      "status": "UNTRACKED",
+      "bytes": 2065,
+      "sha256": "2054f880222e6dac116dbfd508d00b1ea6a78d9b6ee067173653f33c37e66baf",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/test-baseline-diagnostics.mjs",
+          "docs/v1.7.5-baseline-production-differences.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/expected-metadata.json",
+      "status": "UNTRACKED",
+      "bytes": 361550,
+      "sha256": "0b1784c5c57750d98d450a00a648950e71d88d385a990e01cfb4dbe358936e97",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 5,
+        "examples": [
+          "diagnostics/recovery/baseline-check.mjs",
+          "diagnostics/recovery/test-baseline-diagnostics.mjs",
+          "diagnostics/recovery/test-baseline.mjs",
+          "diagnostics/recovery/test-prisma-ownership.mjs",
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/historical-drift.json",
+      "status": "UNTRACKED",
+      "bytes": 1837,
+      "sha256": "4a62093be910b758751b10fa74dde73db4181af6c7e4ec5f73d895d1c4a4b629",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/test-baseline.mjs",
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/local-results.json",
+      "status": "UNTRACKED",
+      "bytes": 4151,
+      "sha256": "44f98317b02954e80b2893db87b499c9625b4a24883fdf4315ebf8df05cf2e90",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 8,
+        "examples": [
+          "diagnostics/recovery/archive/fg-review-candidate-before-final-20261116.json",
+          "diagnostics/recovery/archive/prisma-mastra-before-boundary-closure.md",
+          "diagnostics/recovery/fg-review-candidate-20261116.json",
+          "diagnostics/recovery/final-fg-review-candidate-20261116.json",
+          "diagnostics/recovery/test-baseline.mjs",
+          "diagnostics/recovery/test-prisma-ownership.mjs",
+          "docs/v1.7.5-baseline-proposal.md",
+          "docs/v1.7.5-prisma-mastra-ownership.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/production-check.sql",
+      "status": "UNTRACKED",
+      "bytes": 8912,
+      "sha256": "31abeb224890efcf246fae3b400794d21450473712f7066baff0afe3495c1c25",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 9,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-status-before-boundary-closure.md",
+          "diagnostics/recovery/baseline-audit/production-locate.sql",
+          "diagnostics/recovery/baseline-audit/production-result.json",
+          "diagnostics/recovery/baseline-diagnostics.mjs",
+          "diagnostics/recovery/test-baseline-diagnostics.mjs",
+          "diagnostics/recovery/test-baseline.mjs",
+          "diagnostics/recovery/test-prisma-ownership.mjs",
+          "docs/v1.7.5-baseline-production-differences.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/production-locate.sql",
+      "status": "UNTRACKED",
+      "bytes": 28501,
+      "sha256": "080fa9f5112e0f0b739448ff5f9c95dd915b1c63f72c8f6aeeef0a9f4d95865c",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/baseline-audit/production-mastra-result.json",
+          "diagnostics/recovery/test-baseline-diagnostics.mjs",
+          "docs/v1.7.5-baseline-production-differences.md",
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/production-mastra-result.json",
+      "status": "UNTRACKED",
+      "bytes": 865,
+      "sha256": "ae4af7c402560a12f5ca1b5ceae90d0db52ad60294860b1f2468ef0f3e8e015b",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/archive/prisma-mastra-before-boundary-closure.md",
+          "docs/v1.7.5-prisma-mastra-ownership.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-audit/production-result.json",
+      "status": "UNTRACKED",
+      "bytes": 789,
+      "sha256": "fe987a3db37e241da9fcaeee15c1f324dae82fbe5e968a4771ea3b03f9d7faee",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 6,
+        "examples": [
+          "diagnostics/recovery/baseline-check.mjs",
+          "diagnostics/recovery/test-baseline-diagnostics.mjs",
+          "diagnostics/recovery/test-baseline.mjs",
+          "docs/v1.7.5-baseline-production-differences.md",
+          "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/manifest.json",
+          "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/production-evidence.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-check.mjs",
+      "status": "UNTRACKED",
+      "bytes": 1209,
+      "sha256": "3412d7169b74ecd9df9494a88f27198556e39a41d5445e14c0154db3f56854f4",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/read-only-schema-audit.sql",
+          "docs/v1.7.5-baseline-production-differences.md",
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-diagnostics.mjs",
+      "status": "UNTRACKED",
+      "bytes": 4412,
+      "sha256": "b9b64a7628ddff88f59d9f3abc77b2934b56d2d692d964a4dbf491eba5d79bfb",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 5,
+        "examples": [
+          "diagnostics/recovery/baseline-check.mjs",
+          "diagnostics/recovery/prisma-ownership.mjs",
+          "diagnostics/recovery/test-baseline-diagnostics.mjs",
+          "diagnostics/recovery/test-prisma-ownership.mjs",
+          "docs/v1.7.5-baseline-production-differences.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/baseline-metadata.mjs",
+      "status": "UNTRACKED",
+      "bytes": 12850,
+      "sha256": "8002177d9820801dba55bedce07360ebecb0244c6017fe872c58beee78c52d31",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 6,
+        "examples": [
+          "diagnostics/recovery/baseline-check.mjs",
+          "diagnostics/recovery/baseline-diagnostics.mjs",
+          "diagnostics/recovery/prisma-ownership.mjs",
+          "diagnostics/recovery/test-baseline-diagnostics.mjs",
+          "diagnostics/recovery/test-baseline.mjs",
+          "diagnostics/recovery/test-prisma-ownership.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/build-linux-candidate.mjs",
+      "status": "UNTRACKED",
+      "bytes": 4323,
+      "sha256": "8e2a235e462c566f5d29d47b604d72b7857f547bbd8b702d78446c8a38c558c3",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/handoff-build-results.json",
+          "docs/v1.7.5-final-fg-handoff.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/buildBackend-fg.log",
+      "status": "UNTRACKED",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-build-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/buildBackend-r27.log",
+      "status": "UNTRACKED",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/buildFrontend-fg.log",
+      "status": "UNTRACKED",
+      "bytes": 5298,
+      "sha256": "5ddeefa354fb4f693f079f6bc26a7da0313c64f98e5c60e31ec1ecca15195818",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-build-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/buildFrontend-r27.log",
+      "status": "UNTRACKED",
+      "bytes": 4986,
+      "sha256": "4d0f99da6c364acee30bc94306a2f4f99cd7abe864378d77dc3e9b679c39a179",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/buildOrchestrator-fg.log",
+      "status": "UNTRACKED",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-build-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/buildOrchestrator-r27.log",
+      "status": "UNTRACKED",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/crash-decision-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 1955,
+      "sha256": "8071dcf646f4113852ceeed4dafb13032d19997495865c06fdb052f024377678",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/temporal-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/delivery-guards-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 23411,
+      "sha256": "c3bb8aa9b6880368e18180a3574e38f1d60ff408d0876e83ea4920868cde4441",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/test-delivery-guards.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/delivery-guards-results.json",
+      "status": "UNTRACKED",
+      "bytes": 3335,
+      "sha256": "aee0cc5f9ad7735d6d7cf6113993ba8cafd167e68f71cf615691bd5f9975a525",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/fg-final-verification.json",
+          "diagnostics/recovery/test-delivery-guards.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/derived-crash-child.cjs",
+      "status": "UNTRACKED",
+      "bytes": 2783,
+      "sha256": "ca1352e1e230dbef530b729c3095e490991bc312243c053b9c474c9aaa3f5d3a",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/derived-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/derived-fixture-support.cjs",
+      "status": "UNTRACKED",
+      "bytes": 6442,
+      "sha256": "9bc94fa1eb2807569d26150768a0be0aba49e7cadbdd21ed54d8d98720e06f22",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/derived-crash-child.cjs",
+          "diagnostics/recovery/derived-recovery-fixture.cjs",
+          "diagnostics/recovery/fg-fixture-support.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/derived-recovery-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 42555,
+      "sha256": "a578140ebf7afe52ecc103bec60d24d503c5fdbe0e29e0c617fe467e1fd7c9cb",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/test-temporal-recovery.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/derived-recovery-results.json",
+      "status": "UNTRACKED",
+      "bytes": 7917,
+      "sha256": "df6c7d662c25c25b5fd13680c3433cd3c8741be78eaf386918b137284e2d8597",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 8,
+        "examples": [
+          "diagnostics/recovery/archive/matrix-before-fg.json",
+          "diagnostics/recovery/archive/matrix-before-r04-r14-20261116.json",
+          "diagnostics/recovery/derived-recovery-fixture.cjs",
+          "diagnostics/recovery/fg-final-verification.json",
+          "diagnostics/recovery/matrix-coverage-review.json",
+          "docs/v1.7.5-derived-actions-r27.md",
+          "docs/v1.7.5-fg-operational-report.md",
+          "docs/v1.7.5-final-fg-handoff.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-build-results.json",
+      "status": "UNTRACKED",
+      "bytes": 726,
+      "sha256": "7f24be97a3eaa6e7207a8644fc2f26cfdd4cc4d2042dfa80806f18289425d079",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-final-verification.json",
+      "status": "UNTRACKED",
+      "bytes": 3107,
+      "sha256": "257c73bd564846b8c17eeb8ddbecf545ccb9874a084b2740e7acc448b6d0b9a2",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "docs/v1.7.5-fg-operational-report.md",
+          "docs/v1.7.5-final-fg-handoff.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-fixture-support.cjs",
+      "status": "UNTRACKED",
+      "bytes": 7341,
+      "sha256": "1cd548fac1e9323485974be53a4c2fab81fcd0e3036bdde97b05e011984f9928",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/fg-recovery-fixture.cjs",
+          "diagnostics/recovery/fg-worker-child.cjs",
+          "diagnostics/recovery/handoff-recovery-fixture.cjs",
+          "diagnostics/recovery/linux-candidate-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-manifest-crash-child.cjs",
+      "status": "UNTRACKED",
+      "bytes": 2534,
+      "sha256": "c9ffa9a42b09480d7e8585992fd504598a45008a8b8fd0ec2c1f06fd3426cf7c",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-recovery-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 71391,
+      "sha256": "d4c97f090a3cb18d9921e27990482ee0d7a4cc6cbb1539deb0eef22ce0c1124a",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/test-temporal-recovery.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-recovery-results.json",
+      "status": "UNTRACKED",
+      "bytes": 9110,
+      "sha256": "783248e733e4c9f4d4025dea94599865696c4d961cc004308b4ee900e8f6b6e1",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 6,
+        "examples": [
+          "diagnostics/recovery/archive/matrix-before-r04-r14-20261116.json",
+          "diagnostics/recovery/fg-final-verification.json",
+          "diagnostics/recovery/fg-recovery-fixture.cjs",
+          "diagnostics/recovery/matrix-coverage-review.json",
+          "docs/v1.7.5-fg-operational-report.md",
+          "docs/v1.7.5-final-fg-handoff.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-review-candidate-20261116.json",
+      "status": "UNTRACKED",
+      "bytes": 216271,
+      "sha256": "26fd5710f68b1e8269b2a3368b3c6b608519c71d24fbde5b32cbaae4cc49f782",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/archive/fg-final-verification-before-r04-r14-20261116.json",
+          "diagnostics/recovery/fg-final-verification.json",
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-stalled-child.cjs",
+      "status": "UNTRACKED",
+      "bytes": 1486,
+      "sha256": "89317ecafd6aa20aabb156f7c0b2a5754c4b55c06938b61b03469db235cc12bd",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fg-worker-child.cjs",
+      "status": "UNTRACKED",
+      "bytes": 2580,
+      "sha256": "7e234cf507c8061af851ef109a220f042ab20eb1ee539477c93c261dbdf3168d",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/final-fg-review-candidate-20261116.json",
+      "status": "UNTRACKED",
+      "bytes": 219910,
+      "sha256": "25ab72fc598a52bd4bf6a85b36c0ed0dd1a7999f5ddf2534bb5f71d2dd3c4358",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-final-verification.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fixture-workflows.ts",
+      "status": "UNTRACKED",
+      "bytes": 2422,
+      "sha256": "c4db8e7fa4672b2b120951294e797f942a6658dbb33b011e7b984a1f33d3a734",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/derived-recovery-fixture.cjs",
+          "diagnostics/recovery/fg-recovery-fixture.cjs",
+          "diagnostics/recovery/handoff-recovery-fixture.cjs",
+          "diagnostics/recovery/temporal-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/fixtures/v106-before-completion.workflow.ts",
+      "status": "UNTRACKED",
+      "bytes": 2603,
+      "sha256": "353fbab80061cff8411aafd2a7b53fe652e9490dc7dd0e2df2ad4468399f1fea",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/foundation-results.json",
+      "status": "UNTRACKED",
+      "bytes": 5976,
+      "sha256": "96789e500a567d033917b950f8d16bcf90454e2442b93fa183de1f3018233d19",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-status-before-boundary-closure.md",
+          "diagnostics/recovery/test-foundation.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/generate-local-client.mjs",
+      "status": "UNTRACKED",
+      "bytes": 1570,
+      "sha256": "0a7141f8b6d392cc314023bd9c840e3810c3dc847e4799d1330ddcdecb2c446a",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/handoff-build-results.json",
+      "status": "UNTRACKED",
+      "bytes": 1645,
+      "sha256": "1038f66af0035b328688e25a4955573903b1665d042f758ca1c25ac603e15ac0",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/fg-final-verification.json",
+          "docs/v1.7.5-final-fg-handoff.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/handoff-crash-child.cjs",
+      "status": "UNTRACKED",
+      "bytes": 1341,
+      "sha256": "ab292b3c538c3334382c27bdbe94b256f0364cb992246c525748d3454c3d5ad7",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/handoff-recovery-fixture.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/handoff-recovery-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 22000,
+      "sha256": "41f30e09a76e70f69c47ba70dc8e5258bbb47e7938692f281eee34e7bfce8b76",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/test-temporal-recovery.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/handoff-recovery-results.json",
+      "status": "UNTRACKED",
+      "bytes": 1885,
+      "sha256": "f6d5a8d7429d33247956fd8a567737b99e3727eed2974bbcc0db56f0ea10528d",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/fg-final-verification.json",
+          "diagnostics/recovery/handoff-recovery-fixture.cjs",
+          "diagnostics/recovery/matrix-coverage-review.json",
+          "docs/v1.7.5-final-fg-handoff.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/handoff-safety-audit.json",
+      "status": "UNTRACKED",
+      "bytes": 1691,
+      "sha256": "ea068d238e44cbc34bb48c50ced8948a1259ea7d14c143b4fe47e51f095d36d9",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/fg-final-verification.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/implementation-progress.md",
+      "status": "UNTRACKED",
+      "bytes": 1942,
+      "sha256": "f6be3dd8e83f1493352d90a245a691a24ace14a4fd5fc69afee1d798bfaa8d72",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/jest-dom-environment.cjs",
+      "status": "UNTRACKED",
+      "bytes": 747,
+      "sha256": "c08a790ef0340c781c63efa69c5044a982dd770cd77a64a8e73c6c60634d3362",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "apps/frontend/jest.recovery.config.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/linux-candidate-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 12129,
+      "sha256": "af568ea0d7160403230ab1db9713c0299c131dc004df1adbef7178f4d5b93e52",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/test-temporal-recovery.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/linux-candidate-image.json",
+      "status": "UNTRACKED",
+      "bytes": 729,
+      "sha256": "6e21a84d8e858c5ca8c99a8164dfe0058a278a9c3bb7a1770487965d5cf4aa2b",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 6,
+        "examples": [
+          "diagnostics/recovery/build-linux-candidate.mjs",
+          "diagnostics/recovery/fg-final-verification.json",
+          "diagnostics/recovery/linux-candidate-fixture.cjs",
+          "diagnostics/recovery/matrix-coverage-review.json",
+          "docs/v1.7.5-final-fg-handoff.md",
+          "docs/v1.7.5-r28-candidate-homologation-plan.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/linux-candidate-results.json",
+      "status": "UNTRACKED",
+      "bytes": 5386,
+      "sha256": "72d7226b32322d71b9770d1d8689641b77b7e1f828fa3e9a2a1f010e88593ebb",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 6,
+        "examples": [
+          "diagnostics/recovery/fg-final-verification.json",
+          "diagnostics/recovery/linux-candidate-fixture.cjs",
+          "diagnostics/recovery/matrix-coverage-review.json",
+          "diagnostics/recovery/test-r28-infrastructure.py",
+          "docs/v1.7.5-final-fg-handoff.md",
+          "docs/v1.7.5-r28-candidate-homologation-plan.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/mastra-local-init.cjs",
+      "status": "UNTRACKED",
+      "bytes": 690,
+      "sha256": "5d8c5903beb23d51047721c3e62c93093e009f11986e0c700b3000adb3439fa3",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/test-prisma-ownership.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/matrix-coverage-review.json",
+      "status": "UNTRACKED",
+      "bytes": 23132,
+      "sha256": "b15e2abd8d957bb26729d8a3158907357e0704604d1e4d6c0e2d2a3d3f9be52f",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 9,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-progress-before-fg.md",
+          "diagnostics/recovery/archive/implementation-status-before-r27.md",
+          "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+          "diagnostics/recovery/archive/v1.7.5-implementation-status-before-fg.md",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "diagnostics/recovery/fg-final-verification.json",
+          "docs/v1.7.5-derived-actions-r27.md",
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/prisma-ownership.mjs",
+      "status": "UNTRACKED",
+      "bytes": 5047,
+      "sha256": "9a71af6dad91edc7d1c3b5e89458198ac7041ba0639a3d020b0129366646823d",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 7,
+        "examples": [
+          "package.json",
+          "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+          "diagnostics/recovery/archive/prisma-mastra-before-boundary-closure.md",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "diagnostics/recovery/test-prisma-ownership.mjs",
+          "docs/v1.7.5-derived-actions-r27.md",
+          "docs/v1.7.5-prisma-mastra-ownership.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-compact-collector-ast.json",
+      "status": "UNTRACKED",
+      "bytes": 191,
+      "sha256": "66eee38662bcc2c574635b25fb4cce4b8df87cd93a49b27e13fd168dfccb2658",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-compact-linux-baseline.log",
+      "status": "UNTRACKED",
+      "bytes": 2311,
+      "sha256": "9a32e0e031cfff8e6921e8d39b4f4529aa5a08ecb0c91ed7ab393d57e565358e",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-compact-linux-compact.log",
+      "status": "UNTRACKED",
+      "bytes": 1369,
+      "sha256": "9dc080d39621ef2f168d1039402285bf2e5c3334d0e14bf2dbf0af642be13036",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-compact-linux-runtime.log",
+      "status": "UNTRACKED",
+      "bytes": 78,
+      "sha256": "9cdc1a97b3f22e68cb2001e41e3a85b0494efd83a19a97dae63fd5504711355a",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-compact-linux-sdk.log",
+      "status": "UNTRACKED",
+      "bytes": 136,
+      "sha256": "ed8205edaf42e8096b0da59422808c7cee6400edeb842eb484b6fad8b64d90ba",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-compact-linux-smoke.ndjson",
+      "status": "UNTRACKED",
+      "bytes": 12822,
+      "sha256": "39cb404d1e6361ffe0c192ca05943c06777132825c6b56f81cc600820811fb65",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json",
+          "docs/v1.7.5-r28-compact-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-compact-results.json",
+      "status": "UNTRACKED",
+      "bytes": 4823,
+      "sha256": "938c56dc440e841245fa7ba5540440bbff049fb9e2612d3354c542b385e4e70c",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-r28-compact-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-infrastructure-readonly-results.json",
+      "status": "UNTRACKED",
+      "bytes": 3503,
+      "sha256": "e54ef10a6c4d8e4ce0477e2b88a68a7b38df5b1e57036e4a8657c08f57b57eb8",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "docs/v1.7.5-r28-compact-audit.md",
+          "docs/v1.7.5-r28-infrastructure-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-linux-lab-local.json",
+      "status": "UNTRACKED",
+      "bytes": 720,
+      "sha256": "6e872949d009be871967dfa8d49e5f2a02330487ca656217d45ef544a129bad9",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/r28-operational-plan-review.json",
+      "status": "UNTRACKED",
+      "bytes": 2503,
+      "sha256": "7851ce49bdaf8f1553bbef3b3467f1984b27babbb4ed3c034eac181741d98d1c",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/read-only-schema-audit.sql",
+      "status": "UNTRACKED",
+      "bytes": 608,
+      "sha256": "ea21355d2a162951b5b5afe77e0aaa7c0b0089a6dc5dd433169b7e50f1d5ccae",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-status-before-boundary-closure.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/run-check.cjs",
+      "status": "UNTRACKED",
+      "bytes": 3806,
+      "sha256": "ae9cdfbb17c767f6e73a328e74eccf95a5df6afbbbc5559a545fec629d786e63",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/fg-build-results.json",
+          "diagnostics/recovery/handoff-build-results.json",
+          "docs/v1.7.5-derived-actions-r27.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/signed-policy-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 4092,
+      "sha256": "7521a9d63e1cbe0c092757d6f67b313b5d009d09951c5ed435ca39c2339bd99a",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 5,
+        "examples": [
+          "diagnostics/recovery/delivery-guards-fixture.cjs",
+          "diagnostics/recovery/derived-recovery-fixture.cjs",
+          "diagnostics/recovery/fg-recovery-fixture.cjs",
+          "diagnostics/recovery/temporal-recovery-fixture.cjs",
+          "docs/v1.7.5-final-fg-handoff.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/temporal-recovery-fixture.cjs",
+      "status": "UNTRACKED",
+      "bytes": 46028,
+      "sha256": "22c4eeb22237c85071e97ab9bc71cc5d314783d824422bde96dc9c86864d7d79",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/test-temporal-recovery.mjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/temporal-recovery-results.json",
+      "status": "UNTRACKED",
+      "bytes": 2735,
+      "sha256": "5ac46ac09d0ee8df8c60c330df39b3f16d6b3df57b4ab77aa0d5ce3931eba645",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 9,
+        "examples": [
+          "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+          "diagnostics/recovery/archive/matrix-before-fg.json",
+          "diagnostics/recovery/archive/matrix-before-r04-r14-20261116.json",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "diagnostics/recovery/fg-final-verification.json",
+          "diagnostics/recovery/matrix-coverage-review.json",
+          "diagnostics/recovery/temporal-recovery-fixture.cjs",
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-baseline-diagnostics.mjs",
+      "status": "UNTRACKED",
+      "bytes": 14162,
+      "sha256": "db4d657f91477aa327e75f8a88c069a0ccbdf97d5c763ae4a407e1c3761ac6d6",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/v1.7.5-baseline-production-differences.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-baseline.mjs",
+      "status": "UNTRACKED",
+      "bytes": 28425,
+      "sha256": "746178280d3678759a489b4d4d9783a7b0b94b4495ff04ecc28bb0c6f8abbd6d",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "docs/v1.7.5-baseline-production-differences.md",
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-delivery-guards.mjs",
+      "status": "UNTRACKED",
+      "bytes": 3494,
+      "sha256": "ade8c5ccf33c4c2d7a8920b65594e04a15cc7604e16f08b3d0c256d3a0a9cd13",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "diagnostics/recovery/delivery-guards-fixture.cjs",
+          "docs/v1.7.5-derived-actions-r27.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-foundation.mjs",
+      "status": "UNTRACKED",
+      "bytes": 11408,
+      "sha256": "b64b404669c8d1cc7ee3c4055e874f19efdaeccf690c5138b1d6b8ff53ed8b4d",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "package.json",
+          "diagnostics/recovery/archive/implementation-status-before-boundary-closure.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-prisma-ownership.mjs",
+      "status": "UNTRACKED",
+      "bytes": 26692,
+      "sha256": "845ea82abeb614375953486f139d7966ff0815601b016ee827619ab9632dfe0b",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 6,
+        "examples": [
+          "package.json",
+          "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+          "diagnostics/recovery/archive/prisma-mastra-before-boundary-closure.md",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "docs/v1.7.5-derived-actions-r27.md",
+          "docs/v1.7.5-prisma-mastra-ownership.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-r28-compact.py",
+      "status": "UNTRACKED",
+      "bytes": 14932,
+      "sha256": "dad71740aeba1925e470c6560969d9e1391db16e34b42a143d0d3eca2aee9b09",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-r28-infrastructure.py",
+      "status": "UNTRACKED",
+      "bytes": 13561,
+      "sha256": "8885a76217c27b4faba4684fea63ccc1d45f8c6b25dac619404dae678e16d11e",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json",
+          "diagnostics/recovery/r28-infrastructure-readonly-results.json",
+          "docs/v1.7.5-r28-infrastructure-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-r28-plan-snippets.cjs",
+      "status": "UNTRACKED",
+      "bytes": 3937,
+      "sha256": "cae7d93199fc7085e09a8247055c88f83102cd76bec07c29352af8504cf5a225",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "diagnostics/recovery/r28-operational-plan-review.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-r28-sdk-probe.cjs",
+      "status": "UNTRACKED",
+      "bytes": 3839,
+      "sha256": "a256c01cdca2d415b84c2de513095db446681f457128b00c89899d9906b07be4",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json",
+          "diagnostics/recovery/r28-infrastructure-readonly-results.json",
+          "docs/v1.7.5-r28-infrastructure-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-review-artifact.cjs",
+      "status": "UNTRACKED",
+      "bytes": 922,
+      "sha256": "1e8737021e41bb3d0f597d7fe429872e31694adc65398077b2be8b8df4a8ea78",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/archive/matrix-before-r04-r14-20261116.json",
+          "diagnostics/recovery/matrix-coverage-review.json"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-temporal-recovery.mjs",
+      "status": "UNTRACKED",
+      "bytes": 5033,
+      "sha256": "84dc25210737d12b0cfa95b08e05167002ac226537ec1a5990bfd194b1e058b5",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "docs/v1.7.5-derived-actions-r27.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/test-worker-containment.mjs",
+      "status": "UNTRACKED",
+      "bytes": 7531,
+      "sha256": "96e8fef559dd3fc63cc8c179e0f309c12cb3f406600f852564c2217138803cb3",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/recovery/worker-containment-results.json",
+      "status": "UNTRACKED",
+      "bytes": 959,
+      "sha256": "709dad95f74e87847f411e4d79e7ecfb1ccd8d98b8293fc1dda70ad0155cca76",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/archive/matrix-before-r04-r14-20261116.json",
+          "diagnostics/recovery/matrix-coverage-review.json",
+          "diagnostics/recovery/test-worker-containment.mjs",
+          "docs/v1.7.5-fg-operational-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/temporal-startup/Dockerfile",
+      "status": "UNTRACKED",
+      "bytes": 332,
+      "sha256": "273ca39520e772464319b36def897d2915d02a567ff188dee494a53a01f9914f",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/temporal-startup/latest-results.json",
+      "status": "UNTRACKED",
+      "bytes": 1871,
+      "sha256": "f4da65b1bc6ff157bb820eedbab955d13e5177372a7222e17d03fe01a2d38572",
+      "category": "DIAGNOSTIC_EVIDENCE_OR_GENERATED",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/temporal-startup/verify-results.mjs",
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/temporal-startup/prepare-linux-dependencies.mjs",
+      "status": "UNTRACKED",
+      "bytes": 4551,
+      "sha256": "2d123699b885ee15f5e18a5cac7b7d27e5199a4a59826bb594576f7889c96377",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/temporal-startup/prepare-linux-overlay.mjs",
+      "status": "UNTRACKED",
+      "bytes": 2800,
+      "sha256": "61ea36f8373d604048817b3c9b233be65ba9acd8075a3028c8f4a384bfe19024",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/temporal-startup/run-local.mjs",
+      "status": "UNTRACKED",
+      "bytes": 12571,
+      "sha256": "4c7b7b8bce93100fe601deaa0c5616c23e8caf428e6f387fdb79f2d94d95489e",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/temporal-startup/trace-startup.cjs",
+      "status": "UNTRACKED",
+      "bytes": 4473,
+      "sha256": "b7569846fdf53bc29a471d8b7af5f895d3bc1851a22a63733155e413b29b8735",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/temporal-startup/run-local.mjs",
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "diagnostics/temporal-startup/verify-results.mjs",
+      "status": "UNTRACKED",
+      "bytes": 3382,
+      "sha256": "0fb3daeeb1e17eaed3ee941025e01bb5d41a4bc4962a5c91fb79e4422a5c3e9b",
+      "category": "DIAGNOSTIC_CODE",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docker-compose.yaml",
+      "status": "MODIFIED",
+      "bytes": 6242,
+      "sha256": "2fc7efc0c64366293a855178c4816d9346a245c4b7319317e05dcbcae3ab2348",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "docker/recovery/Dockerfile.candidate",
+      "status": "UNTRACKED",
+      "bytes": 1572,
+      "sha256": "d924bc5e04ab70eb3e10301d4aeab96ef2178a3993d33cfe9d44c7f76237d2ad",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "docs/instagram-regression-v1.7.3-v1.7.4.md",
+      "status": "UNTRACKED",
+      "bytes": 17110,
+      "sha256": "ab6e5ba688aacdf57f5643c6d1372b1c95ecd952286327f3272ba6b7bf89eb7f",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/temporal-orchestrator-native-startup-v1.7.4.md",
+      "status": "UNTRACKED",
+      "bytes": 15017,
+      "sha256": "926ff542005712793d9c8f6f965e42f8a76b995a1c1b73ff552590c3502fb3e7",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/temporal-worker-v1.7.4-diagnosis.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/temporal-worker-v1.7.4-diagnosis.md",
+      "status": "UNTRACKED",
+      "bytes": 29670,
+      "sha256": "043f6621750b8ca33d4367571258c367ad0c3e3c87e8ead91c95954ca38dd11b",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 1,
+        "examples": [
+          "docs/temporal-orchestrator-native-startup-v1.7.4.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-baseline-production-differences.md",
+      "status": "UNTRACKED",
+      "bytes": 11790,
+      "sha256": "2b3b24021582fc890635c17586211d83873dc8206c02352313b69fb981fc9b27",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/archive/local-recovery-report-before-r27.md",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-baseline-proposal.md",
+      "status": "UNTRACKED",
+      "bytes": 14231,
+      "sha256": "c6377102af5f6640ec8f87b00b35076b74b6205d06a9c10b86d3246f22702112",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-derived-actions-r27.md",
+      "status": "UNTRACKED",
+      "bytes": 13901,
+      "sha256": "176347a763b59254096aa0b2f1c2a54bf5c7936a3dc5f7fce75b9c950e8d2239",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-progress-before-fg.md",
+          "diagnostics/recovery/archive/v1.7.5-implementation-status-before-fg.md",
+          "diagnostics/recovery/archive/v1.7.5-local-recovery-report-before-fg.md",
+          "docs/v1.7.5-local-recovery-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-fg-operational-report.md",
+      "status": "UNTRACKED",
+      "bytes": 22557,
+      "sha256": "88de7a35f2549bdbe593a5f972401f026397d72c50762e1d1d9c0b153c9b0d41",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 4,
+        "examples": [
+          "diagnostics/recovery/implementation-progress.md",
+          "docs/v1.7.5-final-fg-handoff.md",
+          "docs/v1.7.5-implementation-status.md",
+          "docs/v1.7.5-local-recovery-report.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-final-fg-handoff.md",
+      "status": "UNTRACKED",
+      "bytes": 20109,
+      "sha256": "fb1dd65840474fe49782607471b9ccc0f4fd2e15217d3432df064e3258fe9687",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "docs/v1.7.5-fg-operational-report.md",
+          "docs/v1.7.5-implementation-status.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-implementation-status.md",
+      "status": "UNTRACKED",
+      "bytes": 1877,
+      "sha256": "bd9966b1a62a2414624baf9d4c1a6e41bcd0f7a8cf6ccfcaffab32c82627176b",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-local-recovery-report.md",
+      "status": "UNTRACKED",
+      "bytes": 1468,
+      "sha256": "be5e93eb09b8cbbf5b43f1d95851f523a33531ccda647fe06c61484ba56560e1",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 5,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-progress-before-fg.md",
+          "diagnostics/recovery/archive/implementation-status-before-r27.md",
+          "diagnostics/recovery/archive/v1.7.5-implementation-status-before-fg.md",
+          "docs/v1.7.5-baseline-production-differences.md",
+          "docs/v1.7.5-prisma-mastra-ownership.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-prisma-mastra-ownership.md",
+      "status": "UNTRACKED",
+      "bytes": 17569,
+      "sha256": "75d469855b8da2077f7f0e677b3ef0ea07ef667424c2885fa35e2ce3bdf1476c",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/archive/implementation-status-before-boundary-closure.md",
+          "docs/v1.7.5-baseline-proposal.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-r28-candidate-homologation-plan.md",
+      "status": "UNTRACKED",
+      "bytes": 9450,
+      "sha256": "782951cabf1b02b5b1d3f38209e144f8e098344cbcec4da8790e0c1890b89276",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/r28-infrastructure-readonly-results.json",
+          "docs/v1.7.5-r28-infrastructure-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-r28-compact-audit.md",
+      "status": "UNTRACKED",
+      "bytes": 10299,
+      "sha256": "f57437bc3a4f953decc3d43d9ccd7b5e7967c758602c0cf0c0a66e3b3d0c94cf",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 3,
+        "examples": [
+          "diagnostics/recovery/r28-compact-results.json",
+          "docs/v1.7.5-r28-candidate-homologation-plan.md",
+          "docs/v1.7.5-r28-infrastructure-audit.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-r28-infrastructure-audit.md",
+      "status": "UNTRACKED",
+      "bytes": 21839,
+      "sha256": "e3bd5d8f9960adc1848e731530233d9b9c9e654a819036c600e4222c7bdadcdc",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/r28-infrastructure-readonly-results.json",
+          "docs/v1.7.5-r28-candidate-homologation-plan.md"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-r28-operational-containment-plan.md",
+      "status": "UNTRACKED",
+      "bytes": 30982,
+      "sha256": "b53886204177289caf48b464f70c3b198b6d851189be0370878e58d72cda8a3f",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 2,
+        "examples": [
+          "diagnostics/recovery/r28-operational-plan-review.json",
+          "diagnostics/recovery/test-r28-plan-snippets.cjs"
+        ],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "docs/v1.7.5-safe-recovery-plan.md",
+      "status": "UNTRACKED",
+      "bytes": 30454,
+      "sha256": "f2c07430de3ab5656e95a7122c4b998b7f7e7b4ebd1e4d517cf0dbf4060d8ba9",
+      "category": "DOCUMENTATION",
+      "snapshotEligible": true,
+      "securityFindings": [],
+      "references": {
+        "count": 0,
+        "examples": [],
+        "method": "Exact path or long basename; dynamic references may not be found"
+      }
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/automation-recovery.service.ts",
+      "status": "UNTRACKED",
+      "bytes": 39638,
+      "sha256": "0afea28fb80d4ea4ee824efe7da3f41034d3b118277e9f22c7ba3adedfe78583",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/derived-effect-result.spec.ts",
+      "status": "UNTRACKED",
+      "bytes": 9070,
+      "sha256": "60d649659aa620dd00b57da8377a19b75e35c4307a0d7a3f18fe63007f07332e",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/derived-effect-result.ts",
+      "status": "UNTRACKED",
+      "bytes": 4638,
+      "sha256": "0744c747bcda8309c8681f012554d811d91c434ac0fbc049e2bfea0338affd5b",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/derived-publication.service.ts",
+      "status": "UNTRACKED",
+      "bytes": 27377,
+      "sha256": "2526ae3c1316c934d9c6c6d9fe05a17bb6ad2e23b128d27b41f6facb8aa62889",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/instagram-comment-time-reader.ts",
+      "status": "UNTRACKED",
+      "bytes": 1621,
+      "sha256": "7219111aa3c0581b1335d750f00094a8ce575d983a8e1b9261a3c6d43b3a1371",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/publication-completion.service.ts",
+      "status": "UNTRACKED",
+      "bytes": 13453,
+      "sha256": "4269ce73cf0e5a347bb6a84bc3c734a659aaecf24b196da7de933ba6aedb86f2",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/publication-mutation-guard.ts",
+      "status": "UNTRACKED",
+      "bytes": 2356,
+      "sha256": "6aff421e0e1604d66a35689a236836232ef73c1bcf8815bf20a8ab80b85397ff",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/publication-reconciliation.service.ts",
+      "status": "UNTRACKED",
+      "bytes": 7364,
+      "sha256": "1cdbf4a8f6b8ffe1d74b3409e275d634b02c253bd0fccd312060b419b80a9aec",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/publication-scheduling.service.ts",
+      "status": "UNTRACKED",
+      "bytes": 25732,
+      "sha256": "dbcc4407fd2b582599c96a0a6612cd0eb4f069d0a7b3c05e743cecb8b1b03942",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/recovery-application.service.ts",
+      "status": "UNTRACKED",
+      "bytes": 23382,
+      "sha256": "126ec4fffbed9185a417a6c71340ddffbd72f9631f8937ff383d78b07418990a",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/recovery-approval.ts",
+      "status": "UNTRACKED",
+      "bytes": 7656,
+      "sha256": "db472b6d02972b886a5e9b2cca4622eea4ef6ef691d5645246e0c5fa340df822",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/recovery-inventory-source.ts",
+      "status": "UNTRACKED",
+      "bytes": 10933,
+      "sha256": "404a8a9709a3ea2061228a3cce5ebd4ea8e64509ca811dc945cacc8bd8c2f12f",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/recovery-inventory.ts",
+      "status": "UNTRACKED",
+      "bytes": 17756,
+      "sha256": "8500f699480c73b99326082f3d31af6b26d7971738ec2901db2f8c96dc7a1ac7",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/recovery-manifest.service.ts",
+      "status": "UNTRACKED",
+      "bytes": 8206,
+      "sha256": "7b262f025af3d21e7e569b1acb7151198a2ba1ecf49a0d4f39a58a51211362e1",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/recovery-policy.ts",
+      "status": "UNTRACKED",
+      "bytes": 2312,
+      "sha256": "f17047657682607d5ecf6c20185f15ebb6a4e69d18ffb85523701f43ab869b89",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/automation-recovery/worker-consumption.ts",
+      "status": "UNTRACKED",
+      "bytes": 5705,
+      "sha256": "fb7afc40f7af07ff08057f1a0f007230a4b9d979ecdbd9633aef6eaf3db60933",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/00000000000000_v1_7_4_baseline/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 52377,
+      "sha256": "700a0e4016d594ce06b013b0f602cdc074526db4d5af2d6a83dab928fd4ad702",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/manifest.json",
+      "status": "UNTRACKED",
+      "bytes": 4585,
+      "sha256": "0ba1afa980b12425c82f9b70d759ef300f9e056280ab22c649a56dc26fc0231a",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/expected-owned-metadata.json",
+      "status": "UNTRACKED",
+      "bytes": 263628,
+      "sha256": "d12c243d73ef2d7f55617efd661a422364acda1bdbe8bb42ec0de4db81417336",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/local-results.json",
+      "status": "UNTRACKED",
+      "bytes": 3651,
+      "sha256": "560b9926f5f2d1f4eef46971bb8cc2a033147f2291295d71cfd5223e9a715c37",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/manifest.json",
+      "status": "UNTRACKED",
+      "bytes": 3246,
+      "sha256": "78763e9afb19439017fb91122cee8ef7b37c8694a630c06701ac2123a8df857a",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/00000000000000_v1_7_4_prisma_owned/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 46739,
+      "sha256": "8d6cd1a1c712401b67c9b8021a49a6a5b76092d7d01d90f864550e3f63bc9f4f",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261114000000_safe_recovery_foundation/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 4274,
+      "sha256": "c0f27b0e008e1326ed244c665190d9fabd5adabd6148ebc209d7baedf94d3edd",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261115000000_recovery_effect_attempt/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1025,
+      "sha256": "2c862d666003b065bf31b71c6792f6f4f5438a6d5db21b5605a6b08246e12c2a",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261115010000_schedule_intents_and_evidence/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1308,
+      "sha256": "50fad31fed985f3927564a3f5cec002a1fb10012c6bb6c8a41f36d3abc5934d3",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261115020000_derived_action_contract/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1139,
+      "sha256": "c4c39b35bd99e3b29169f5b26ee6edb2b2cc2a3a70d54258551d7e3e9ff44459",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261116000000_recovery_manifest/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1545,
+      "sha256": "6bed22bc3bbff51eaed3c937815a7357eddb02fd2e395beb6c619984212c9352",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/20261117000000_recovery_authorization/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1133,
+      "sha256": "fe184f730f76a30bfc042f37c0d5f34873bc0c2c82219434ff869f625198e813",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/migrations/migration_lock.toml",
+      "status": "UNTRACKED",
+      "bytes": 24,
+      "sha256": "1db17a8d051aa136110736752c5e1f8b7ed92b6ea8e803112fbbe2497047c210",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/ownership-boundary-check.sql",
+      "status": "UNTRACKED",
+      "bytes": 4109,
+      "sha256": "c49f4f1e19fa0d4ae2e6c4c79891efdbe657449218d97a43ccd40e714a39f782",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/ownership-policy.json",
+      "status": "UNTRACKED",
+      "bytes": 5532,
+      "sha256": "dbbef113556622bae2d4643244d6ecce3417635f6897f491e27c7b211a99bfba",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/production-boundary-result.json",
+      "status": "UNTRACKED",
+      "bytes": 696,
+      "sha256": "eb44759a95c728ca3f173baed213479b1d786d3e2696030df23cf4b6473514b8",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/schema.baseline.prisma",
+      "status": "UNTRACKED",
+      "bytes": 30635,
+      "sha256": "da064e82b6255c2f862487ddb813e0fc9404a6ded9466c255e9ab555ef1a89e0",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/schema.current.prisma",
+      "status": "UNTRACKED",
+      "bytes": 37838,
+      "sha256": "8b57539a61a199de236b73ee7d0f00e48521b6bb1dca2b9158c73463abccb976",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/production-evidence.json",
+      "status": "UNTRACKED",
+      "bytes": 899,
+      "sha256": "34e6b5ea8ee5c50a6624d717fe0ba481fc4d837fca60d221b7ce4b8b86c02203",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/schema.reconciled.prisma",
+      "status": "UNTRACKED",
+      "bytes": 35495,
+      "sha256": "d5ebe880500fe946e457de6db1bfb33bd523bc8b09c188f1b16e936e8d352e71",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/baseline-proposal/schema.v1.7.4.prisma",
+      "status": "UNTRACKED",
+      "bytes": 35495,
+      "sha256": "91f5cbc501915132f9fdd1f914b7df0835c6df9b27cc94dfee18bbae5d44bd44",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/database.module.ts",
+      "status": "MODIFIED",
+      "bytes": 8519,
+      "sha256": "1f4b2f19ef461902191bfcbfd6e6effa0de680e1fcf6443728379d535e4aadd9",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/instagram-comment-automations/instagram-comment-automation.repository.spec.ts",
+      "status": "MODIFIED",
+      "bytes": 3258,
+      "sha256": "3c6f6ea2e2d749ff141de547ae22d808d4806e0daa4d9474037d7d7ea7b8131d",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/instagram-comment-automations/instagram-comment-automation.repository.ts",
+      "status": "MODIFIED",
+      "bytes": 7616,
+      "sha256": "630b6c95d9f74e459c09fd72e94c3fa1923f28b706bc06e3001d1ae054da4fd3",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/instagram-webhooks/instagram-webhook-events.repository.spec.ts",
+      "status": "MODIFIED",
+      "bytes": 3619,
+      "sha256": "0504def663fe264ae6b8bfdb631cb7f2c411fa598e03049d5042c5fa0164885d",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/instagram-webhooks/instagram-webhook-events.repository.ts",
+      "status": "MODIFIED",
+      "bytes": 1819,
+      "sha256": "2dabf95c069447319e54856317c87eef101ca6d8578513e3c05d2e0c34aee289",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/integrations/integration.service.ts",
+      "status": "MODIFIED",
+      "bytes": 18980,
+      "sha256": "9d0433202edd1dce86b86355ecd87d97feb11efcc9cd01a3c8f45742a73494a1",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/migrations/20261114000000_safe_recovery_foundation/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 4274,
+      "sha256": "c0f27b0e008e1326ed244c665190d9fabd5adabd6148ebc209d7baedf94d3edd",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/migrations/20261115000000_recovery_effect_attempt/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1025,
+      "sha256": "2c862d666003b065bf31b71c6792f6f4f5438a6d5db21b5605a6b08246e12c2a",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/migrations/20261115010000_schedule_intents_and_evidence/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1308,
+      "sha256": "50fad31fed985f3927564a3f5cec002a1fb10012c6bb6c8a41f36d3abc5934d3",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/migrations/20261115020000_derived_action_contract/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1139,
+      "sha256": "c4c39b35bd99e3b29169f5b26ee6edb2b2cc2a3a70d54258551d7e3e9ff44459",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/migrations/20261116000000_recovery_manifest/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1545,
+      "sha256": "6bed22bc3bbff51eaed3c937815a7357eddb02fd2e395beb6c619984212c9352",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/migrations/20261117000000_recovery_authorization/migration.sql",
+      "status": "UNTRACKED",
+      "bytes": 1133,
+      "sha256": "fe184f730f76a30bfc042f37c0d5f34873bc0c2c82219434ff869f625198e813",
+      "category": "MIGRATION_OR_BASELINE_PRESERVE",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/posts/posts.repository.ts",
+      "status": "MODIFIED",
+      "bytes": 22932,
+      "sha256": "95a6009fde6f2d4c338c6f617b03b997b633460188301ff9dfec8f23d06c4c07",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/posts/posts.service.ts",
+      "status": "MODIFIED",
+      "bytes": 28597,
+      "sha256": "11b3415773ccf900b4ed4cdb91eb7f1904c4dc44e4a71a0b87c4fdff5613af30",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/database/prisma/schema.prisma",
+      "status": "MODIFIED",
+      "bytes": 42698,
+      "sha256": "3bce20279af492347611317216eaf9187dd1c39882012a73097f24d2127772fc",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/instagram-comment-automation/instagram-comment-automation-dispatcher.service.spec.ts",
+      "status": "MODIFIED",
+      "bytes": 2379,
+      "sha256": "93b55af3beab5606187ef78924387ee1976c48feb859add0d32b6b637c8bde43",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/instagram-comment-automation/instagram-comment-automation-dispatcher.service.ts",
+      "status": "MODIFIED",
+      "bytes": 3279,
+      "sha256": "910a5edc152afb38c38cd61b9785d14dc4d2616c4cc64f0845342eec1506563e",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/instagram-comment-automation/instagram-comment-automation.service.spec.ts",
+      "status": "MODIFIED",
+      "bytes": 16815,
+      "sha256": "422dd3f359f54358ff5841cf6b5e9b8abb981610123be2489d93ec35ba79e9fd",
+      "category": "REGRESSION_TEST",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/instagram-comment-automation/instagram-comment-automation.service.ts",
+      "status": "MODIFIED",
+      "bytes": 11375,
+      "sha256": "b8b8e6605e8397b68000bddae9c10177a8927b7ebe22bd9417764fec480c44b0",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/integrations/social.abstract.ts",
+      "status": "MODIFIED",
+      "bytes": 4800,
+      "sha256": "d3288798eb4c15cb1719911894795cdb0e8a4ecf70393675dd1f1d70a3148abf",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/integrations/social/bluesky.provider.ts",
+      "status": "MODIFIED",
+      "bytes": 15915,
+      "sha256": "9d94600a572723dae05f7fc8d63273ef7ed0001bdbe369c784b7be2b1110cbc5",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/integrations/social/linkedin.page.provider.ts",
+      "status": "MODIFIED",
+      "bytes": 25907,
+      "sha256": "240d0bf7037a8174a1af4781d77a1ae84650513f527c6b364b36ef572407bf4f",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/integrations/social/linkedin.provider.ts",
+      "status": "MODIFIED",
+      "bytes": 22610,
+      "sha256": "c87b8b162556f0b25ae415a7c886b5fff911a687540d4d87cbd58dc5594c4fef",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/integrations/social/threads.provider.ts",
+      "status": "MODIFIED",
+      "bytes": 16599,
+      "sha256": "25989d4bd0f3c2d94296e12ecc13e1022b0f95e341f0175a718c626755867875",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/integrations/social/x.provider.ts",
+      "status": "MODIFIED",
+      "bytes": 23830,
+      "sha256": "91e9fb30d5a2b85189cbb67c0254f1cc81867bc460463710cd830964e3380ecd",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/integrations/youtube-publication.service.ts",
+      "status": "MODIFIED",
+      "bytes": 17331,
+      "sha256": "1046163749b92acf8f165e21ce53bdb899bdbed90ebc8f19f6793a27d44be1bf",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/temporal/temporal-tls.ts",
+      "status": "UNTRACKED",
+      "bytes": 907,
+      "sha256": "5e8081d11eac0d539cffdda2f47a61d6dfb77b14664e5a108b798ebcc2282140",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "libraries/nestjs-libraries/src/temporal/temporal.module.ts",
+      "status": "MODIFIED",
+      "bytes": 4813,
+      "sha256": "ef1302b5f2a0ef6bd6224f3a658b9c9b5e7aaf9e5af368721a5e1e624001eea2",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "package.json",
+      "status": "MODIFIED",
+      "bytes": 12151,
+      "sha256": "a8de0f4542cc88995b8502d70373360e7765fe97c3dba9b3812197a670f25a21",
+      "category": "APPLICATION_OR_BUILD_CONFIGURATION",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "recovery-release.json",
+      "status": "UNTRACKED",
+      "bytes": 923,
+      "sha256": "eaa4f72cdf54805258968574fc04e87bcfa4400ae0855eb817b21624458a214d",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/deny-shared-schema-push.cjs",
+      "status": "UNTRACKED",
+      "bytes": 273,
+      "sha256": "4a797a7bc9a52b353510fe496be11e34af267c972eda435ed50a0978506f8307",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/inventory-dry-run.cjs",
+      "status": "UNTRACKED",
+      "bytes": 3723,
+      "sha256": "259bef1af5c98213714e49120791da863b95aec158dba5db74e35ac79541456c",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/preflight.cjs",
+      "status": "UNTRACKED",
+      "bytes": 1071,
+      "sha256": "d77b0603082709b3eb9dde635bbfa601dccffb51b22b992ecb217a71122fdd06",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/r28-infrastructure-readonly.py",
+      "status": "UNTRACKED",
+      "bytes": 60336,
+      "sha256": "538b933f19b5dc2715609feed40c9065382982f7a282744eddb08b6bdd275923",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/r28-infrastructure-readonly.py.sha256",
+      "status": "UNTRACKED",
+      "bytes": 97,
+      "sha256": "4bbd43ff59f539f97edbd620e692fc8c2a069ea19bd1e4fbe2d8b08d5842b599",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/review-artifact.cjs",
+      "status": "UNTRACKED",
+      "bytes": 3555,
+      "sha256": "8bbd7963481ed2ba14dcf5b83d3eb662bce3b15adc3f38fadbd022eb461e52a7",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/runtime-artifact.cjs",
+      "status": "UNTRACKED",
+      "bytes": 1442,
+      "sha256": "47de0b597889d094adde18763d10ea15f600b16d235ededf27565624e255abbc",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/trendpostiz-orchestrator-observer.service.example",
+      "status": "UNTRACKED",
+      "bytes": 459,
+      "sha256": "1f866b03284ce85baff2a23f439216f07d7b41828bebe538164af2dae38845b1",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/trendpostiz-orchestrator-observer.timer.example",
+      "status": "UNTRACKED",
+      "bytes": 272,
+      "sha256": "2d8bc986c042f7b6c21d2156a41bfeee5147b28ab2b7071960522356ad03c185",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/verify-owned-chain.cjs",
+      "status": "UNTRACKED",
+      "bytes": 2438,
+      "sha256": "50dde6a89e5dfbcea223cdbcd439f2d42e22feb13e14f78bb78e95b88e78711d",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    },
+    {
+      "path": "scripts/recovery/watchdog-observe.cjs",
+      "status": "UNTRACKED",
+      "bytes": 1422,
+      "sha256": "a49b032a58a64bee87676ea81bc915da01df35d07fff320adabff9b8a8149278",
+      "category": "OPERATIONAL_EXPERIMENTAL",
+      "snapshotEligible": true,
+      "securityFindings": []
+    }
+  ]
+}

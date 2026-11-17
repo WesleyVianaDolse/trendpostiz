@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { AutomationRecoveryService } from '../automation-recovery/automation-recovery.service';
+import { RecoveryHold } from '../automation-recovery/recovery-policy';
 import { PlatformService } from '@gitroom/nestjs-libraries/database/prisma/platform/platform.service';
 import { InstagramCommentAutomationRepository } from '@gitroom/nestjs-libraries/database/prisma/instagram-comment-automations/instagram-comment-automation.repository';
 import { matchesInstagramComment } from '@gitroom/nestjs-libraries/instagram-comment-automation/instagram-comment-matching';
@@ -25,7 +27,8 @@ export class InstagramCommentAutomationService {
   constructor(
     private _repository: InstagramCommentAutomationRepository,
     private _messaging: InstagramCommentMessagingService,
-    private _platform: PlatformService
+    private _platform: PlatformService,
+    private _recovery: AutomationRecoveryService
   ) {}
 
   async prepare(
@@ -34,6 +37,13 @@ export class InstagramCommentAutomationService {
     const event = await this._repository.findEventForProcessing(webhookEventId);
     if (!event) return { process: false, reason: 'event_not_found' };
     if (event.automationExecution?.processedAt) return { process: false, reason: 'already_processed' };
+    if (event.integration) {
+      try { await this._recovery.guardCommentEvent(event.id, event.integration.organizationId); }
+      catch (error) {
+        if (error instanceof RecoveryHold) return { process: false, reason: error.reason };
+        throw error;
+      }
+    }
     if (event.integration && !await this._platform.isOrganizationActive(event.integration.organizationId)) {
       await this._repository.updateEventStatus(event.id, 'SKIPPED');
       return { process: false, reason: 'organization_suspended' };
@@ -136,7 +146,6 @@ export class InstagramCommentAutomationService {
     });
 
     if (!execution) {
-      await this._repository.updateEventStatus(event.id, 'SKIPPED');
       return { process: false, reason: 'already_claimed' };
     }
 
@@ -152,6 +161,10 @@ export class InstagramCommentAutomationService {
   async deliverPublicReply(executionId: string) {
     const context = await this.getDeliveryContext(executionId, 'public');
     if (!context) return false;
+    if (context.confirmedReplyId) {
+      await this._repository.updateDeliverySuccess(executionId, 'public', context.confirmedReplyId);
+      return true;
+    }
     if (!getInstagramIntegrationCapabilities(context.integration).publicReply) {
       await this._repository.updateDeliveryFailure(
         executionId,
@@ -161,11 +174,11 @@ export class InstagramCommentAutomationService {
       return false;
     }
     try {
-      const replyId = await this._messaging.replyToComment(
+      const replyId = await this._recovery.executeComment(context.webhookEventId, context.integration.organizationId, 'public', () => this._messaging.replyToComment(
         context.integration,
         context.externalCommentId,
         context.text
-      );
+      ));
       await this._repository.updateDeliverySuccess(
         executionId,
         'public',
@@ -180,6 +193,10 @@ export class InstagramCommentAutomationService {
   async deliverPrivateReply(executionId: string) {
     const context = await this.getDeliveryContext(executionId, 'private');
     if (!context) return false;
+    if (context.confirmedReplyId) {
+      await this._repository.updateDeliverySuccess(executionId, 'private', context.confirmedReplyId);
+      return true;
+    }
     if (
       !getInstagramIntegrationCapabilities(context.integration).privateReply
     ) {
@@ -201,18 +218,16 @@ export class InstagramCommentAutomationService {
       );
       return false;
     }
-    if (
-      context.integration.providerIdentifier === 'instagram' &&
-      !(await this._repository.claimFacebookPrivateReplyAttempt(executionId))
-    ) {
-      return false;
-    }
     try {
-      const replyId = await this._messaging.sendPrivateReplyFromComment(
+      const replyId = await this._recovery.executeComment(context.webhookEventId, context.integration.organizationId, 'private', async () => {
+        if (context.integration.providerIdentifier === 'instagram' &&
+          !(await this._repository.claimFacebookPrivateReplyAttempt(executionId))) throw new RecoveryHold('PRIVATE_REPLY_ALREADY_RESERVED');
+        return this._messaging.sendPrivateReplyFromComment(
         context.integration,
         context.externalCommentId,
         context.text
-      );
+        );
+      });
       await this._repository.updateDeliverySuccess(
         executionId,
         'private',
@@ -248,9 +263,11 @@ export class InstagramCommentAutomationService {
       executionId
     );
     if (!execution) return null;
-    if (!await this._platform.isOrganizationActive(execution.automation.integration.organizationId)) {
-      await this._repository.updateDeliveryFailure(executionId, delivery, 'Organização suspensa.');
-      return null;
+    const confirmedReplyId = await this._recovery.confirmedCommentReceipt(execution.webhookEventId, execution.automation.integration.organizationId, delivery);
+    try { if (!confirmedReplyId) await this._recovery.guardCommentEvent(execution.webhookEventId, execution.automation.integration.organizationId); }
+    catch (error) {
+      if (error instanceof RecoveryHold) return null;
+      throw error;
     }
     const status =
       delivery === 'public'
@@ -260,12 +277,22 @@ export class InstagramCommentAutomationService {
       delivery === 'public'
         ? execution.automation.publicReplyText
         : execution.automation.privateReplyText;
-    if (status !== 'PENDING' || !text?.trim()) return null;
+    if (!confirmedReplyId && (status !== 'PENDING' || !text?.trim())) return null;
+    if (!confirmedReplyId) {
+      if (!execution.automation.enabled) return null;
+      if (!await this._platform.isOrganizationActive(execution.automation.integration.organizationId)) {
+        await this._repository.updateDeliveryFailure(executionId, delivery, 'Organização suspensa.');
+        return null;
+      }
+    }
     return {
+      confirmedReplyId,
+      webhookEventId: execution.webhookEventId,
       externalCommentId: execution.externalCommentId,
       text,
       integration: execution.automation.integration,
-      commentReceivedAt: execution.webhookEvent?.receivedAt,
+      commentReceivedAt: execution.webhookEvent?.occurredAtSource === 'META_COMMENT_CREATED_TIME'
+        ? execution.webhookEvent.occurredAt : execution.webhookEvent?.receivedAt,
     };
   }
 
@@ -274,6 +301,7 @@ export class InstagramCommentAutomationService {
     delivery: 'public' | 'private',
     error: unknown
   ) {
+    if (error instanceof RecoveryHold) return false;
     if (error instanceof InstagramMetaApiError && error.transient) {
       throw error;
     }

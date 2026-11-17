@@ -7,6 +7,7 @@ import { EmailActivity } from '@gitroom/orchestrator/activities/email.activity';
 import { IntegrationsActivity } from '@gitroom/orchestrator/activities/integrations.activity';
 import { HealthController } from '@gitroom/orchestrator/health.controller';
 import { InstagramCommentAutomationActivity } from '@gitroom/orchestrator/activities/instagram-comment-automation.activity';
+import { RecoveryPublicationActivity } from './activities/recovery-publication.activity';
 
 const activities = [
   PostActivity,
@@ -14,6 +15,7 @@ const activities = [
   EmailActivity,
   IntegrationsActivity,
   InstagramCommentAutomationActivity,
+  RecoveryPublicationActivity,
 ];
 @Module({
   imports: [

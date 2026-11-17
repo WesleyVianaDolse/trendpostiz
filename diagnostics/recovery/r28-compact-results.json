@@ -1,0 +1,129 @@
+{
+  "scope": "LOCAL_COMPACT_DIAGNOSTIC_PREPARATION",
+  "verifiedAt": "2026-11-17T01:29:32.712Z",
+  "original": {
+    "sha256": "8b01b747716b45efd91ce44e056aa77ec3fca3cd559d977397334557cd87dce3",
+    "lines": 726,
+    "archive": "diagnostics/recovery/archive/r28-infrastructure-readonly-v1-8b01b747.py",
+    "source": "PREVIOUS_LOCAL_DELIVERY_AND_ATTESTATION_NOT_RELEASE_BLOB"
+  },
+  "operatorCopy": {
+    "sha256": "25dc84b8cc392b22ffc00f6585d38f45d59662845b20c35dfb2d9d644fe44360",
+    "lines": 718,
+    "exactMatch": false,
+    "provenance": "OPERATOR_REPORTED_BYTES_NOT_RECEIVED"
+  },
+  "reportedVps": {
+    "os": "Ubuntu 24.04",
+    "arch": "x86_64",
+    "vcpus": 2,
+    "memoryReported": "8 GB",
+    "swapReported": false,
+    "docker": "29.5.1",
+    "postizVersion": "1.7.4",
+    "restart": "always",
+    "pm2": "7.1.2",
+    "orchestratorIdentified": true,
+    "temporalRunning": true,
+    "sharedNetworkReported": true,
+    "isolationProven": false,
+    "recordsReported": 385,
+    "suppressedReported": 291,
+    "gapsReported": 66,
+    "current32QueuePollerCounts": "UNKNOWN_FROM_RECEIVED_SUMMARY",
+    "source": "OPERATOR_REPORT_NOT_AGENT_PRODUCTION_ACCESS"
+  },
+  "compact": {
+    "format": "R28_INFRA_READONLY_V2_COMPACT",
+    "sha256": "538b933f19b5dc2715609feed40c9065382982f7a282744eddb08b6bdd275923",
+    "lines": 913,
+    "defaultOutputRecords": 44,
+    "maxExtraQueueOutputRecords": 52,
+    "recordBudget": 96,
+    "legacyRecordLimitUnchanged": 384,
+    "mandatoryExternalAndInternalIntegrityCheck": true
+  },
+  "tests": {
+    "linux": "WSL2 Alpine 3.22.8 x86_64",
+    "python": "3.12.16",
+    "node": "22.23.5",
+    "baseline": 16,
+    "compact": 10,
+    "sdkSandbox": 8,
+    "totalLinuxSyntheticChecks": 34,
+    "result": "PASS",
+    "compactFinalRunEvidence": "Final 10-test WSL execution reported PASS in tool transcript; compact log preserves prior 9-test successful run.",
+    "realLinuxCliReadOnlySmokeRows": 44,
+    "cliIntegrityMismatchRejected": true,
+    "vpsExecuted": false,
+    "realDockerOrTemporalUsed": false
+  },
+  "bootstrap": {
+    "source": "https://dl-cdn.alpinelinux.org/alpine/v3.22/releases/x86_64/alpine-minirootfs-3.22.8-x86_64.tar.gz",
+    "rootfsSha256": "2d7f46af9b7e86ad64ebeba3fe9b75b62dd5b259e708afb2ab21268f627696e5",
+    "ephemeralLocalLinux": true,
+    "officialPackageDownloads": true,
+    "productionCredentialsUsed": false
+  },
+  "cleanup": {
+    "ownedDistributionRemoved": true,
+    "ownedNameUniquelyVerified": true,
+    "registryPathValidationCompleted": false,
+    "note": "Registry path normalization failed with a nonterminating PowerShell error; unregister was limited to the generated owned name. No registry-path verification is claimed.",
+    "remainingOwnedDistributionRegistered": false,
+    "dockerDesktopStatePreserved": "Stopped"
+  },
+  "previouslyReviewedApplicationFilesUnchanged": 1108,
+  "applicationOrFlagsChanged": false,
+  "productionOperations": false,
+  "phaseH": false,
+  "phaseI": false,
+  "operationalR28Certified": false,
+  "fullMatrixCertified": false,
+  "files": [
+    {
+      "file": "scripts/recovery/r28-infrastructure-readonly.py",
+      "sha256": "538b933f19b5dc2715609feed40c9065382982f7a282744eddb08b6bdd275923"
+    },
+    {
+      "file": "scripts/recovery/r28-infrastructure-readonly.py.sha256",
+      "sha256": "4bbd43ff59f539f97edbd620e692fc8c2a069ea19bd1e4fbe2d8b08d5842b599"
+    },
+    {
+      "file": "diagnostics/recovery/test-r28-infrastructure.py",
+      "sha256": "8885a76217c27b4faba4684fea63ccc1d45f8c6b25dac619404dae678e16d11e"
+    },
+    {
+      "file": "diagnostics/recovery/test-r28-compact.py",
+      "sha256": "dad71740aeba1925e470c6560969d9e1391db16e34b42a143d0d3eca2aee9b09"
+    },
+    {
+      "file": "diagnostics/recovery/test-r28-sdk-probe.cjs",
+      "sha256": "a256c01cdca2d415b84c2de513095db446681f457128b00c89899d9906b07be4"
+    },
+    {
+      "file": "diagnostics/recovery/r28-compact-linux-smoke.ndjson",
+      "sha256": "39cb404d1e6361ffe0c192ca05943c06777132825c6b56f81cc600820811fb65"
+    },
+    {
+      "file": "diagnostics/recovery/r28-compact-linux-baseline.log",
+      "sha256": "9a32e0e031cfff8e6921e8d39b4f4529aa5a08ecb0c91ed7ab393d57e565358e"
+    },
+    {
+      "file": "diagnostics/recovery/r28-compact-linux-compact.log",
+      "sha256": "9dc080d39621ef2f168d1039402285bf2e5c3334d0e14bf2dbf0af642be13036"
+    },
+    {
+      "file": "diagnostics/recovery/r28-compact-linux-sdk.log",
+      "sha256": "ed8205edaf42e8096b0da59422808c7cee6400edeb842eb484b6fad8b64d90ba"
+    },
+    {
+      "file": "diagnostics/recovery/r28-compact-collector-ast.json",
+      "sha256": "66eee38662bcc2c574635b25fb4cce4b8df87cd93a49b27e13fd168dfccb2658"
+    },
+    {
+      "file": "docs/v1.7.5-r28-compact-audit.md",
+      "sha256": "f57437bc3a4f953decc3d43d9ccd7b5e7967c758602c0cf0c0a66e3b3d0c94cf"
+    }
+  ]
+}

@@ -1,0 +1,386 @@
+{
+  "scope": "ISOLATED_F_G_PREPARATION",
+  "postgres": "17.11",
+  "temporal": "1.28.2",
+  "results": [
+    {
+      "id": "FG01 immutable dry-run persists proposed T0, decisions and hashes; no client write",
+      "scenarios": [
+        "R04",
+        "R19"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG02 real process manifest crash before-commit",
+      "scenarios": [
+        "R14"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG02 real process manifest crash after-commit",
+      "scenarios": [
+        "R14"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG03 concurrent classifiers are idempotent; unauthorized operator cannot prepare",
+      "scenarios": [
+        "R13",
+        "R31"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG04 changed cutoff/source and tampered item invalidate a complete manifest",
+      "scenarios": [
+        "R04",
+        "R14"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG05 fixed cadence inventory skips missed/manual/confirmed slots; no catch-up",
+      "scenarios": [
+        "R16",
+        "R18",
+        "R20"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG06 V106 preserves success notification, streak and thread webhook payload",
+      "scenarios": [
+        "R12",
+        "R27"
+      ],
+      "result": "PASS",
+      "httpRequests": 4
+    },
+    {
+      "id": "FG07 uncertain webhook cannot retry or taint confirmed primary",
+      "scenarios": [
+        "R13",
+        "R15"
+      ],
+      "result": "PASS",
+      "httpRequests": 3
+    },
+    {
+      "id": "FG08 V101 queued legacy provider activity is expired after a second cutoff",
+      "scenarios": [
+        "R06"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG08 V102 queued legacy provider activity is expired after a second cutoff",
+      "scenarios": [
+        "R06"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG08 V103 queued legacy provider activity is expired after a second cutoff",
+      "scenarios": [
+        "R06"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG08 V104 queued legacy provider activity is expired after a second cutoff",
+      "scenarios": [
+        "R06"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG08 V105 queued legacy provider activity is expired after a second cutoff",
+      "scenarios": [
+        "R06"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG09 V101 actual activity retry rechecks T0 before any provider HTTP",
+      "scenarios": [
+        "R06",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG09 V102 actual activity retry rechecks T0 before any provider HTTP",
+      "scenarios": [
+        "R06",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG09 V103 actual activity retry rechecks T0 before any provider HTTP",
+      "scenarios": [
+        "R06",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG09 V104 actual activity retry rechecks T0 before any provider HTTP",
+      "scenarios": [
+        "R06",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG09 V105 actual activity retry rechecks T0 before any provider HTTP",
+      "scenarios": [
+        "R06",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG10 explicit future revision wins over a queued legacy activity",
+      "scenarios": [
+        "R09",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 3
+    },
+    {
+      "id": "FG11 late thread receipt cannot overwrite manual proof or a new revision",
+      "scenarios": [
+        "R12"
+      ],
+      "result": "PASS",
+      "httpRequests": 5
+    },
+    {
+      "id": "FG12 two real worker processes reserve one logical publication",
+      "scenarios": [
+        "R13"
+      ],
+      "result": "PASS",
+      "httpRequests": 5
+    },
+    {
+      "id": "FG13 actual hourly reconciler and former two-day reader cannot revive expired posts",
+      "scenarios": [
+        "R07"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG14 real HTTP JWT/membership, DTO and manual confirmation contract",
+      "scenarios": [
+        "R11",
+        "R31"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG15 actual V106 future timer remains on UTC slot across timezone offsets",
+      "scenarios": [
+        "R20"
+      ],
+      "result": "PASS",
+      "httpRequests": 3
+    },
+    {
+      "id": "FG17 V101 legacy ABANDON child remains independently guarded after parent completion",
+      "scenarios": [
+        "R17",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG17 V102 legacy ABANDON child remains independently guarded after parent completion",
+      "scenarios": [
+        "R17",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG17 V103 legacy ABANDON child remains independently guarded after parent completion",
+      "scenarios": [
+        "R17",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG17 V104 legacy ABANDON child remains independently guarded after parent completion",
+      "scenarios": [
+        "R17",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG17 V105 legacy ABANDON child remains independently guarded after parent completion",
+      "scenarios": [
+        "R17",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG18 expired recurring parent gets one replacement and one next child on original cadence",
+      "scenarios": [
+        "R18",
+        "R16",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 3
+    },
+    {
+      "id": "FG19 all unavailable states and an administrative race preserve restrictions",
+      "scenarios": [
+        "R31"
+      ],
+      "result": "PASS",
+      "httpRequests": 4
+    },
+    {
+      "id": "FG20 prior V106 history replays with completion patch disabled",
+      "scenarios": [
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 1
+    },
+    {
+      "id": "FG21 read-only complete namespace inventory captures retry/timer/ABANDON metadata without payloads",
+      "scenarios": [
+        "R04",
+        "R17",
+        "R19"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG22 external observation survives a native stall and three isolated restarts",
+      "scenarios": [
+        "R29"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG23 artifact verification rejects old protocol and stale source; never opens workers",
+      "scenarios": [
+        "R28"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG24 real YouTube publication service crash before-checkpoint",
+      "scenarios": [
+        "R15",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 1
+    },
+    {
+      "id": "FG24 real YouTube publication service crash after-checkpoint",
+      "scenarios": [
+        "R15",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 1
+    },
+    {
+      "id": "FG25 superseding a partial batch preserves old audit and blocks stale resume",
+      "scenarios": [
+        "R14",
+        "R04"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    },
+    {
+      "id": "FG26 failed series occurrence cannot invalidate its already scheduled future child",
+      "scenarios": [
+        "R18",
+        "R16"
+      ],
+      "result": "PASS",
+      "httpRequests": 4
+    },
+    {
+      "id": "FG27 competing legacy failure cannot invalidate an in-flight claimant",
+      "scenarios": [
+        "R13",
+        "R12"
+      ],
+      "result": "PASS",
+      "httpRequests": 3
+    },
+    {
+      "id": "FG28 failed thread reply preserves primary and sends a separate failure notification",
+      "scenarios": [
+        "R12",
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 4
+    },
+    {
+      "id": "FG16 pending timers, retries and completed commands replay without HTTP",
+      "scenarios": [
+        "R30"
+      ],
+      "result": "PASS",
+      "httpRequests": 0
+    }
+  ],
+  "actualWorkflowTasks": 385,
+  "workflowTaskCountMethod": "distinct workflowId/runId/eventId; repeated history snapshots are not counted twice",
+  "actualRuns": 50,
+  "historyCount": 70,
+  "activityChildBootMs": [
+    15636,
+    15698,
+    16522,
+    18934
+  ],
+  "activityChildBootDeadlineMs": 180000,
+  "fullMatrixCertified": false,
+  "productionAuthorized": false,
+  "activationAuthorized": false
+}

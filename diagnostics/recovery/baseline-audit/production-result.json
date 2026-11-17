@@ -1,0 +1,18 @@
+{
+  "source": "Operator-reported production execution of production-check.sql in this conversation; no remote connection.",
+  "postgres": "17.11",
+  "reportedScript": "production-check.sql",
+  "localArtifactSha256AtReport": "31abeb224890efcf246fae3b400794d21450473712f7066baff0afe3495c1c25",
+  "baselineSha256AtReport": "700a0e4016d594ce06b013b0f602cdc074526db4d5af2d6a83dab928fd4ad702",
+  "artifactIdentityCaveat": "Local provenance recorded; operator did not separately attest a production-side file checksum.",
+  "sections": {
+    "database": "MISMATCH",
+    "tables": "MISMATCH",
+    "columns": "MISMATCH",
+    "constraints": "MISMATCH",
+    "indexes": "MISMATCH",
+    "enums": "MATCH",
+    "extras": "MISMATCH"
+  },
+  "productionCompatibility": "BLOCKED_PENDING_TARGETED_DIAGNOSIS"
+}

@@ -1,0 +1,106 @@
+# v1.7.5 — fronteira Prisma / Mastra e baseline proposta
+
+**Atualização — fronteira confirmada:** o operador informou `MATCH` nos sete checks em PostgreSQL 17.11, com `ROLLBACK` e nenhuma alteração. Evidência em `prisma-owned/production-boundary-result.json`. A cadeia Prisma-owned foi selecionada como pacote local de migração; os SQLs históricos e a proposta completa permanecem preservados como evidência fora desse pacote. A diferença ambiental continua documentada separadamente. As instruções de confirmação pendente abaixo registram a etapa anterior; não repetir a consulta em produção. O desenvolvimento C–G foi autorizado; H–I permanecem indisponíveis.
+
+Estado em 15/11/2026: a causa da divergência foi identificada no escopo da baseline. A nova candidata e a fronteira de DDL estão validadas localmente em PostgreSQL 17.11. A adoção em produção permanece pendente da confirmação pontual da fronteira e da revisão operacional. C–G não foram iniciadas nesta etapa; workers continuam retidos.
+
+## Evidência e causa
+
+O operador informou 93 divergências no localizador, todas em objetos `mastra_*` e na rotina `trigger_set_timestamps`. Nenhuma tabela da aplicação apareceu como divergente e `enums` já retornara `MATCH`. O resultado recebido foi registrado em `diagnostics/recovery/baseline-audit/production-mastra-result.json`, como resumo do operador: não inventamos as 93 linhas nem os nomes individuais que não foram fornecidos. A divergência ambiental de collation continua registrada nos relatórios anteriores.
+
+A baseline anterior foi gerada do **schema usado para o Prisma Client**, que contém oito modelos Mastra. Esse schema mistura projeções de acesso a dados com responsabilidade por DDL. O SQL gerado incluía as oito tabelas externas, inclusive `mastra_ai_spans` e `mastra_evals`, apesar de ambas terem `@@ignore`. Portanto, `@@ignore` não é uma solução para excluir seus objetos de Prisma Migrate. Essa sobreposição explica por que o comparador estrito encontrou divergências de Mastra sem apontar objetos principais do TrendPostiz.
+
+| Evidência no código | Responsabilidade comprovada |
+| --- | --- |
+| `libraries/nestjs-libraries/src/chat/mastra.store.ts:3` | Instancia `PostgresStore`, com o mesmo `DATABASE_URL` da aplicação, sem `schemaName` e sem `disableInit`. |
+| `chat/mastra.service.ts`, `MastraService.mastra`; `chat/load.tools.service.ts`, `Memory({ storage: pStore })` | Usa esse store no agente/memória. Não foi alterado. |
+| `node_modules/@mastra/pg/dist/index.js`, `PostgresStore`, `init`, `PgDB.createTable`, `alterTable`, `MemoryPG.init` | O adaptador cria tabelas com `CREATE TABLE IF NOT EXISTS`, adiciona colunas, constraints e índices e inicializa os domínios sem Prisma Migrate. Versão instalada/lock: **1.8.5**. |
+| Mesmo pacote, `generateTimestampTriggerSQL` / `setupTimestampTriggers` | Gera `public.trigger_set_timestamps()` e seu trigger de timestamps. O nome da rotina relatada existe exatamente no gerador do SDK. O contrato concreto da rotina de produção ainda será confirmado pelo hash, sem exportar seu corpo. |
+| `@mastra/core` **1.21.0**, `MastraCompositeStore.init` / `augmentWithInit` | Inicializa os stores e pode fazê-lo no primeiro uso. O default de `disableInit` é false; existe também `MASTRA_DISABLE_STORAGE_INIT`. Não lemos nem alteramos essa variável em produção. |
+| Seis migrações históricas + `20261114000000_safe_recovery_foundation` | Nenhuma contém referência direta a tabelas Mastra ou à rotina. Arquivos originais foram comparados com o commit-base e preservados. |
+| `database/prisma/platform/organization-deletion.ts`, `purgeOrganizationMemory` | A aplicação usa modelos Mastra para DML na limpeza autorizada de memória por organização, incluindo SQL específico para spans. Isso é uma dependência de acesso a dados, não prova de responsabilidade Prisma pelo DDL. |
+
+A inicialização **real** de `PostgresStore` 1.8.5 foi executada apenas no banco descartável: criou 27 tabelas Mastra, além da rotina/objetos auxiliares, sem existir `_prisma_migrations`. Isso confirma a administração independente. Não foi inicializado o backend, um agente de IA, providers ou Temporal, nem houve chamadas às APIs de clientes.
+
+Referência oficial: [PostgreSQL no Mastra](https://mastra.ai/integrations/databases/postgresql), incluindo o schema padrão `public` e a opção `disableInit`. A prova específica de versão é o pacote instalado, seu checksum registrado e o teste local; não pressupomos que a documentação atual descreva exatamente todo o código 1.8.5.
+
+## Responsabilidade explícita
+
+| Conjunto | Administrador do DDL | Regra de preservação |
+| --- | --- | --- |
+| 46 tabelas da baseline da aplicação e seus enums/constraints/índices | Prisma, por schema de migração separado e SQL revisado | Contrato original da v1.7.4, com a ordem do enum já confirmada; não acomodar divergências funcionais silenciosamente. |
+| Seis tabelas novas de recuperação e campos aditivos | Migração Prisma de fundação | Controle permanece `BLOCKED`; não autoriza consumo de filas. |
+| Tabelas Mastra conhecidas e objetos ligados a elas | Mastra/operador responsável pelo Mastra | Nenhum CREATE/ALTER/DROP/RENAME dessas estruturas nas migrações Prisma candidatas. |
+| `public.trigger_set_timestamps()` sem argumentos, retornando trigger | Gerador do `@mastra/pg` | Fora da baseline Prisma; confirmar contrato e que não governa tabelas da aplicação. |
+| Projeções Mastra em `schema.prisma` | Prisma Client para DML existente | Preservar modelos/delegates usados pela aplicação; não usar esse arquivo como alvo de DDL compartilhado. |
+| Objetos desconhecidos/customizados ou dependências cruzadas | Pendente de classificação explícita | Não ocultar por prefixo, apagar ou incorporar automaticamente à baseline. |
+| Provider/locale/versão de collation | Configuração do PostgreSQL/ambiente | Preservar evidência separada. A nova fronteira não transforma o `database: MISMATCH` em `MATCH`. |
+
+`prisma-owned/ownership-policy.json` lista **30 nomes externos exatos**, com procedência: constantes do SDK, oito modelos legados do client e o arquivo legado `mastra_agents_legacy` criado pelo migrador interno de agentes do SDK. Nem todos precisam existir em cada instalação. Não há exclusão genérica de tudo que começa por `mastra_`: nomes novos precisam de revisão. As consultas de escopo mantêm tabelas e rotinas desconhecidas visíveis como divergências.
+
+Essa é uma fronteira de administração técnica, não uma declaração de que os papéis PostgreSQL de produção já possuem privilégios separados. Nos testes, um papel criou os objetos da aplicação, outro criou os objetos Mastra; o papel de migração foi impedido pelo PostgreSQL de alterar a tabela externa. A configuração de papéis equivalente em produção precisa de avaliação e autorização próprias, sem concessões automáticas.
+
+## Nova candidata, preservando os artefatos anteriores
+
+Pasta: `libraries/nestjs-libraries/src/database/prisma/baseline-proposal/prisma-owned/`.
+
+- `schema.baseline.prisma`: projeção somente para migrações da v1.7.4 reconciliada, retirando os oito modelos externos; 46 tabelas.
+- `schema.current.prisma`: projeção do schema local aditivo; 52 tabelas, sem os modelos externos e sem generator de client.
+- `migrations/00000000000000_v1_7_4_prisma_owned/migration.sql`: baseline gerada pelo Prisma **6.5.0**, exclusivamente da projeção administrada.
+- `migrations/20261114000000_safe_recovery_foundation/migration.sql`: cópia exata da migração aditiva já testada.
+- `ownership-policy.json`, `manifest.json`, `expected-owned-metadata.json`, `local-results.json`: escopo, hashes, procedência e validação.
+- `ownership-boundary-check.sql`: somente as perguntas de fronteira ainda não respondidas pelo resumo recebido.
+
+O schema runtime `schema.prisma` não mudou nesta etapa. Não removemos os delegates Mastra nem alteramos a limpeza por organização. Nenhuma migração da cadeia candidata faz referência a `mastra_*` ou `trigger_set_timestamps`.
+
+A candidata anterior que incluía Mastra e seus scripts de auditoria são preservados como evidência, com os mesmos hashes. **Ela está superada para futura adoção. Nunca aplicar nem marcar como aplicadas as duas baselines.** As seis migrações históricas continuam intactas e fora da cadeia candidata nova; a reorganização futura precisa preservá-las como arquivo histórico, sem repeti-las após a baseline que já incorpora suas alterações na aplicação.
+
+`node scripts/recovery/verify-owned-chain.cjs` confere somente arquivos: SQL exato, schema projetado, schema runtime de origem, política, lockfile, implementação Mastra e nomes das duas migrações. Recusa alteração não revisada e não conecta a banco. O resultado não concede autorização de produção.
+
+## Evitar reintroduzir a sobreposição
+
+Separar o datamodel não torna seguro gerar migrações a partir de um banco compartilhado vivo. O teste **O15** comprovou que `migrate diff --from-url` desse banco para o schema sem Mastra propõe `DROP TABLE` dos objetos externos. Esse SQL nunca foi aplicado.
+
+Para futuras mudanças, gerar/revisar o diff **entre datamodels administrados** ou em ambiente contendo somente objetos administrados, usando sombra descartável separada. Implantar apenas a cadeia SQL revisada e verificada; não usar `migrate dev`, `reset`, `db push` ou introspecção do banco compartilhado como gerador automático de DDL. Prisma Migrate deploy aplica os arquivos de migração; não é um filtro de propriedade para SQL arbitrário. [Referência do Prisma](https://www.prisma.io/docs/orm/reference/prisma-cli-reference#migrate-deploy). O comportamento foi validado com o binário 6.5.0; a documentação atual pode descrever versões posteriores.
+
+Os helpers `prisma-db-push` e `prisma-reset` agora recusam execução com código 78, sem carregar `.env` ou chamar Prisma/banco. `prisma-generate` continua usando o schema runtime completo para gerar o client. Helpers não impedem alguém de chamar a CLI diretamente com credenciais privilegiadas; a combinação de artefatos revisados, papéis de DDL limitados e procedimento operacional continua necessária.
+
+## Confirmação mínima pendente em produção
+
+O relato de ausência de divergências nos objetos da aplicação e o `enums: MATCH` são aceitos como evidência da comparação anterior. Não é necessário repetir essa auditoria, exportar as 93 linhas, enviar dump ou fornecer dados de clientes.
+
+Para fechar a fronteira com a lista **exata** conhecida pelo SDK e com a rotina preservada, copiar/colar manualmente apenas `prisma-owned/ownership-boundary-check.sql`, em sessão fora de qualquer transação anterior. Executar o script inteiro até o `ROLLBACK`; em caso de erro, encerrar a transação e reportar o erro sanitizado. É uma transação somente de leitura, com timeouts, que retorna sete pares `section/status`:
+
+| Verificação | O que impede |
+| --- | --- |
+| `unclassified_mastra_name` | Excluir silenciosamente uma tabela com prefixo Mastra cuja procedência não foi identificada. |
+| `external_relation_kind` | Tratar como tabela um nome conhecido que na instalação seja view/foreign table ou outro tipo. |
+| `cross_boundary_fk` | Omitir dependência referencial de um conjunto para o outro. |
+| `cross_boundary_inheritance` | Propagar `ALTER TABLE` para um descendente externo por herança/particionamento entre conjuntos. |
+| `timestamps_on_non_external_relation` | Excluir uma rotina que também controle escrita em tabelas da aplicação. |
+| `routine_recorded_non_external_dependency` | Omitir dependência catalogada da rotina em relações fora do conjunto externo. |
+| `timestamps_function_contract` | Confiar apenas no nome da rotina: verifica assinatura e hash da definição gerada pela versão local do SDK, sem retornar o corpo. |
+
+Para a instalação relatada, o esperado é `MATCH` nas sete. `REVIEW_REQUIRED`, `MISMATCH` ou ausência inesperada exigem somente investigação do ponto afetado, sem DDL. `ABSENT_OPTIONAL` é o resultado para instalações novas sem Mastra; como a rotina foi relatada presente em produção, esse retorno nessa instalação não comprova a mesma fronteira e precisa ser explicado. Se uma versão antiga legítima do SDK tiver outro corpo, comparar a versão correspondente localmente e revisar a evidência; não atualizar a rotina de produção para obter `MATCH`.
+
+Dependências dinâmicas em corpos SQL/PLpgSQL não são totalmente descritas por `pg_depend`. Por isso a verificação da rotina inclui o hash do contrato conhecido, além da associação de triggers e das dependências registradas. Não executa a rotina, seus triggers ou defaults.
+
+**Conclusão da fase B:** a geração da candidata e a viabilidade da fronteira estão comprovadas localmente; o escopo principal da aplicação foi relatado compatível em produção. O fechamento operacional da fronteira ainda depende desses sete retornos pontuais e da revisão da cadeia/arquivamento. `migrationChainVerified` permanece false até esse fechamento. C–G não são liberadas automaticamente por este relatório ou pelos testes.
+
+## Estratégia de adoção futura — não executada
+
+1. Concluir os checks de fronteira, registrar a aceitação ambiental separadamente e revisar os manifestos/hashes. Manter workers, reconciliadores e publicações contidos. Coordenar também escritores de DDL do Mastra para evitar evolução simultânea; não executar o SDK em produção como forma de preparar a baseline.
+2. Em operação expressamente autorizada, conferir backup/restauração e o estado do histórico Prisma no momento da adoção. Preparar um único pacote ativo com a nova baseline administrada e a migração aditiva; preservar as migrações antigas fora dessa cadeia, com os checksums. Não inserir a nova baseline antes das seis migrações parciais existentes.
+3. Para o banco existente e compatível, registrar **somente a nova baseline** como já aplicada, apontando explicitamente para o schema da cadeia administrada. Isso cria o histórico Prisma sem executar o CREATE das tabelas existentes. O procedimento de `migrate resolve --applied` foi testado apenas no banco descartável, com um papel de migração sem domínio sobre as tabelas Mastra. Não marcar todas as migrações como aplicadas.
+4. Aplicar somente a migração aditiva revisada da recuperação, com `migrate deploy` explícito e o pacote administrado. Não executar `db push`, scripts do SDK, comandos de deduplicação Mastra ou a baseline antiga completa. Para banco novo, o deploy pode criar o conjunto administrado; a inicialização opcional do Mastra continua sendo responsabilidade independente.
+5. Conferir schema administrado, controle fechado, recibos/agendamentos e preservação dos objetos externos. Os testes demonstram a preservação; a operação real exige suas verificações próprias. Não abrir filas nesse passo. Somente após B fechada avaliar o desenvolvimento C–G; H/I continuam fora da autorização atual.
+
+[Baselining no Prisma](https://www.prisma.io/docs/orm/prisma-migrate/workflows/baselining) descreve a adoção de histórico sem recriar dados; a sequência concreta acima foi comprovada localmente com 6.5.0.
+
+Reversão não deve executar down migration, apagar histórico, reconstruir Mastra ou voltar ao `db push` do schema runtime. Manter dados e ledger aditivos. Um artefato antigo com credenciais amplas pode ignorar os helpers novos: não permitir que seja usado para administrar DDL ou consumir filas durante essa recuperação. A adoção da baseline também não habilita um worker antigo a ignorar as proteções de envio ainda pendentes.
+
+## Validação e riscos restantes
+
+`node diagnostics/recovery/test-prisma-ownership.mjs`: **17/17 testes O01–O17 aprovados**, com resultados individuais em `prisma-owned/local-results.json`. A suite valida separação dos modelos, preservação do contrato da aplicação, dependências históricas, inicialização real do SDK, adoção em banco compartilhado, identidade de objetos/dados Mastra, recibo confirmado e agendamento futuro/recorrente sintético, proteção por papéis, instalação nova, idempotência, divergências não ocultadas, FK/trigger/herança cruzados, alteração de rotina, locale diferente e verificação de artefatos. Não usa `.env`, tokens, agentes, APIs externas ou workers; usa somente usuários e dados sintéticos em PostgreSQL 17.11 descartável. As migrações/resolve ocorreram somente nesses bancos descartáveis. Não houve necessidade de rebuild dos aplicativos: nenhum código de aplicação/client/provider foi alterado nesta etapa.
+
+Riscos ainda abertos: classificação exata dos nomes de produção, contrato da rotina se a versão instalada divergir, tratamento ambiental de collation, privilégios reais de DDL e coordenação de futuras atualizações do SDK. A separação de DDL não comprova todas as consultas DML possíveis do client legado nem a operação completa do Copilot. Nenhuma versão de dependência foi atualizada, nenhum cliente foi desconectado e nenhum provider/Direct foi alterado. Os cenários R01–R31 e as barreiras C–G continuam pendentes.

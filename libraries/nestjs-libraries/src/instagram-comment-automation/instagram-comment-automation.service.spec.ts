@@ -22,7 +22,9 @@ describe('InstagramCommentAutomationService', () => {
   const service = new InstagramCommentAutomationService(
     repository as any,
     messaging as any,
-    { isOrganizationActive: jest.fn().mockResolvedValue(true) } as any
+    { isOrganizationActive: jest.fn().mockResolvedValue(true) } as any,
+    { confirmedCommentReceipt: jest.fn().mockResolvedValue(null), guardCommentEvent: jest.fn().mockResolvedValue(undefined),
+      executeComment: (_event: string, _org: string, _delivery: string, send: () => Promise<unknown>) => send() } as any
   );
   const event = {
     id: 'event-1',
@@ -48,6 +50,7 @@ describe('InstagramCommentAutomationService', () => {
     automationExecution: null,
   };
   const automation = {
+    enabled: true,
     id: 'automation-1',
     matchType: 'EXACT',
     publicReplyEnabled: true,
@@ -267,7 +270,7 @@ describe('InstagramCommentAutomationService', () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       publicReplyStatus: 'PENDING',
-      automation: {
+      automation: { enabled: true,
         publicReplyText: 'Public reply',
         integration: event.integration,
       },
@@ -285,7 +288,7 @@ describe('InstagramCommentAutomationService', () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       publicReplyStatus: 'PENDING',
-      automation: {
+      automation: { enabled: true,
         publicReplyText: 'Public reply',
         integration: { ...event.integration, refreshNeeded: true },
       },
@@ -305,7 +308,7 @@ describe('InstagramCommentAutomationService', () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       privateReplyStatus: 'PENDING',
-      automation: {
+      automation: { enabled: true,
         privateReplyText: 'Private reply',
         integration: event.integration,
       },
@@ -325,7 +328,7 @@ describe('InstagramCommentAutomationService', () => {
   const facebookDelivery = () => ({
     externalCommentId: 'comment-1', publicReplyStatus: 'SUCCESS', privateReplyStatus: 'PENDING',
     webhookEvent: { receivedAt: new Date() },
-    automation: { privateReplyText: 'Private reply', integration: {
+    automation: { enabled: true, privateReplyText: 'Private reply', integration: {
       ...event.integration, providerIdentifier: 'instagram', facebookPageId: 'page-1', webhookMessagesSubscribed: false,
     } },
   });
@@ -392,7 +395,7 @@ describe('InstagramCommentAutomationService', () => {
       webhookEvent: {
         receivedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
       },
-      automation: {
+      automation: { enabled: true,
         privateReplyText: 'Private reply',
         integration: event.integration,
       },
@@ -412,7 +415,7 @@ describe('InstagramCommentAutomationService', () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       publicReplyStatus: 'PENDING',
-      automation: {
+      automation: { enabled: true,
         publicReplyText: 'Public reply',
         integration: event.integration,
       },
@@ -434,7 +437,7 @@ describe('InstagramCommentAutomationService', () => {
     repository.findExecutionWithDeliveryContext.mockResolvedValue({
       externalCommentId: 'comment-1',
       publicReplyStatus: 'PENDING',
-      automation: {
+      automation: { enabled: true,
         publicReplyText: 'Public reply',
         integration: event.integration,
       },

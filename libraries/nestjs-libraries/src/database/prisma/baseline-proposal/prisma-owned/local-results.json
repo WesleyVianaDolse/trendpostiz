@@ -1,0 +1,114 @@
+{
+  "status": "LOCAL_CHAIN_VALIDATED_PRODUCTION_BOUNDARY_CONFIRMED",
+  "postgres": "17.11",
+  "tests": [
+    {
+      "name": "O01 migration/client schemas are separated; all eight external client models remain intact",
+      "result": "PASS"
+    },
+    {
+      "name": "O02 six historical migrations and recovery foundation contain no direct external dependencies",
+      "result": "PASS"
+    },
+    {
+      "name": "O03 scoped baseline exactly preserves the previously audited application contract",
+      "result": "PASS"
+    },
+    {
+      "name": "O04 real locked Mastra PostgresStore initializes external tables independently of Prisma Migrate",
+      "result": "PASS"
+    },
+    {
+      "name": "O05 scoped hashes remain equal after real SDK init and every ownership guard passes",
+      "result": "PASS"
+    },
+    {
+      "name": "O06 local-only baseline adoption and recovery deploy preserve external data/objects and confirmed application results",
+      "result": "PASS"
+    },
+    {
+      "name": "O07 migration role cannot ALTER external Mastra tables and second deploy is idempotent",
+      "result": "PASS"
+    },
+    {
+      "name": "O08 empty-database deploy creates only owned tables and the closed recovery control",
+      "result": "PASS"
+    },
+    {
+      "name": "O09 new/unclassified names and application drift are never hidden by prefix exclusions",
+      "result": "PASS"
+    },
+    {
+      "name": "O10 foreign keys across the ownership boundary block approval",
+      "result": "PASS"
+    },
+    {
+      "name": "O11 timestamp function attached to application tables is not exempted",
+      "result": "PASS"
+    },
+    {
+      "name": "O12 altered routine bodies and overloads require review without exposing their text",
+      "result": "PASS"
+    },
+    {
+      "name": "O13 environmental collation differences remain visible while owned structures compare equally",
+      "result": "PASS"
+    },
+    {
+      "name": "O14 guarded shared-schema db push/reset helpers refuse before any Prisma or DB operation",
+      "result": "PASS"
+    },
+    {
+      "name": "O15 a live shared-DB diff would propose external drops and is explicitly not adopted",
+      "result": "PASS"
+    },
+    {
+      "name": "O16 read-only artifact verifier rejects changed SQL and extra unreviewed migrations",
+      "result": "PASS"
+    },
+    {
+      "name": "O17 cross-boundary inheritance cannot hide propagation of application ALTER TABLE into external tables",
+      "result": "PASS"
+    },
+    {
+      "name": "O18 every additive migration rolls back all its DDL on an injected failure",
+      "result": "PASS"
+    }
+  ],
+  "managedBaselineTables": 46,
+  "managedCurrentTables": 60,
+  "knownExternalTableNames": 30,
+  "sdkCreatedTables": [
+    "mastra_agent_versions",
+    "mastra_agents",
+    "mastra_ai_spans",
+    "mastra_dataset_items",
+    "mastra_dataset_versions",
+    "mastra_datasets",
+    "mastra_experiment_results",
+    "mastra_experiments",
+    "mastra_mcp_client_versions",
+    "mastra_mcp_clients",
+    "mastra_mcp_server_versions",
+    "mastra_mcp_servers",
+    "mastra_messages",
+    "mastra_observational_memory",
+    "mastra_prompt_block_versions",
+    "mastra_prompt_blocks",
+    "mastra_resources",
+    "mastra_scorer_definition_versions",
+    "mastra_scorer_definitions",
+    "mastra_scorers",
+    "mastra_skill_blobs",
+    "mastra_skill_versions",
+    "mastra_skills",
+    "mastra_threads",
+    "mastra_workflow_snapshot",
+    "mastra_workspace_versions",
+    "mastra_workspaces"
+  ],
+  "realMastraInit": true,
+  "productionUnchanged": true,
+  "runtimeSchemaUnchanged": true,
+  "oldBaselineAndAuditPreserved": true
+}

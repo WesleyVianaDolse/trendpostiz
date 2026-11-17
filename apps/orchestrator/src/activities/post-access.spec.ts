@@ -1,4 +1,5 @@
 import { PostActivity } from './post.activity';
+jest.mock('@temporalio/activity', () => ({ ...jest.requireActual('@temporalio/activity'), Context: { current: () => ({ info: { workflowExecution: { workflowId: 'test-workflow', runId: 'test-run' } } }) } }));
 jest.mock('nestjs-temporal-core', () => ({
   Activity: () => () => {},
   ActivityMethod: () => () => {},
@@ -78,7 +79,8 @@ describe('publication execution suspension', () => {
         client: { getRawClient: () => ({ workflow: { start: jest.fn() } }) },
       } as any,
       { getSubscription: jest.fn().mockResolvedValue({}) } as any,
-      access
+      access,
+      { confirmedPublicationReceipt: jest.fn().mockResolvedValue(null), guardPublication: jest.fn().mockResolvedValue(undefined), executePublication: (_: unknown, send: () => Promise<unknown>) => send() } as any
     );
   });
   it('does not publish a job already in Temporal when its organization is suspended', async () => {

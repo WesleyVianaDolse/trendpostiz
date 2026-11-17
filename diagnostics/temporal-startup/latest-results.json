@@ -1,0 +1,77 @@
+{
+  "scope": "Local isolated tests only. No production root cause established.",
+  "commit": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "environment": {
+    "node": "22.20.0",
+    "temporalServer": "1.28.2",
+    "postgres": "16-alpine",
+    "nestjsTemporalCore": "3.2.3",
+    "temporalSDK": "1.15.0",
+    "clientCredentials": false
+  },
+  "results": [
+    {
+      "name": "normal",
+      "passed": true,
+      "logSha256": "a03fbe858eccfb4f95cd418723f0fd433a17ff147ca18cd0e43df54b1935f50a",
+      "pollers": {
+        "workflow": 1,
+        "activity": 1
+      },
+      "eventTypes": [
+        1,
+        5,
+        6,
+        7
+      ],
+      "importsMs": 9254,
+      "nativeConnectMs": 9,
+      "workersCreationMs": 37884
+    },
+    {
+      "name": "sentry",
+      "passed": true,
+      "logSha256": "99eec28f57a3900dfe5a31fe441663525c95d7b3aa6a12d80d525fbc108f6f43",
+      "pollers": {
+        "workflow": 1,
+        "activity": 1
+      },
+      "eventTypes": [
+        1,
+        5,
+        6,
+        7
+      ],
+      "importsMs": 14618,
+      "nativeConnectMs": 28,
+      "workersCreationMs": 61983
+    },
+    {
+      "name": "untraced",
+      "passed": true,
+      "logSha256": "b8ebdb5337fad8bd69e05efe4a931f4f8fd467a91b05a023158c047a0c61b3c7",
+      "pollers": {
+        "workflow": 1,
+        "activity": 1
+      },
+      "eventTypes": [
+        1,
+        5,
+        6,
+        7
+      ]
+    },
+    {
+      "name": "async-create-stall",
+      "passed": true,
+      "logSha256": "5e45ab5b30d5fa6b1ecf5650e22b3075d9e47c4d4eee19eeeded7c1360a3a4aa",
+      "watchdogElapsedMs": 120006
+    },
+    {
+      "name": "sync-create-stall",
+      "passed": true,
+      "logSha256": "e027f60d7efcda54e584e35a2b21bbfeea3d7b8d04b5a45e2f519aad323021c5",
+      "observed": "Injected synchronous stall: futex, refused health, timer unable to fire beyond deadline"
+    }
+  ]
+}

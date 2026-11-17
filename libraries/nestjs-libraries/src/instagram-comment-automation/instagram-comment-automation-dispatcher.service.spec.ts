@@ -19,10 +19,11 @@ describe('InstagramCommentAutomationDispatcherService', () => {
       }),
     },
   };
-  const repository = { findReceivedEventIds: jest.fn() };
+  const repository = { findReceivedEventIds: jest.fn(), findEventForProcessing: jest.fn().mockResolvedValue({ status: 'RECEIVED', integration: { organizationId: 'org-1' } }) };
   const dispatcher = new InstagramCommentAutomationDispatcherService(
     temporal as any,
-    repository as any
+    repository as any,
+    { guardCommentEvent: jest.fn().mockResolvedValue(undefined) } as any
   );
 
   beforeEach(() => {

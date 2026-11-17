@@ -28,6 +28,8 @@ import { SubscriptionService } from '@gitroom/nestjs-libraries/database/prisma/s
 import type { PostNotificationDetails } from '@gitroom/nestjs-libraries/emails/notification.email';
 import { PlatformService } from '@gitroom/nestjs-libraries/database/prisma/platform/platform.service';
 import { ApplicationFailure } from '@temporalio/common';
+import { AutomationRecoveryService } from '@gitroom/nestjs-libraries/automation-recovery/automation-recovery.service';
+import { RECOVERY_PROTOCOL, RecoveryHold } from '@gitroom/nestjs-libraries/automation-recovery/recovery-policy';
 
 // Drops fields the workflow and downstream activities never read — biggest wins are `error` (grows per retry) and `childrenPost` (Prisma side-loads it on every recursive row).
 function slimPost(post: any) {
@@ -69,8 +71,22 @@ export class PostActivity {
     private _temporalService: TemporalService,
     private _subscriptionService: SubscriptionService,
     private _platform: PlatformService,
+    private _recovery: AutomationRecoveryService,
     private _youtube?: YoutubePublicationService
   ) {}
+
+  private recoveryWorkflowContext() {
+    const execution = Context.current().info.workflowExecution;
+    return { workflowId: execution.workflowId, runId: execution.runId, protocolVersion: RECOVERY_PROTOCOL };
+  }
+
+  private async recoveryCall<T>(run: () => Promise<T>): Promise<T> {
+    try { return await run(); }
+    catch (error) {
+      if (error instanceof RecoveryHold) throw ApplicationFailure.nonRetryable(error.reason, 'automation_recovery_hold');
+      throw error;
+    }
+  }
 
   @ActivityMethod()
   async getIntegrationById(orgId: string, id: string) {
@@ -79,42 +95,12 @@ export class PostActivity {
 
   @ActivityMethod()
   async searchForMissingThreeHoursPosts() {
-    const list = await this._postService.searchForMissingThreeHoursPosts();
-    for (const post of list) {
-      await this._temporalService.client
-        .getRawClient()
-        .workflow.signalWithStart('postWorkflowV105', {
-          workflowId: `post_${post.id}`,
-          taskQueue: 'main',
-          signal: 'poke',
-          workflowIdConflictPolicy: 'USE_EXISTING',
-          signalArgs: [],
-          args: [
-            {
-              taskQueue: post.integration.providerIdentifier
-                .split('-')[0]
-                .toLowerCase(),
-              postId: post.id,
-              organizationId: post.organizationId,
-            },
-          ],
-          typedSearchAttributes: new TypedSearchAttributes([
-            {
-              key: postIdSearchParam,
-              value: post.id,
-            },
-            {
-              key: organizationId,
-              value: post.organizationId,
-            },
-          ]),
-        });
-    }
+    return this._postService.reconcileSafeSchedules();
   }
 
   @ActivityMethod()
   async updatePost(id: string, postId: string, releaseURL: string) {
-    await this._postService.updatePost(id, postId, releaseURL);
+    return this.recoveryCall(() => this._recovery.projectActivityReceipt(this.recoveryWorkflowContext(), id, postId, releaseURL));
   }
 
   @ActivityMethod()
@@ -169,6 +155,11 @@ export class PostActivity {
     integration: Integration,
     posts: Post[]
   ) {
+    const recovery = { ...this.recoveryWorkflowContext(), organizationId: integration.organizationId,
+      integrationId: integration.id, snapshots: posts, actionKey: `comment:${posts[0]?.id}`, parentRemoteId: postId };
+    const confirmed = await this.recoveryCall(() => this._recovery.confirmedPublicationReceipt(recovery));
+    if (confirmed) return confirmed;
+    await this.recoveryCall(() => this._recovery.guardPublication(recovery));
     if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
       throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
     }
@@ -203,11 +194,17 @@ export class PostActivity {
     if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
       throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
     }
-    return getIntegration.comment(integration.internalId, postId, lastPostId, integration.token, payload, integration);
+    return this.recoveryCall(() => this._recovery.executePublication(recovery, () =>
+      getIntegration.comment(integration.internalId, postId, lastPostId, integration.token, payload, integration)));
   }
 
   @ActivityMethod()
-  async postSocial(integration: Integration, posts: Post[]) {
+  async postSocial(integration: Integration, posts: Post[], completionHandled = false) {
+    const recovery = { ...this.recoveryWorkflowContext(), organizationId: integration.organizationId,
+      integrationId: integration.id, snapshots: posts, actionKey: `publication:${posts[0]?.id}` };
+    const confirmed = await this.recoveryCall(() => this._recovery.confirmedPublicationReceipt(recovery));
+    if (confirmed) return confirmed;
+    await this.recoveryCall(() => this._recovery.guardPublication(recovery));
     if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
       throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
     }
@@ -252,11 +249,16 @@ export class PostActivity {
     if (!await this._platform.canPublishPosts(integration.organizationId, posts)) {
       throw ApplicationFailure.nonRetryable('Publicação pausada ou reagendada.', 'organization_suspended');
     }
-    const postNow = integration.providerIdentifier === 'youtube'
-      ? await this._youtube!.publish(integration, payload, Context.current().info.workflowExecution.workflowId)
-      : await getIntegration.post(integration.internalId, integration.token, payload, integration);
+    const bound = integration.providerIdentifier === 'youtube'
+      ? await this.recoveryCall(() => this._recovery.contextForBoundAction(recovery, recovery.actionKey, posts[0].id)) : null;
+    const postNow = await this.recoveryCall(() => this._recovery.executePublication(recovery, () => integration.providerIdentifier === 'youtube'
+      ? this._youtube!.publish(integration, payload, Context.current().info.workflowExecution.workflowId, {
+          snapshot: { ...posts[0], scheduleRevision: bound!.snapshots[0].scheduleRevision },
+          onUploaded: videoId => this._recovery.checkpointPublication(recovery, videoId, `https://www.youtube.com/watch?v=${videoId}`),
+        })
+      : getIntegration.post(integration.internalId, integration.token, payload, integration)));
 
-    await this._temporalService.client
+    if (!completionHandled) await this._temporalService.client
       .getRawClient()
       .workflow.start('streakWorkflow', {
         args: [{ organizationId: integration.organizationId }],
@@ -316,7 +318,8 @@ export class PostActivity {
 
   @ActivityMethod()
   async changeState(id: string, state: State, err?: any, body?: any) {
-    await this._postService.changeState(id, state, err, body);
+    if (state !== 'ERROR') throw ApplicationFailure.nonRetryable('Workflow state mutation requires reconciliation.', 'automation_recovery_hold');
+    return this.recoveryCall(() => this._recovery.recordWorkflowFailure(this.recoveryWorkflowContext(), id));
   }
 
   @ActivityMethod()
@@ -365,7 +368,7 @@ export class PostActivity {
     totalRuns: number;
     currentRun: number;
   }) {
-    return this._integrationService.processPlugs(data);
+    return this.recoveryCall(() => this._integrationService.processPlugs(data, this.recoveryWorkflowContext()));
   }
 
   @ActivityMethod()
@@ -379,7 +382,7 @@ export class PostActivity {
     information: any;
   }) {
     if (!await this._platform.isOrganizationActive(data.orgId)) return;
-    await this._integrationService.processInternalPlug(data);
+    return this.recoveryCall(() => this._integrationService.processInternalPlug(data, false, this.recoveryWorkflowContext()));
   }
 
   @ActivityMethod()

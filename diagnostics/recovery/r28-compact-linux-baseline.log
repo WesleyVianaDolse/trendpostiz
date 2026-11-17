@@ -1,0 +1,21 @@
+test_catalog_matches_the_tested_candidate_without_provider_imports (__main__.ReadOnlyTests.test_catalog_matches_the_tested_candidate_without_provider_imports) ... ok
+test_command_and_reference_sanitization (__main__.ReadOnlyTests.test_command_and_reference_sanitization) ... ok
+test_container_symlinks_do_not_read_host_targets (__main__.ReadOnlyTests.test_container_symlinks_do_not_read_host_targets) ... ok
+test_docker_projection_preserves_restart_and_hides_secrets (__main__.ReadOnlyTests.test_docker_projection_preserves_restart_and_hides_secrets) ... ok
+test_failed_reads_never_print_command_stderr_or_exception (__main__.ReadOnlyTests.test_failed_reads_never_print_command_stderr_or_exception) ... ok
+test_global_output_limit_is_a_visible_gap_and_keeps_summary (__main__.ReadOnlyTests.test_global_output_limit_is_a_visible_gap_and_keeps_summary) ... ok
+test_limits_and_missing_probe_do_not_become_match (__main__.ReadOnlyTests.test_limits_and_missing_probe_do_not_become_match) ... ok
+test_mutating_subprocesses_and_pm2_cli_are_rejected (__main__.ReadOnlyTests.test_mutating_subprocesses_and_pm2_cli_are_rejected) ... ok
+test_no_environment_logs_or_database_read_paths (__main__.ReadOnlyTests.test_no_environment_logs_or_database_read_paths) ... ok
+test_non_linux_never_runs_infrastructure_commands (__main__.ReadOnlyTests.test_non_linux_never_runs_infrastructure_commands) ... ok
+test_pm2_dump_projection_and_pid_namespace (__main__.ReadOnlyTests.test_pm2_dump_projection_and_pid_namespace) ... ok
+test_process_ancestry_detects_outside_consumer_without_argv_export (__main__.ReadOnlyTests.test_process_ancestry_detects_outside_consumer_without_argv_export) ... ok
+test_remote_docker_context_refuses_daemon_queries (__main__.ReadOnlyTests.test_remote_docker_context_refuses_daemon_queries) ... ok
+test_stopped_container_pm2_volume_is_included_without_start (__main__.ReadOnlyTests.test_stopped_container_pm2_volume_is_included_without_start) ... ok
+test_systemd_cron_profile_wrapper_and_unknowns (__main__.ReadOnlyTests.test_systemd_cron_profile_wrapper_and_unknowns) ... ok
+test_temporal_output_is_revalidated_not_forwarded (__main__.ReadOnlyTests.test_temporal_output_is_revalidated_not_forwarded) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.521s
+
+OK

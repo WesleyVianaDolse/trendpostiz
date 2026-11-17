@@ -1,0 +1,48 @@
+{
+  "scope": "LOCAL_ONLY",
+  "verifiedAt": "2026-11-16T17:05:43.891Z",
+  "ownedResources": [
+    {
+      "label": "trendpostiz.recovery-temporal",
+      "containers": 0,
+      "networks": 0
+    },
+    {
+      "label": "trendpostiz.recovery-containment",
+      "containers": 0,
+      "networks": 0
+    },
+    {
+      "label": "trendpostiz.recovery-admission",
+      "containers": 0,
+      "networks": 0
+    },
+    {
+      "label": "trendpostiz.guards",
+      "containers": 0,
+      "networks": 0
+    },
+    {
+      "label": "trendpostiz.ownership",
+      "containers": 0,
+      "networks": 0
+    }
+  ],
+  "protectedFilesUnchanged": [
+    "version.txt",
+    "pnpm-lock.yaml",
+    "libraries/nestjs-libraries/src/integrations/social/instagram.provider.ts",
+    "libraries/nestjs-libraries/src/integrations/social/instagram.standalone.provider.ts",
+    "libraries/nestjs-libraries/src/integrations/social/instagram-comment-messaging.service.ts",
+    "libraries/nestjs-libraries/src/integrations/social/instagram-standalone-messaging.service.ts",
+    "libraries/nestjs-libraries/src/integrations/social/instagram-webhook-subscription.service.ts",
+    "apps/orchestrator/src/workflows/post-workflows/post.workflow.v1.0.1.ts",
+    "apps/orchestrator/src/workflows/post-workflows/post.workflow.v1.0.2.ts",
+    "apps/orchestrator/src/workflows/post-workflows/post.workflow.v1.0.3.ts",
+    "apps/orchestrator/src/workflows/post-workflows/post.workflow.v1.0.4.ts",
+    "apps/orchestrator/src/workflows/post-workflows/post.workflow.v1.0.5.ts"
+  ],
+  "imageDigest": "sha256:e9a282f01db5f05c187b5107c61ee8623160a2a08a63680f0dd552bc78b26d58",
+  "localImagePresent": true,
+  "productionOperations": false
+}

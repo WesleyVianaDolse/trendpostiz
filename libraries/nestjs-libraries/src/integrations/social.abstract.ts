@@ -1,5 +1,6 @@
 import { timer } from '@gitroom/helpers/utils/timer';
 import { Integration } from '@prisma/client';
+import { isDerivedEffectCaptureActive } from '../automation-recovery/derived-effect-result';
 import { ApplicationFailure } from '@temporalio/activity';
 
 export class RefreshToken extends ApplicationFailure {
@@ -109,6 +110,12 @@ export abstract class SocialAbstract {
 
     if (request.status === 200 || request.status === 201) {
       return request;
+    }
+
+    // A mutating derived request may have taken effect despite a 5xx or an
+    // unreadable acknowledgement. Preserve legacy retries outside this context.
+    if (isDerivedEffectCaptureActive() && !['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase())) {
+      throw new Error('DERIVED_REMOTE_OUTCOME_UNCONFIRMED');
     }
 
     if (totalRetries > 2) {

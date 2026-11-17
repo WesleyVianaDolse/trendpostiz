@@ -1,0 +1,19 @@
+ARG NODE_IMAGE=node@sha256:b21fe589dfbe5cc39365d0544b9be3f1f33f55f3c86c87a76ff65a02f8f5848e
+FROM ${NODE_IMAGE}
+RUN apt-get update && apt-get install -y --no-install-recommends openssl python3 make g++ && rm -rf /var/lib/apt/lists/*
+RUN npm install -g pnpm@10.6.1 --no-audit --no-fund
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile --ignore-scripts --prod --config.node-linker=hoisted --config.inject-workspace-packages=true
+RUN npm rebuild bcrypt --build-from-source
+COPY schema.prisma ./
+RUN DATABASE_URL=postgresql://guard_test:synthetic-only@127.0.0.1:1/guard_test pnpm exec prisma generate --schema schema.prisma
+COPY dist ./dist
+COPY scripts/recovery ./scripts/recovery
+RUN node -e "require('@temporalio/worker').bundleWorkflowCode({workflowsPath:require.resolve('./dist/apps/orchestrator/src/workflows/index.js')}).then(b=>require('node:fs').writeFileSync('dist/workflow-bundle.cjs',b.code))"
+RUN node -e "require('bcrypt').hashSync('synthetic',4);require('sharp');require('@temporalio/core-bridge');console.log('Linux native libraries loaded')"
+RUN node scripts/recovery/runtime-artifact.cjs && mkdir -p /uploads && chown node:node /uploads
+ENV RECOVERY_ARTIFACT_ROOT=/app STORAGE_PROVIDER=local UPLOAD_DIRECTORY=/uploads ORCHESTRATOR_PORT=3002
+USER node
+HEALTHCHECK --interval=15s --timeout=4s --start-period=150s CMD node -e "fetch('http://127.0.0.1:3002/health/status').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+CMD ["node","--experimental-require-module","dist/apps/orchestrator/src/admitted-main.js"]

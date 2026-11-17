@@ -1,0 +1,98 @@
+{
+  "status": "PROPOSAL_ONLY",
+  "productionCompatibility": "BLOCKED_REPORTED_MISMATCHES_PENDING_TARGETED_DIAGNOSIS",
+  "revision": "36f4cd9971d5f304b0ab94f373160ea632341ac4",
+  "prisma": "6.5.0",
+  "postgres": "17.11",
+  "productionAuditReport": "../../../../../../diagnostics/recovery/baseline-audit/production-result.json",
+  "schemaSha256": "91f5cbc501915132f9fdd1f914b7df0835c6df9b27cc94dfee18bbae5d44bd44",
+  "baseline": {
+    "name": "00000000000000_v1_7_4_baseline",
+    "sha256": "700a0e4016d594ce06b013b0f602cdc074526db4d5af2d6a83dab928fd4ad702"
+  },
+  "originalUnreconciledBaselineSha256": "0e479d0cc8fd3a7571ff13c48d491d0c2a0851c2a23947b6b065611d18a8b0cf",
+  "reconciledSchemaSha256": "d5ebe880500fe946e457de6db1bfb33bd523bc8b09c188f1b16e936e8d352e71",
+  "reconciliation": [
+    {
+      "object": "InstagramWebhookEventStatus",
+      "property": "enum_label_order",
+      "sourceOrder": [
+        "RECEIVED",
+        "PROCESSING",
+        "PROCESSED",
+        "REPLIED",
+        "SKIPPED",
+        "FAILED",
+        "UNMATCHED",
+        "AMBIGUOUS",
+        "INVALID"
+      ],
+      "confirmedProductionOrder": [
+        "RECEIVED",
+        "UNMATCHED",
+        "AMBIGUOUS",
+        "INVALID",
+        "PROCESSING",
+        "PROCESSED",
+        "REPLIED",
+        "SKIPPED",
+        "FAILED"
+      ],
+      "evidence": "production-evidence.json",
+      "scope": "Local baseline CREATE TYPE and declarative schema only; no production ALTER TYPE"
+    }
+  ],
+  "proposedActiveChain": [
+    "00000000000000_v1_7_4_baseline",
+    "20261114000000_safe_recovery_foundation"
+  ],
+  "nextMigration": {
+    "name": "20261114000000_safe_recovery_foundation",
+    "source": "migrations/20261114000000_safe_recovery_foundation/migration.sql",
+    "sha256": "c0f27b0e008e1326ed244c665190d9fabd5adabd6148ebc209d7baedf94d3edd"
+  },
+  "historical": [
+    {
+      "name": "20260905000000_instagram_webhook_phase_one",
+      "source": "migrations/20260905000000_instagram_webhook_phase_one/migration.sql",
+      "sha256": "bee61d8d1f2e0d49b4426f175f767712d710e3fd3920132da6e5d69c6dfbc959",
+      "workingTreeSha256": "bee61d8d1f2e0d49b4426f175f767712d710e3fd3920132da6e5d69c6dfbc959",
+      "disposition": "PRESERVE_AS_ARCHIVE_IN_A_FUTURE_APPROVED_REORGANIZATION; DO_NOT_REPLAY_AFTER_FULL_BASELINE"
+    },
+    {
+      "name": "20260907000000_instagram_comment_automation_phase_two",
+      "source": "migrations/20260907000000_instagram_comment_automation_phase_two/migration.sql",
+      "sha256": "84ee4bc5e522ac945559607c5cf8185ffdee89e98ec61746cdeb6df0f0bfbb8c",
+      "workingTreeSha256": "84ee4bc5e522ac945559607c5cf8185ffdee89e98ec61746cdeb6df0f0bfbb8c",
+      "disposition": "PRESERVE_AS_ARCHIVE_IN_A_FUTURE_APPROVED_REORGANIZATION; DO_NOT_REPLAY_AFTER_FULL_BASELINE"
+    },
+    {
+      "name": "20260907010000_instagram_multi_provider_foundation",
+      "source": "migrations/20260907010000_instagram_multi_provider_foundation/migration.sql",
+      "sha256": "8c6af37f901e982d0958aa571b6ca455ef00c9981c5d2235ce7b6d974bb77cf4",
+      "workingTreeSha256": "8c6af37f901e982d0958aa571b6ca455ef00c9981c5d2235ce7b6d974bb77cf4",
+      "disposition": "PRESERVE_AS_ARCHIVE_IN_A_FUTURE_APPROVED_REORGANIZATION; DO_NOT_REPLAY_AFTER_FULL_BASELINE"
+    },
+    {
+      "name": "20261028000000_platform_administration",
+      "source": "migrations/20261028000000_platform_administration/migration.sql",
+      "sha256": "3638413cef2741be8b1729e68313a583bc52a3fe1c1df6f1ea62a29dc7490727",
+      "workingTreeSha256": "3638413cef2741be8b1729e68313a583bc52a3fe1c1df6f1ea62a29dc7490727",
+      "disposition": "PRESERVE_AS_ARCHIVE_IN_A_FUTURE_APPROVED_REORGANIZATION; DO_NOT_REPLAY_AFTER_FULL_BASELINE"
+    },
+    {
+      "name": "20261028010000_organization_deletion",
+      "source": "migrations/20261028010000_organization_deletion/migration.sql",
+      "sha256": "503f72a46c154bc4c3841ebbc42fddef44baa738bf080fa9e153d40189c6b574",
+      "workingTreeSha256": "503f72a46c154bc4c3841ebbc42fddef44baa738bf080fa9e153d40189c6b574",
+      "disposition": "PRESERVE_AS_ARCHIVE_IN_A_FUTURE_APPROVED_REORGANIZATION; DO_NOT_REPLAY_AFTER_FULL_BASELINE"
+    },
+    {
+      "name": "20261109000000_youtube_thumbnail_delivery",
+      "source": "migrations/20261109000000_youtube_thumbnail_delivery/migration.sql",
+      "sha256": "8b5fe986723b701e359f651888fcb35b72eaf3e0717d856e7e33aa96fe7da8a1",
+      "workingTreeSha256": "8b5fe986723b701e359f651888fcb35b72eaf3e0717d856e7e33aa96fe7da8a1",
+      "disposition": "PRESERVE_AS_ARCHIVE_IN_A_FUTURE_APPROVED_REORGANIZATION; DO_NOT_REPLAY_AFTER_FULL_BASELINE"
+    }
+  ]
+}

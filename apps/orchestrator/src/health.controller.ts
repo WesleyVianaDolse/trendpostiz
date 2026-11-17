@@ -2,19 +2,30 @@ import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { Connection } from '@temporalio/client';
 import { TemporalService } from 'nestjs-temporal-core';
+import {
+  checkWorkerConsumption,
+  workerRuntime,
+} from '../../../libraries/nestjs-libraries/src/automation-recovery/worker-consumption';
+import { temporalClientTls } from '../../../libraries/nestjs-libraries/src/temporal/temporal-tls';
 
 @Controller('health')
 export class HealthController {
   constructor(private readonly temporalService: TemporalService) {}
 
+  @Get('/live')
+  live() {
+    return { status: 'alive', readinessEndpoint: '/health/status' };
+  }
+
   @Get('/status')
   async getHealthStatus(@Res() res: Response) {
     let connection: Connection | undefined;
     try {
+      await checkWorkerConsumption();
       const address = process.env.TEMPORAL_ADDRESS || 'localhost:7233';
       connection = await Connection.connect({
         address,
-        ...(process.env.TEMPORAL_TLS === 'true' ? { tls: true } : {}),
+        ...temporalClientTls(),
         ...(process.env.TEMPORAL_API_KEY
           ? { apiKey: process.env.TEMPORAL_API_KEY }
           : {}),
@@ -40,7 +51,8 @@ export class HealthController {
         (worker) => worker.taskQueue === 'main'
       );
       const allWorkersHealthy =
-        workerStatuses.length > 0 &&
+        JSON.stringify(workerStatuses.map((w) => w.taskQueue).sort()) ===
+          JSON.stringify(workerRuntime().queues.sort()) &&
         workerStatuses.every((worker) => worker.running && worker.healthy);
 
       if (!mainWorker?.running || !mainWorker.healthy || !allWorkersHealthy) {

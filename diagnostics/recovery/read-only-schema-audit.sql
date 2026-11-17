@@ -1,0 +1,8 @@
+-- SUPERSEDED: do not run the previous broad audit.
+-- PostgreSQL 17.11/public and absence of _prisma_migrations are already confirmed.
+-- Initial consolidated production check already ran: enums MATCH; six MISMATCH.
+-- Locate already ran: operator reports only Mastra objects/routine divergent.
+-- Next manual read-only step: baseline-proposal/prisma-owned/ownership-boundary-check.sql
+-- under libraries/nestjs-libraries/src/database/prisma/.
+-- Optional targeted SQL: node diagnostics/recovery/baseline-check.mjs locate <section>
+-- The previous script is preserved in archive/read-only-schema-audit.sql.

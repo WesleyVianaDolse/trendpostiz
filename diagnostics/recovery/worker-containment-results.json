@@ -1,0 +1,29 @@
+{
+  "postgres": "17.11",
+  "temporal": "1.28.2",
+  "results": [
+    {
+      "name": "K01 new release client authenticates with a private mTLS certificate",
+      "result": "PASS"
+    },
+    {
+      "name": "K02 legacy plaintext connection is denied before polling",
+      "result": "PASS"
+    },
+    {
+      "name": "K03 TLS without client cert and untrusted old cert are denied",
+      "result": "PASS"
+    },
+    {
+      "name": "K04 pending test workflow remains unconsumed with zero pollers",
+      "result": "PASS"
+    },
+    {
+      "name": "K05 stale forensic process with network none has no outbound route",
+      "result": "PASS"
+    }
+  ],
+  "productionContainmentVerified": false,
+  "activationAuthorized": false,
+  "limitation": "mTLS rejects clients without release credentials; binary identity additionally requires stopped old consumers, exclusive key mounts and pinned image/protocol attestation. No existing server or worker was changed."
+}

@@ -1,0 +1,89 @@
+{
+  "date": "2026-11-16",
+  "verifiedAt": "2026-11-16T17:06:15.179Z",
+  "scope": "LOCAL_ONLY",
+  "handoffChecksPassed": 13,
+  "linuxCandidateChecksPassed": 6,
+  "fgChecksPassed": 42,
+  "derivedChecksPassed": 48,
+  "generalFixtureChecksPassed": 31,
+  "deliveryGuardChecksPassed": 23,
+  "ownershipChecksPassed": 18,
+  "containmentOptionChecksPassed": 5,
+  "distinctFgWorkflowTasks": 385,
+  "fgRuns": 50,
+  "fgHistorySnapshots": 70,
+  "scenariosCertifiedForExercisedIsolatedContract": 30,
+  "pending": [
+    "R28"
+  ],
+  "fullMatrixCertified": false,
+  "buildsPassed": 3,
+  "backendRegressionPassed": 223,
+  "backendDifferentialTestsSkipped": 8,
+  "frontendRegressionPassed": 23,
+  "recoveryUIDOMPassed": 6,
+  "derivedContractUnitPassed": 18,
+  "ownedDisposableContainersAndNetworksRemaining": 0,
+  "reviewArtifact": "final-fg-review-candidate-20261116.json",
+  "reviewArtifactFiles": 1108,
+  "reviewArtifactProtocolVersion": 1,
+  "reviewSourceDigest": "4ccd95dfe7c053dd072d0f9032f2bf52c7dac5197ef6dd893a437fcc7de78ec4",
+  "workflowContextProtocol": 1,
+  "admissionContractProtocol": 2,
+  "workerRuntimeProtocol": 2,
+  "workerRuntimeSourceDigest": "24f26a331bfe0edfb1e9152d9f7590784f396de6add617e324233a13d5a1ad09",
+  "imageDigest": "sha256:e9a282f01db5f05c187b5107c61ee8623160a2a08a63680f0dd552bc78b26d58",
+  "registryManifestDigest": null,
+  "realLinuxWorkersVerified": 32,
+  "realWorkflowQueuePollersVerified": 32,
+  "realActivityQueuePollersVerified": 32,
+  "productionContainmentVerified": false,
+  "operationalR28Certified": false,
+  "productionAdmissionEnabled": false,
+  "productionHomologated": false,
+  "productionAuthorized": false,
+  "activationAuthorized": false,
+  "evidence": [
+    {
+      "file": "handoff-recovery-results.json",
+      "sha256": "f6d5a8d7429d33247956fd8a567737b99e3727eed2974bbcc0db56f0ea10528d"
+    },
+    {
+      "file": "linux-candidate-results.json",
+      "sha256": "72d7226b32322d71b9770d1d8689641b77b7e1f828fa3e9a2a1f010e88593ebb"
+    },
+    {
+      "file": "linux-candidate-image.json",
+      "sha256": "6e21a84d8e858c5ca8c99a8164dfe0058a278a9c3bb7a1770487965d5cf4aa2b"
+    },
+    {
+      "file": "fg-recovery-results.json",
+      "sha256": "783248e733e4c9f4d4025dea94599865696c4d961cc004308b4ee900e8f6b6e1"
+    },
+    {
+      "file": "temporal-recovery-results.json",
+      "sha256": "5ac46ac09d0ee8df8c60c330df39b3f16d6b3df57b4ab77aa0d5ce3931eba645"
+    },
+    {
+      "file": "derived-recovery-results.json",
+      "sha256": "df6c7d662c25c25b5fd13680c3433cd3c8741be78eaf386918b137284e2d8597"
+    },
+    {
+      "file": "delivery-guards-results.json",
+      "sha256": "aee0cc5f9ad7735d6d7cf6113993ba8cafd167e68f71cf615691bd5f9975a525"
+    },
+    {
+      "file": "matrix-coverage-review.json",
+      "sha256": "b15e2abd8d957bb26729d8a3158907357e0704604d1e4d6c0e2d2a3d3f9be52f"
+    },
+    {
+      "file": "handoff-build-results.json",
+      "sha256": "1038f66af0035b328688e25a4955573903b1665d042f758ca1c25ac603e15ac0"
+    },
+    {
+      "file": "handoff-safety-audit.json",
+      "sha256": "ea068d238e44cbc34bb48c50ced8948a1259ea7d14c143b4fe47e51f095d36d9"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { derivedMutation, derivedLinkedInResponse } from '../../automation-recovery/derived-effect-result';
 import {
   AuthTokenDetails,
   PostDetails,
@@ -611,6 +612,7 @@ export class LinkedinProvider extends SocialAbstract implements SocialProvider {
       }
     );
 
+    await derivedLinkedInResponse(response, 'LINKEDIN_COMMENT_ID');
     const { object } = await response.json();
     return object;
   }
@@ -722,7 +724,7 @@ export class LinkedinProvider extends SocialAbstract implements SocialProvider {
     information: any,
     isPersonal = true
   ) {
-    return this.comment(
+    return derivedMutation(() => this.comment(
       integration.internalId,
       postId,
       undefined,
@@ -739,7 +741,7 @@ export class LinkedinProvider extends SocialAbstract implements SocialProvider {
       ],
       integration,
       isPersonal ? 'personal' : 'company'
-    );
+    ));
   }
 
   @PostPlug({
@@ -756,7 +758,7 @@ export class LinkedinProvider extends SocialAbstract implements SocialProvider {
     information: any,
     isPersonal = true
   ) {
-    await this.fetch(`https://api.linkedin.com/rest/posts`, {
+    const response = await derivedMutation(() => this.fetch(`https://api.linkedin.com/rest/posts`, {
       body: JSON.stringify({
         author:
           (isPersonal ? 'urn:li:person:' : `urn:li:organization:`) +
@@ -781,7 +783,8 @@ export class LinkedinProvider extends SocialAbstract implements SocialProvider {
         'LinkedIn-Version': '202601',
         Authorization: `Bearer ${integration.token}`,
       },
-    });
+    }));
+    await derivedLinkedInResponse(response, 'LINKEDIN_POST_ID');
   }
 
   override async mention(token: string, data: { query: string }) {

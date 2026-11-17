@@ -1,0 +1,58 @@
+{
+  "status": "LOCAL_FOLLOWUP_DIAGNOSTICS_VALIDATED",
+  "postgres": "17.11",
+  "baselineUnchanged": true,
+  "originalCheckUnchanged": true,
+  "followupSqlSha256": "080fa9f5112e0f0b739448ff5f9c95dd915b1c63f72c8f6aeeef0a9f4d95865c",
+  "productionCompatibility": "BLOCKED_PENDING_LOCATE_RESULTS",
+  "results": [
+    {
+      "name": "D01 pinned diagnostic settings reproduce the existing expected contract without baseline changes",
+      "result": "PASS"
+    },
+    {
+      "name": "D02 consolidated locate returns safe environment context and no matching object names",
+      "result": "PASS"
+    },
+    {
+      "name": "D03 missing and extra tables/columns are located without listing the whole schema",
+      "result": "PASS"
+    },
+    {
+      "name": "D04 table property differences are functional candidates; targeted detail returns only changed properties",
+      "result": "PASS"
+    },
+    {
+      "name": "D05 column type/nullability/default changes identify Post only and never return default literals",
+      "result": "PASS"
+    },
+    {
+      "name": "D06 renamed indexes/constraints are strict mismatches pending structural comparison",
+      "result": "PASS"
+    },
+    {
+      "name": "D07 different database locale and instance OIDs do not change ordinary table/column hashes",
+      "result": "PASS"
+    },
+    {
+      "name": "D08 current baseline signatures survive tested display-setting differences; diagnostics pin settings",
+      "result": "PASS"
+    },
+    {
+      "name": "D09 deparser text is not semantic equivalence; date/time defaults vary with display settings",
+      "result": "PASS"
+    },
+    {
+      "name": "D10 extra views/routines are located without exporting definitions or function bodies",
+      "result": "PASS"
+    },
+    {
+      "name": "D11 consolidated locate and targeted detail run read-only without SELECT on application tables",
+      "result": "PASS"
+    },
+    {
+      "name": "D12 context flags missing public USAGE; visibility is not silently treated as schema equivalence",
+      "result": "PASS"
+    }
+  ]
+}

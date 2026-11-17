@@ -1,6 +1,15 @@
 import { Global, Module } from '@nestjs/common';
 import { YoutubePublicationService } from '../../integrations/youtube-publication.service';
 import { PlatformService } from './platform/platform.service';
+import { AutomationRecoveryService } from '../../automation-recovery/automation-recovery.service';
+import { InstagramCommentTimeReader } from '../../automation-recovery/instagram-comment-time-reader';
+import { PublicationMutationGuard } from '../../automation-recovery/publication-mutation-guard';
+import { PublicationSchedulingService } from '../../automation-recovery/publication-scheduling.service';
+import { PublicationReconciliationService } from '../../automation-recovery/publication-reconciliation.service';
+import { DerivedPublicationService } from '../../automation-recovery/derived-publication.service';
+import { PublicationCompletionService } from '../../automation-recovery/publication-completion.service';
+import { RecoveryManifestService } from '../../automation-recovery/recovery-manifest.service';
+import { RecoveryApplicationService } from '../../automation-recovery/recovery-application.service';
 import {
   PrismaRepository,
   PrismaService,
@@ -68,6 +77,15 @@ import { InstagramCommentAutomationService } from '@gitroom/nestjs-libraries/ins
     YoutubePublicationService,
     PrismaService,
     PlatformService,
+    AutomationRecoveryService,
+    InstagramCommentTimeReader,
+    PublicationMutationGuard,
+    PublicationSchedulingService,
+    PublicationReconciliationService,
+    DerivedPublicationService,
+    PublicationCompletionService,
+    RecoveryManifestService,
+    RecoveryApplicationService,
     PrismaRepository,
     PrismaTransaction,
     UsersService,

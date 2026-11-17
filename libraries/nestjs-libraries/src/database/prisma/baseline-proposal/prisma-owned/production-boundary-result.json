@@ -1,0 +1,16 @@
+{
+  "source": "Operator-reported manual production execution; PostgreSQL 17.11; transaction ended with ROLLBACK; no modifications.",
+  "sections": {
+    "cross_boundary_fk": "MATCH",
+    "cross_boundary_inheritance": "MATCH",
+    "external_relation_kind": "MATCH",
+    "routine_recorded_non_external_dependency": "MATCH",
+    "timestamps_function_contract": "MATCH",
+    "timestamps_on_non_external_relation": "MATCH",
+    "unclassified_mastra_name": "MATCH"
+  },
+  "localArtifactSha256AtReport": "c49f4f1e19fa0d4ae2e6c4c79891efdbe657449218d97a43ccd40e714a39f782",
+  "productionModified": false,
+  "environmentalCollationDifference": "RETAINED_SEPARATELY",
+  "operationalAuthorization": "NONE"
+}

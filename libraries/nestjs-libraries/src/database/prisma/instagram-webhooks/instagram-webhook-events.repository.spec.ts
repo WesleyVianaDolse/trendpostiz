@@ -36,15 +36,16 @@ describe('InstagramWebhookEventsRepository', () => {
         update: expect.not.objectContaining({ status: expect.anything() }),
       })
     );
-    expect(updateMany).toHaveBeenCalledWith({
+    expect(updateMany).toHaveBeenCalledWith(expect.objectContaining({
       where: {
         id: 'event-1',
+        recoverySkipReason: null,
         status: {
           in: ['RECEIVED', 'UNMATCHED', 'AMBIGUOUS', 'INVALID'],
         },
       },
-      data: { integrationId: 'integration-1', status: 'RECEIVED' },
-    });
+      data: expect.objectContaining({ integrationId: 'integration-1', status: 'RECEIVED' }),
+    }));
     expect(create).not.toHaveBeenCalled();
   });
 

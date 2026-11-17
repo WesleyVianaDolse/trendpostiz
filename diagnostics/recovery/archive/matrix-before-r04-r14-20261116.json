@@ -1,0 +1,451 @@
+{
+  "status": "LOCAL_F_G_EXPANDED_OPERATIONAL_HANDOFF_PENDING",
+  "fullMatrixCertified": false,
+  "productionHomologated": false,
+  "activationAuthorized": false,
+  "meaning": "Local certificates cover the recorded subcases only. R04/R14/R28 remain unclosed; production recovery/worker activation unavailable.",
+  "certifiedIsolated": [
+    "R01",
+    "R02",
+    "R03",
+    "R05",
+    "R06",
+    "R07",
+    "R08",
+    "R09",
+    "R10",
+    "R11",
+    "R12",
+    "R13",
+    "R15",
+    "R16",
+    "R17",
+    "R18",
+    "R19",
+    "R20",
+    "R21",
+    "R22",
+    "R23",
+    "R24",
+    "R25",
+    "R26",
+    "R27",
+    "R29",
+    "R30",
+    "R31"
+  ],
+  "pending": [
+    "R04",
+    "R14",
+    "R28"
+  ],
+  "scenarios": {
+    "R01": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real PostgreSQL transaction, expiry decision, ERROR and zero HTTP, inside actual Temporal activity.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R02": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Equality/+1ms in the general fixture; the dedicated R27 V106 primary-plus-plug fixture additionally waits on a genuine future Temporal timer and asserts no early HTTP and all mutation times >= admitted slot.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R03": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "V106 processes an eligible slot after ordinary latency; actual provider adapter and HTTP receipt.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R04": {
+      "coverage": "PARTIAL_HANDOFF_PENDING",
+      "evidence": "Persisted proposed T0/run/version; source/cutoff/tamper invalidation, real second-cutoff denial of pending legacy activities and retries; no activation path.",
+      "fgChecks": [
+        "FG01 immutable dry-run persists proposed T0, decisions and hashes; no client write",
+        "FG04 changed cutoff/source and tampered item invalidate a complete manifest",
+        "FG21 read-only complete namespace inventory captures retry/timer/ABANDON metadata without payloads",
+        "FG25 superseding a partial batch preserves old audit and blocks stale resume"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "remaining": "Connect approved/revalidated manifest, exact T0/generation and containment evidence to the real H-I handoff. Present code cannot open workers."
+    },
+    "R05": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual V101-V105 started without pollers on their queue, then consumed; guarded PostActivity expires each with zero HTTP.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R06": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual queued provider activity and retry after cutoff in every V101-V105.",
+      "fgChecks": [
+        "FG08 V101 queued legacy provider activity is expired after a second cutoff",
+        "FG08 V102 queued legacy provider activity is expired after a second cutoff",
+        "FG08 V103 queued legacy provider activity is expired after a second cutoff",
+        "FG08 V104 queued legacy provider activity is expired after a second cutoff",
+        "FG08 V105 queued legacy provider activity is expired after a second cutoff",
+        "FG09 V101 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V102 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V103 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V104 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V105 actual activity retry rechecks T0 before any provider HTTP"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R07": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real current missingPostWorkflow calls the guarded full reconciler. The historical two-day reader is now read-only and has no workflow-start callers; unbound/renamed old runs cannot send.",
+      "fgChecks": [
+        "FG13 actual hourly reconciler and former two-day reader cannot revive expired posts"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R08": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Raw ERROR-to-QUEUE cannot remove expiry; simple retry helper refuses an expired occurrence.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R09": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual service/repository revision with old scheduled activity and new V106 timer/delivery preserves the new revision.",
+      "fgChecks": [
+        "FG10 explicit future revision wins over a queued legacy activity"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R10": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Published Post with existing unknown-origin remote reference preserved; zero resend.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R11": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real HTTP PostsController, JWT AuthMiddleware, PostgreSQL membership/DTO/service plus six interactive DOM checks; expired automatic result and manual attestation coexist.",
+      "fgChecks": [
+        "FG14 real HTTP JWT/membership, DTO and manual confirmation contract"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json",
+        "apps/frontend/src/components/new-launch/publication-recovery-history.spec.tsx"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R12": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real multi-row thread with positive late checkpoint, manual proof and newer revision; late old activity cannot overwrite. Ancillary uncertainty is separate from primary proof. A failed thread reply sends its own review notification and cannot downgrade the confirmed primary or emit the complete-thread webhook.",
+      "fgChecks": [
+        "FG06 V106 preserves success notification, streak and thread webhook payload",
+        "FG11 late thread receipt cannot overwrite manual proof or a new revision",
+        "FG27 competing legacy failure cannot invalidate an in-flight claimant",
+        "FG28 failed thread reply preserves primary and sends a separate failure notification"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R13": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Two distinct actual Node processes are both observed entering postSocial; the owner HTTP ACK is held until both participate. One HTTP publication, one claim, confirmed Post; concurrent manual approvals and classifiers are idempotent.",
+      "fgChecks": [
+        "FG03 concurrent classifiers are idempotent; unauthorized operator cannot prepare",
+        "FG07 uncertain webhook cannot retry or taint confirmed primary",
+        "FG12 two real worker processes reserve one logical publication",
+        "FG27 competing legacy failure cannot invalidate an in-flight claimant"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R14": {
+      "coverage": "PARTIAL_HANDOFF_PENDING",
+      "evidence": "Actual process crashes before/after DB expiry commit (general fixture) and manifest chunk commit, persisted cursor resume, concurrent classifiers and superseded partial version preserved.",
+      "fgChecks": [
+        "FG02 real process manifest crash before-commit",
+        "FG02 real process manifest crash after-commit",
+        "FG04 changed cutoff/source and tampered item invalidate a complete manifest",
+        "FG25 superseding a partial batch preserves old audit and blocks stale resume"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "remaining": "Implement/review the approved-manifest application executor for client-state classifications, reviewed legacy bindings and future replacements; its actual H application is not implemented/authorized."
+    },
+    "R15": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual YoutubePublicationService and durable common checkpoint inside Temporal activities; real child exits before/after checkpoint. Synthetic upload HTTP accepted once; new run cannot repeat it. Recorded positive upload evidence survives.",
+      "fgChecks": [
+        "FG07 uncertain webhook cannot retry or taint confirmed primary",
+        "FG24 real YouTube publication service crash before-checkpoint",
+        "FG24 real YouTube publication service crash after-checkpoint"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R16": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real PostgreSQL multiple missed/confirmed/manual slots and fixed-anchor proposed replacement, plus actual future replacement/child flow; no catch-up.",
+      "fgChecks": [
+        "FG05 fixed cadence inventory skips missed/manual/confirmed slots; no catch-up",
+        "FG18 expired recurring parent gets one replacement and one next child on original cadence",
+        "FG26 failed series occurrence cannot invalidate its already scheduled future child"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R17": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real closed parent and ABANDON child in every V101-V105; child classified independently with zero HTTP.",
+      "fgChecks": [
+        "FG17 V101 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V102 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V103 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V104 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V105 legacy ABANDON child remains independently guarded after parent completion",
+        "FG21 read-only complete namespace inventory captures retry/timer/ABANDON metadata without payloads"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R18": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Concurrent deterministic replacement admission, actual future delivery and next child timer; failed first occurrence cannot invalidate that child.",
+      "fgChecks": [
+        "FG05 fixed cadence inventory skips missed/manual/confirmed slots; no catch-up",
+        "FG18 expired recurring parent gets one replacement and one next child on original cadence",
+        "FG26 failed series occurrence cannot invalidate its already scheduled future child"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R19": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Unresolved series is persistently retained in a manifest, returned by scoped reconciliation history, and rendered even without occurrence rows.",
+      "fgChecks": [
+        "FG01 immutable dry-run persists proposed T0, decisions and hashes; no client write",
+        "FG21 read-only complete namespace inventory captures retry/timer/ABANDON metadata without payloads"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json",
+        "apps/frontend/src/components/new-launch/publication-recovery-history.spec.tsx"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R20": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Fixed UTC interval and explicit offset resolve to one stored instant; actual pending timer does not deliver early. No calendar/DST rule is introduced.",
+      "fgChecks": [
+        "FG05 fixed cadence inventory skips missed/manual/confirmed slots; no catch-up",
+        "FG15 actual V106 future timer remains on UTC slot across timezone offsets"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R21": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual Instagram workflow suppresses old event without execution or HTTP.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R22": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual workflow suppresses pending old deliveries and preserves prior public success/ID.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R23": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Upsert/redelivery plus actual workflow preserve failed Direct and confirmed public reply; zero new HTTP.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R24": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual metadata reader uses fake HTTP timestamp to suppress old first arrival; missing metadata leaves RECEIVED without execution.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R25": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Both original Instagram strategies execute via real HTTP transport redirected exclusively to local fake API; public success, Direct failure and FAILED aggregate. Facebook Page /messages and Standalone /me/messages verified.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R26": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real concurrent expiry/finalize/upsert/dispatcher retain suppression and confirmed public result.",
+      "fgChecks": [],
+      "sources": [
+        "temporal-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R27": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "48/48 dedicated PostgreSQL17.11/Temporal1.28.2/HTTP checks, 278 WorkflowTasks: 12 audited provider paths, explicit no-effect/remote receipts/uncertainty, 4 actual process crashes, concurrency, T0, future timers, recurrence, immutable config, manual parent, sticky expiry, disabled metadata, positive V101-V106 and replay.",
+      "fgChecks": [
+        "FG06 V106 preserves success notification, streak and thread webhook payload"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json",
+        "derived-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R28": {
+      "coverage": "PARTIAL_HANDOFF_PENDING",
+      "evidence": "Unavailable PostgreSQL fails closed, protocol/source artifact rejection and factory refusal. Five isolated real-server mTLS/quarantine checks; queued workflow has no pollers or consumption.",
+      "fgChecks": [
+        "FG23 artifact verification rejects old protocol and stale source; never opens workers"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json",
+        "worker-containment-results.json",
+        "diagnostics/recovery/test-review-artifact.cjs"
+      ],
+      "remaining": "Attest old-consumer containment on the deployment infrastructure, pin and homologate the Linux image/protocol, and integrate the I admission contract. Local mTLS/quarantine success is not production containment."
+    },
+    "R29": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Three externally killed/restarted synthetic Node children actually stalled in Atomics.wait; external HTTP deadline works and PostgreSQL T0/decisions unchanged. Production observer still cannot restart.",
+      "fgChecks": [
+        "FG22 external observation survives a native stall and three isolated restarts"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R30": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Actual pending timers, provider activities, retries, ABANDON and expired/successful V101-V105 histories, plus prior V106 snapshot replay with completion patch absent; no replay HTTP.",
+      "fgChecks": [
+        "FG09 V101 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V102 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V103 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V104 actual activity retry rechecks T0 before any provider HTTP",
+        "FG09 V105 actual activity retry rechecks T0 before any provider HTTP",
+        "FG10 explicit future revision wins over a queued legacy activity",
+        "FG17 V101 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V102 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V103 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V104 legacy ABANDON child remains independently guarded after parent completion",
+        "FG17 V105 legacy ABANDON child remains independently guarded after parent completion",
+        "FG18 expired recurring parent gets one replacement and one next child on original cadence",
+        "FG20 prior V106 history replays with completion patch disabled",
+        "FG24 real YouTube publication service crash before-checkpoint",
+        "FG24 real YouTube publication service crash after-checkpoint",
+        "FG28 failed thread reply preserves primary and sends a separate failure notification",
+        "FG16 pending timers, retries and completed commands replay without HTTP"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    },
+    "R31": {
+      "coverage": "CERTIFIED_ISOLATED",
+      "evidence": "Real HTTP live membership/JWT scope, roles, disabled/inactive users and suspended org; all integration availability flags and a DB administrative change between reservation and final send check.",
+      "fgChecks": [
+        "FG03 concurrent classifiers are idempotent; unauthorized operator cannot prepare",
+        "FG14 real HTTP JWT/membership, DTO and manual confirmation contract",
+        "FG19 all unavailable states and an administrative race preserve restrictions"
+      ],
+      "sources": [
+        "temporal-recovery-results.json",
+        "fg-recovery-results.json",
+        "apps/frontend/src/components/new-launch/publication-recovery-history.spec.tsx"
+      ],
+      "scope": "Only the exercised synthetic local contract; not production/API homologation."
+    }
+  },
+  "finalFgRun": {
+    "checks": 42,
+    "actualWorkflowTasks": 382,
+    "actualRuns": 50,
+    "historyCount": 70,
+    "activityChildBootMs": [
+      64983,
+      65130,
+      59099,
+      58432
+    ],
+    "activityChildBootDeadlineMs": 180000
+  }
+}

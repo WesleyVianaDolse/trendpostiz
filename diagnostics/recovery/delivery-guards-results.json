@@ -1,0 +1,102 @@
+{
+  "status": "PHASE_C_SERVICE_GUARDS_TESTED",
+  "postgres": "17.11",
+  "temporal": "NOT_TESTED_BY_THIS_SUITE",
+  "recoveryMatrixR01R31": "NOT_A_SUBSTITUTE_FOR_PHASE_F",
+  "tests": [
+    {
+      "name": "C01 absent authorization/closed control prevents all HTTP",
+      "result": "PASS"
+    },
+    {
+      "name": "C02 T0-minus-one expires atomically with ERROR, immutable decision and zero HTTP",
+      "result": "PASS"
+    },
+    {
+      "name": "C03 T0 equality and ordinary latency are eligible; duplicate attempts reuse a real receipt",
+      "result": "PASS"
+    },
+    {
+      "name": "C04 concurrent reservations produce exactly one HTTP request",
+      "result": "PASS"
+    },
+    {
+      "name": "C05 lost response after server acceptance stays uncertain across service restart and is not resent",
+      "result": "PASS"
+    },
+    {
+      "name": "C06 confirmed old results and future wall-clock slots are preserved without HTTP",
+      "result": "PASS"
+    },
+    {
+      "name": "C07 rescheduling during a remote call cannot be overwritten by its late receipt/error",
+      "result": "PASS"
+    },
+    {
+      "name": "C08 tenant, protocol, unavailable integration and suspension checks fail closed",
+      "result": "PASS"
+    },
+    {
+      "name": "C09 an unbound legacy run is retained without inventing occurrence time",
+      "result": "PASS"
+    },
+    {
+      "name": "C10 an old comment without execution is skipped with no artificial execution or HTTP",
+      "result": "PASS"
+    },
+    {
+      "name": "C11 late arrival of an old comment is skipped; unknown creation time is held",
+      "result": "PASS"
+    },
+    {
+      "name": "C12 partial public success is preserved and only the unattempted old Direct is suppressed",
+      "result": "PASS"
+    },
+    {
+      "name": "C13 failed/reserved Direct remains failed after duplicate expiry checks",
+      "result": "PASS"
+    },
+    {
+      "name": "C14 both Instagram credential families use separate public/private durable claims",
+      "result": "PASS"
+    },
+    {
+      "name": "C15 a later recovery generation does not clear uncertain reservations",
+      "result": "PASS"
+    },
+    {
+      "name": "C16 a simple schedule revision change rejects an old activity without changing the new post",
+      "result": "PASS"
+    },
+    {
+      "name": "C17 known upload checkpoints survive late projection failure without permitting another upload",
+      "result": "PASS"
+    },
+    {
+      "name": "C18 derived effects require parent proof and keep independent action claims on the same slot",
+      "result": "PASS"
+    },
+    {
+      "name": "C19 a binding without an approved payload or with changed config cannot authorize its first send",
+      "result": "PASS"
+    },
+    {
+      "name": "C20 changing a stored occurrence date cannot revive an old legacy payload",
+      "result": "PASS"
+    },
+    {
+      "name": "C21 untrusted old entry timestamps are retained rather than promoted to creation proof",
+      "result": "PASS"
+    },
+    {
+      "name": "C22 unavailable PostgreSQL cannot fall back to sending an external request",
+      "result": "PASS"
+    },
+    {
+      "name": "C23 human confirmation of a valid pending slot suppresses a new automatic send",
+      "result": "PASS"
+    }
+  ],
+  "httpRequests": 13,
+  "production": "UNCHANGED"
+}

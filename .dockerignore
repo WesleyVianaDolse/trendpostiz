@@ -21,3 +21,17 @@ dist
 .git
 .github
 reports
+
+# Recovery builds must not copy credentials, database exports or lab artifacts.
+.env
+.env.*
+**/.env
+**/.env.*
+**/*.env
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.dump
+**/*.backup
+diagnostics

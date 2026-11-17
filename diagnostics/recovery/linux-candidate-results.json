@@ -1,0 +1,242 @@
+{
+  "scope": "ISOLATED_REAL_LINUX_IMAGE",
+  "results": [
+    {
+      "id": "L01 unsigned candidate exits 78 without starting consumers",
+      "result": "PASS"
+    },
+    {
+      "id": "L02 runtime rejects old protocol and altered artifact without relying on flags",
+      "result": "PASS"
+    },
+    {
+      "id": "L02b quarantined consumer without application guards cannot reach Temporal",
+      "result": "PASS"
+    },
+    {
+      "id": "L03 real compiled NestJS starts every expected native worker and reports readiness",
+      "result": "PASS"
+    },
+    {
+      "id": "L04 all workflow/activity queues have actual pollers; liveness and isolation hold",
+      "result": "PASS"
+    },
+    {
+      "id": "L05 revocation fails readiness and an old admission cannot restart the process",
+      "result": "PASS"
+    }
+  ],
+  "imageDigest": "sha256:e9a282f01db5f05c187b5107c61ee8623160a2a08a63680f0dd552bc78b26d58",
+  "buildManifestDigest": "sha256:e9a282f01db5f05c187b5107c61ee8623160a2a08a63680f0dd552bc78b26d58",
+  "sourceDigest": "24f26a331bfe0edfb1e9152d9f7590784f396de6add617e324233a13d5a1ad09",
+  "queues": [
+    "main",
+    "x",
+    "linkedin",
+    "reddit",
+    "instagram",
+    "facebook",
+    "threads",
+    "youtube",
+    "gmb",
+    "tiktok",
+    "pinterest",
+    "dribbble",
+    "discord",
+    "slack",
+    "kick",
+    "twitch",
+    "mastodon",
+    "bluesky",
+    "lemmy",
+    "wrapcast",
+    "telegram",
+    "nostr",
+    "vk",
+    "medium",
+    "devto",
+    "hashnode",
+    "wordpress",
+    "listmonk",
+    "moltbook",
+    "whop",
+    "skool",
+    "mewe"
+  ],
+  "actualWorkflowPollers": 32,
+  "actualActivityPollers": 32,
+  "realCompiledNestJS": true,
+  "nativeLibrariesVerified": true,
+  "readiness": {
+    "status": 200,
+    "body": {
+      "status": "ok",
+      "temporal": "connected",
+      "workers": [
+        {
+          "taskQueue": "main",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "x",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "linkedin",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "reddit",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "instagram",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "facebook",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "threads",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "youtube",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "gmb",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "tiktok",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "pinterest",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "dribbble",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "discord",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "slack",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "kick",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "twitch",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "mastodon",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "bluesky",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "lemmy",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "wrapcast",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "telegram",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "nostr",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "vk",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "medium",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "devto",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "hashnode",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "wordpress",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "listmonk",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "moltbook",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "whop",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "skool",
+          "running": true,
+          "healthy": true
+        },
+        {
+          "taskQueue": "mewe",
+          "running": true,
+          "healthy": true
+        }
+      ]
+    }
+  },
+  "productionInfrastructureVerified": false,
+  "operationalR28Certified": false,
+  "productionAuthorized": false
+}

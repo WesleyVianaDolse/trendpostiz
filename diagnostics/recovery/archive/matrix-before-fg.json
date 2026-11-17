@@ -1,0 +1,135 @@
+{
+  "status": "INCOMPLETE_NOT_A_RELEASE_CERTIFICATE",
+  "fixtureResults": "temporal-recovery-results.json",
+  "meaning": "PASS in a fixture establishes only the exercised subcases. It does not certify every obligation of the corresponding approved scenario.",
+  "fullMatrixCertified": false,
+  "scenarios": {
+    "R01": {
+      "coverage": "EXERCISED",
+      "evidence": "Real PostgreSQL transaction, expiry decision, ERROR and zero HTTP, inside actual Temporal activity."
+    },
+    "R02": {
+      "coverage": "EXERCISED",
+      "evidence": "Equality/+1ms in the general fixture; the dedicated R27 V106 primary-plus-plug fixture additionally waits on a genuine future Temporal timer and asserts no early HTTP and all mutation times >= admitted slot."
+    },
+    "R03": {
+      "coverage": "EXERCISED",
+      "evidence": "V106 processes an eligible slot after ordinary latency; actual provider adapter and HTTP receipt."
+    },
+    "R04": {
+      "coverage": "PARTIAL",
+      "remaining": "Second persisted cutoff exercised; full manifest invalidation/admission lifecycle belongs to the still unavailable H-I transition."
+    },
+    "R05": {
+      "coverage": "EXERCISED",
+      "evidence": "Actual V101-V105 started without pollers on their queue, then consumed; guarded PostActivity expires each with zero HTTP."
+    },
+    "R06": {
+      "coverage": "PARTIAL",
+      "remaining": "Provider-queue activity exercised; add actual legacy postSocial ActivityTaskScheduled/retry history held across a cutoff change."
+    },
+    "R07": {
+      "coverage": "PARTIAL",
+      "remaining": "Old slot and renamed unbound run held; exercise both complete reconciler workflows and all relevant producer branches."
+    },
+    "R08": {
+      "coverage": "EXERCISED",
+      "evidence": "Raw ERROR-to-QUEUE cannot remove expiry; simple retry helper refuses an expired occurrence."
+    },
+    "R09": {
+      "coverage": "PARTIAL",
+      "remaining": "Real revisioned repository edit and stale send rejection exercised; add old queued activity plus new workflow/timer in the same history test."
+    },
+    "R10": {
+      "coverage": "EXERCISED",
+      "evidence": "Published Post with existing unknown-origin remote reference preserved; zero resend."
+    },
+    "R11": {
+      "coverage": "PARTIAL",
+      "remaining": "Authenticated membership/service checks, idempotent manual proof and preserved ERROR exercised; HTTP authorization and rendered UI flow still require tests."
+    },
+    "R12": {
+      "coverage": "PARTIAL",
+      "remaining": "Late receipt/error cannot overwrite a newer revision; add late result after separate manual confirmation and a multi-row thread."
+    },
+    "R13": {
+      "coverage": "PARTIAL",
+      "remaining": "Eight real concurrent DB claims produce one HTTP; add multiple actual worker processes and concurrent classification/manual approvals."
+    },
+    "R14": {
+      "coverage": "PARTIAL",
+      "remaining": "Actual child-process crash before commit rolls back; after commit preserves decision and resumed batch is idempotent. Full manifest cursor/version recovery is not implemented."
+    },
+    "R15": {
+      "coverage": "PARTIAL",
+      "remaining": "Real HTTP acceptance/connection loss and positive ledger checkpoint survive retries; exercise the actual YouTube adapter checkpoint inside the Temporal crash scenario."
+    },
+    "R16": {
+      "coverage": "PARTIAL",
+      "remaining": "Fixed anchor skips directly to eligible slot without POST; inventory/classification of multiple existing missed slots and previous confirmed series history remains."
+    },
+    "R17": {
+      "coverage": "PARTIAL",
+      "remaining": "Real legacy postNow=true blocked; create a real ABANDON child and close its parent before consuming the child."
+    },
+    "R18": {
+      "coverage": "PARTIAL",
+      "remaining": "Concurrent staging creates one replacement intent on the original cadence; exercise full parent-to-replacement-to-future-child delivery/timer lifecycle."
+    },
+    "R19": {
+      "coverage": "PARTIAL",
+      "remaining": "Legacy revision-zero anchor held without deleting series; persistent unresolved-inventory reason and complete UI exposure remain."
+    },
+    "R20": {
+      "coverage": "PARTIAL",
+      "remaining": "UTC fixed-interval/offset arithmetic exercised; add stored schedule and Temporal timer checks at offset boundaries. No local-calendar recurrence rule is introduced."
+    },
+    "R21": {
+      "coverage": "EXERCISED",
+      "evidence": "Actual Instagram workflow suppresses old event without execution or HTTP."
+    },
+    "R22": {
+      "coverage": "EXERCISED",
+      "evidence": "Actual workflow suppresses pending old deliveries and preserves prior public success/ID."
+    },
+    "R23": {
+      "coverage": "EXERCISED",
+      "evidence": "Upsert/redelivery plus actual workflow preserve failed Direct and confirmed public reply; zero new HTTP."
+    },
+    "R24": {
+      "coverage": "EXERCISED",
+      "evidence": "Actual metadata reader uses fake HTTP timestamp to suppress old first arrival; missing metadata leaves RECEIVED without execution."
+    },
+    "R25": {
+      "coverage": "EXERCISED",
+      "evidence": "Both original Instagram strategies execute via real HTTP transport redirected exclusively to local fake API; public success, Direct failure and FAILED aggregate. Facebook Page /messages and Standalone /me/messages verified."
+    },
+    "R26": {
+      "coverage": "EXERCISED",
+      "evidence": "Real concurrent expiry/finalize/upsert/dispatcher retain suppression and confirmed public result."
+    },
+    "R27": {
+      "coverage": "EXERCISED_LOCAL_DEDICATED",
+      "evidence": "48/48 dedicated PostgreSQL17.11/Temporal1.28.2/HTTP checks, 272 WorkflowTasks: 12 audited provider paths, explicit no-effect/remote receipts/uncertainty, 4 actual process crashes, concurrency, T0, future timers, recurrence, immutable config, manual parent, sticky expiry, disabled metadata, positive V101-V106 and replay.",
+      "remaining": "No production/API homologation or legacy backlog binding/classification is claimed. H-I remain unavailable; full matrix certification is separate."
+    },
+    "R28": {
+      "coverage": "PARTIAL",
+      "remaining": "Unavailable DB, blocked policy, protocol zero and new worker factory refusal exercised. Infrastructure containment of an arbitrary pre-guard binary is not implemented or certified."
+    },
+    "R29": {
+      "coverage": "PARTIAL",
+      "remaining": "Persisted decisions survive new service instances; observer has no restart API. Repeated external restart of a synthetic stalled child still requires a dedicated test."
+    },
+    "R30": {
+      "coverage": "PARTIAL",
+      "evidence": "General expired histories and dedicated successful V101-V106/derived-child histories replayed deterministically with zero HTTP.",
+      "remaining": "Pending legacy timers/retries and all ABANDON/recurrence histories spanning a cutoff change still require dedicated full-scenario coverage."
+    },
+    "R31": {
+      "coverage": "PARTIAL",
+      "remaining": "DB-backed suspension/pause/deletion/disabled integration and cross-tenant membership held; finish endpoint-level access, all unavailable-integration modes and concurrent admin-state changes."
+    }
+  },
+  "derivedFixtureResults": "derived-recovery-results.json"
+}

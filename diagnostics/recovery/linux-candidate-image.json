@@ -1,0 +1,13 @@
+{
+  "scope": "LOCAL_UNPUBLISHED_WORKER_IMAGE",
+  "tag": "trendpostiz-v175-worker:v175-candidate-0d3352f7-a6e1-4af7-bb8e-8cdb6a3cbab1",
+  "imageDigest": "sha256:e9a282f01db5f05c187b5107c61ee8623160a2a08a63680f0dd552bc78b26d58",
+  "localImageId": "sha256:e9a282f01db5f05c187b5107c61ee8623160a2a08a63680f0dd552bc78b26d58",
+  "baseImage": "node@sha256:b21fe589dfbe5cc39365d0544b9be3f1f33f55f3c86c87a76ff65a02f8f5848e",
+  "context": "C:\\Users\\viana\\AppData\\Local\\Temp\\v175-candidate-0d3352f7-a6e1-4af7-bb8e-8cdb6a3cbab1COx0FV",
+  "compiledModules": 206,
+  "packages": 58,
+  "rootLockSha256": "b49efedc6326ced26b6d656ad153d6dce24ee5467913f0bf9190c9ba2eba78bf",
+  "registryManifestDigest": null,
+  "productionAuthorized": false
+}

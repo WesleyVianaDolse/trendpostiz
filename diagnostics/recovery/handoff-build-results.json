@@ -1,0 +1,59 @@
+{
+  "scope": "LOCAL_SANITIZED_BUILD_AND_REGRESSION",
+  "verifiedAt": "2026-11-16T17:06:14.562Z",
+  "commands": [
+    {
+      "command": "node diagnostics/recovery/run-check.cjs buildBackend",
+      "exitCode": 0,
+      "result": "PASS",
+      "startsApplication": false
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs buildOrchestrator",
+      "exitCode": 0,
+      "result": "PASS",
+      "startsApplication": false
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs buildFrontend",
+      "exitCode": 0,
+      "result": "PASS",
+      "startsApplication": false
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs regression",
+      "exitCode": 0,
+      "suitesPassed": 20,
+      "testsPassed": 223,
+      "testsSkipped": 8
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs frontendRegression",
+      "exitCode": 0,
+      "suitesPassed": 2,
+      "testsPassed": 23
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs recoveryUI",
+      "exitCode": 0,
+      "suitesPassed": 1,
+      "testsPassed": 6
+    },
+    {
+      "command": "node diagnostics/recovery/run-check.cjs derived",
+      "exitCode": 0,
+      "suitesPassed": 1,
+      "testsPassed": 18
+    },
+    {
+      "command": "node diagnostics/recovery/build-linux-candidate.mjs",
+      "exitCode": 0,
+      "result": "PASS",
+      "workerOnly": true,
+      "pushed": false
+    }
+  ],
+  "productionOperations": false,
+  "releasePromoted": false,
+  "note": "Results recorded from completed local commands in this session; earlier fg-build logs are historical, not logs of these commands."
+}

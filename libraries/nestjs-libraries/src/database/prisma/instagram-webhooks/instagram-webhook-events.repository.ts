@@ -38,22 +38,18 @@ export class InstagramWebhookEventsRepository {
     const event = await this._events.model.instagramWebhookEvent.upsert({
       where: { externalCommentId: input.externalCommentId },
       create: data,
-      update: {
-        instagramAccountId: input.instagramAccountId,
-        mediaId: input.mediaId,
-        authorId: input.authorId,
-        authorUsername: input.authorUsername,
-        commentText: input.commentText,
-        payload: input.payload,
-      },
+      update: {},
     });
 
     await this._events.model.instagramWebhookEvent.updateMany({
       where: {
         id: event.id,
+        recoverySkipReason: null,
         status: { in: ['RECEIVED', 'UNMATCHED', 'AMBIGUOUS', 'INVALID'] },
       },
       data: {
+        ...data,
+        // The first receipt/verified creation proof is never replaced by replay.
         integrationId: input.integrationId,
         status: input.status,
       },
